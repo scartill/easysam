@@ -94,6 +94,9 @@ def preprocess_lambda(resources_data, resources_dir, lambda_def, entry_path, ent
         if not path:
             raise UserWarning(f'Import file {entry_path} contains no path name')
 
+        if 'paths' not in resources_data:
+            resources_data['paths'] = {}
+
         if path in resources_data['paths']:
             raise UserWarning(f'Import file {entry_path} contains duplicate path {path}')
 
@@ -104,6 +107,9 @@ def preprocess_lambda(resources_data, resources_dir, lambda_def, entry_path, ent
 
 
 def preprocess_tables(resources_data: dict, table_def: dict, entry_path: Path):
+    if 'tables' not in resources_data:
+        resources_data['tables'] = {}
+
     for table_name, table_data in table_def.items():
         if table_name in resources_data['tables']:
             raise UserWarning(f'Import file {entry_path} contains duplicate table {table_name}')
