@@ -27,6 +27,7 @@ def deploy(cliparams, directory, resources, stack):
     copy_common_dependencies(directory, resources)
     sam_build(cliparams, directory)
     sam_deploy(cliparams, directory, stack)
+    remove_common_dependencies(directory)
 
 
 def sam_build(cliparams, directory):
@@ -100,8 +101,6 @@ def copy_common_dependencies(directory, resources):
 
         for dep in deps:
             dep_path = Path(common, dep)
-            print(dep_path)
-            print(lambda_path)
 
             if dep_path.is_dir():
                 lg.info(f'Copying {dep_path} directory to {lambda_path}')

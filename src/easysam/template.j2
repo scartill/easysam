@@ -28,6 +28,7 @@ Globals:
       AllowCredentials: False
 
 Resources:
+  {% if paths is defined %}
   ####### Necessary for API Gateway Logging ########
   ApiGwAccountConfig: 
     Type: "AWS::ApiGateway::Account"
@@ -101,8 +102,9 @@ Resources:
   ApiLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "apigw-${AWS::StackName}-${Stage}"
-      RetentionInDays: 7
+        LogGroupName: !Sub "apigw-${AWS::StackName}-${Stage}"
+        RetentionInDays: 7
+  {% endif %}  # paths
 
   {% if streams is defined %}
   {{ lprefix }}DeliveryStreamPolicy:
@@ -153,6 +155,7 @@ Resources:
                 'sts:ExternalId': !Ref 'AWS::AccountId'
   {% endif %}  # streams
 
+  {% if tables is defined %}
   GatewayDynamoRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -177,7 +180,9 @@ Resources:
                   - 'dynamodb:GetItem'
 ## Todo: provide only required resources list
                 Resource: '*'
-
+  {% endif %}  # tables
+  
+  {% if queues is defined %}
   GatewaySQSRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -210,9 +215,10 @@ Resources:
               Action:
                 - lambda:InvokeFunction
               Resource: 
-                - !GetAtt twitchxv1authorizerFunction.Arn
-                - !GetAtt backofficev1authorizerFunction.Arn
-                - !GetAtt backofficev1authorizerFunction.Arn
+                {% for auth_name, auth_params in authorizers.items() %}
+                - !GetAtt {{ auth_name }}Function.Arn
+                {% endfor %}
+  {% endif %}  # queues
 
   {% if streams is defined %}
   {% for stream_name, stream in streams.items() %}
@@ -387,7 +393,7 @@ Resources:
     Properties:
       LayerName: !Sub pythonthrdparty-${Stage}
       Description: Dependencies for all python lambdas
-      ContentUri: thrdparty/.
+      ContentUri: thirdparty/.
       CompatibleRuntimes:
         - python3.13
     Metadata:
