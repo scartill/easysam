@@ -183,7 +183,8 @@ def generate(directory, path, preprocess_only):
         click.echo(yaml.dump(resources_data, indent=4))
         return
 
-    lg.debug(f'Resources processed: {resources_data}')
+    lg.debug('Resources processed')
+    lg.debug(yaml.dump(resources_data, indent=4))
 
     loader = FileSystemLoader(searchpath=[
         str(Path(__file__).parent.resolve()),
