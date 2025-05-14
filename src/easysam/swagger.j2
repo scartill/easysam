@@ -1,0 +1,223 @@
+{% set lprefix = prefix.lower() %}
+
+---
+swagger: "2.0"
+info:
+  version: "1.0"
+  title: 
+    Fn::Sub: "${AWS::StackName}"
+basePath: "/${Stage}"
+schemes:
+- "https"
+{% if paths is defined %}
+paths:
+  {% for original_path_name, path_params in paths.items() %}
+  {% if path_params.integration is not defined and path_params.greedy is not defined or path_params.greedy%}
+    {% set paths = [original_path_name, original_path_name+'/{proxy+}'] %}
+  {% else %}
+    {% set paths = [original_path_name] %}
+  {% endif %}
+  {% for path_name in paths %}
+  {{ path_name }}:
+    {% if path_params.definition is defined %}
+    {{ path_params.definition }}
+    {% elif path_params.integration == 'dynamo'%}
+    {{ path_params.method }}:
+      responses:
+        "200":
+          description: "OK"
+          headers:
+            Access-Control-Allow-Headers:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+      x-amazon-apigateway-integration:
+        type: "aws"
+        httpMethod: "POST"
+        credentials:
+          Fn::GetAtt:
+            - {{ path_params.role }}
+            - Arn
+        uri:
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:dynamodb:action/{{ path_params.action }}'
+        passthroughBehavior: WHEN_NO_TEMPLATES
+        requestParameters:
+          {% for req_param in path_params.parameters %}
+          integration.request.path.{{ req_param }}: method.request.path.{{ req_param }}
+          {% endfor %}
+        requestTemplates:
+          application/json: 
+            Fn::Sub: {{path_params.requestTemplate|tojson}}
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers : "'*'"
+              method.response.header.Access-Control-Allow-Methods : "'*'"
+              method.response.header.Access-Control-Allow-Origin : "'*'"
+            responseTemplates: 
+              application/json: {% include path_params.responseTemplateFile %}
+    {% elif path_params.integration == 'sqs'%}
+    {{ path_params.method }}:
+      responses:
+        "200":
+          description: Sent to queue
+          headers:
+            Access-Control-Allow-Headers:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error
+      {% if path_params.authorizer %}
+      security:
+      - {{ path_params.authorizer }}: []
+      {% endif %}
+      x-amazon-apigateway-integration:
+        type: "aws"
+        httpMethod: "POST"
+        credentials:
+          Fn::GetAtt:
+            - {{ path_params.role }}
+            - Arn
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:sqs:path/${AWS::AccountId}/${{'{'}}{{lprefix}}{{path_params.queue.replace('-', '')}}Queue.QueueName}
+        requestParameters:
+          integration.request.header.Content-Type: "'application/x-www-form-urlencoded'"
+        requestTemplates:
+          application/json: 
+            Fn::Sub: {{path_params.requestTemplate|tojson}}
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers : "'*'"
+              method.response.header.Access-Control-Allow-Methods : "'*'"
+              method.response.header.Access-Control-Allow-Origin : "'*'"
+            responseTemplates: 
+              application/json: {% include path_params.responseTemplateFile %}
+        passthroughBehavior: NEVER
+        
+    {% else %}
+    x-amazon-apigateway-any-method:
+      {% if path_params.open %}
+      responses:
+        "200":
+          description: Ok
+          headers:
+            Access-Control-Allow-Headers:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error      
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: 
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${{ "{" }}{{ path_params.function }}Function.Arn}/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers : "'*'"
+              method.response.header.Access-Control-Allow-Methods : "'*'"
+              method.response.header.Access-Control-Allow-Origin : "'*'"  
+        passthroughBehavior: "when_no_match"
+      {% else %}
+      consumes:
+      - "application/json"
+      responses:
+        "200":
+          description: Ok
+          headers:
+            Access-Control-Allow-Headers:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error  
+      {% if not path_name.endswith('/{proxy+}') or 'backoffice' in path_name %}
+      security:
+      - {{ path_params.authorizer }}: []
+      {% endif %}
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: 
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${{"{"}}{{ path_params.function }}Function.Arn}/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers : "'*'"
+              method.response.header.Access-Control-Allow-Methods : "'*'"
+              method.response.header.Access-Control-Allow-Origin : "'*'"  
+        passthroughBehavior: "when_no_templates"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+      {% endif %}
+    {% endif %}  
+  {% endfor %}
+  {% endfor %}
+{% endif %}
+
+{% if authorizers is defined %}
+securityDefinitions:
+ {% for auth_name, auth_params in authorizers.items() %}
+  {{ auth_name }}:
+    type: "apiKey"
+
+    {% if 'token' in auth_params or 'headers' in auth_params %}
+    in: "header"
+    {% elif 'query' in auth_params %}
+    in: "query"
+    {% endif %}
+
+    {% if 'token' in auth_params %}
+    name: "{{ auth_params.token }}"
+    {% elif 'headers' in auth_params %}
+    name: "Unused"
+    {% elif 'query' in auth_params %}
+    name: "{{ auth_params.query }}"
+    {% endif %}
+
+    x-amazon-apigateway-authtype: "custom"
+    x-amazon-apigateway-authorizer:
+      {% if 'token' in auth_params %}
+      type: "token"
+      {% elif 'headers' in auth_params %}
+      type: "request"
+      {% elif 'query' in auth_params %}
+      type: "request"
+      {% endif %}
+
+      authorizerUri:
+        Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${{"{"}}{{ auth_params.function }}Function.Arn}/invocations"
+
+      {% if 'ttl' in auth_params %}
+      authorizerResultTtlInSeconds: {{ auth_params.ttl }}
+      {% else %}
+      authorizerResultTtlInSeconds: 300
+      {% endif %}
+      
+      {% if 'headers' in auth_params %}
+      identitySource: "{% for header in auth_params.headers %}method.request.header.{{ header }}{% if not loop.last %}, {% endif %}{% endfor %}"
+      {% elif 'query' in auth_params %}
+      identitySource: "method.request.querystring.{{ auth_params.query }}"
+      {% endif %}
+ {% endfor %}
+{% endif %}

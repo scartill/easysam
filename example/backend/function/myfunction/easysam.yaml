@@ -1,0 +1,10 @@
+lambda:
+  name: authv1login
+  resources:
+    tables:
+    - Users
+    - ExternalLinks
+  integration:
+    path: /auth/v1/login
+    open: true
+    greedy: false

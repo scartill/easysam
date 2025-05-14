@@ -1,0 +1,474 @@
+{% set lprefix = prefix.lower() %}
+
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  {{ prefix }}
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+
+Globals:
+  Function:
+    Runtime: python3.13
+    Handler: index.handler
+    Architectures:
+      - x86_64
+    Timeout: 30
+    Environment:
+      Variables:
+        ENV: !Ref Stage
+  Api:
+    Cors:
+      AllowOrigin: "'*'"
+      AllowHeaders: "'*'"
+      AllowMethods: "'*'"
+      AllowCredentials: False
+
+Resources:
+  ####### Necessary for API Gateway Logging ########
+  ApiGwAccountConfig: 
+    Type: "AWS::ApiGateway::Account"
+    Properties: 
+      CloudWatchRoleArn: !GetAtt "ApiGatewayLoggingRole.Arn"
+  ApiGatewayLoggingRole: 
+    Type: "AWS::IAM::Role"
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - Effect: Allow
+            Principal: 
+              Service: 
+                - "apigateway.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns: 
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+  ApiDeployment:
+    Type: AWS::Serverless::Api
+    Properties:
+      OpenApiVersion: 3.0.1
+      StageName: !Ref Stage
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiLogGroup.Arn
+        Format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","resourcePath":"$context.resourcePath","status":$context.status,"responseLatency":$context.responseLatency}'
+
+      {% if authorizers is defined %}
+      Auth:
+        Authorizers:
+          {% for auth_name, auth_params in authorizers.items() %}
+          {{ auth_name }}:
+            FunctionArn: !GetAtt {{ auth_name }}Function.Arn
+
+            {% if 'token' in auth_params %}
+            FunctionPayloadType: TOKEN
+            {% elif 'headers' in auth_params or 'query' in auth_params %}
+            FunctionPayloadType: REQUEST
+            {% endif %}
+
+            Identity:
+              {% if 'token' in auth_params %}
+              Header: {{ auth_params.token }}
+              {% elif 'headers' in auth_params %}
+              Context:
+                - httpMethod
+                - resourcePath
+              Headers:
+                {% for header in auth_params.headers %}
+                - {{ header }}
+                {% endfor %}
+              {% elif 'query' in auth_params %}
+              QueryStrings:
+                - {{ auth_params.query }}
+              {% endif %}
+
+              {% if 'ttl' in auth_params %}
+              ReauthorizeEvery: {{ auth_params.ttl }}
+              {% else %}
+              ReauthorizeEvery: 300
+              {% endif %}
+          {% endfor %}
+      {% endif %}
+      DefinitionBody:
+        'Fn::Transform':
+          Name: 'AWS::Include'
+          Parameters:
+            Location: './build/swagger.yaml'
+
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "apigw-${AWS::StackName}-${Stage}"
+      RetentionInDays: 7
+
+  {% if streams is defined %}
+  {{ lprefix }}DeliveryStreamPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - !Ref {{ lprefix }}DeliveryStreamRole
+      PolicyName: {{ lprefix }}_firehose_delivery_policy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 's3:AbortMultipartUpload'
+              - 's3:GetBucketLocation'
+              - 's3:GetObject'
+              - 's3:ListBucket'
+              - 's3:ListBucketMultipartUploads'
+              - 's3:PutObject'
+            Resource:
+            {% for stream_name, stream in streams.items() %}
+              - !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ stream.bucketname.replace('-', '') }}Bucket}/*
+            {% endfor%}
+          - Effect: Allow
+            Action:
+              - 'kinesis:DescribeStream'
+              - 'kinesis:GetShardIterator'
+              - 'kinesis:GetRecords'
+              - 'kinesis:ListShards'
+            Resource:
+            {% for stream_name, stream in streams.items() %}
+              - !GetAtt {{ lprefix }}{{ stream_name.replace('-', '') }}Stream.Arn
+            {% endfor %}
+
+  {{ lprefix }}DeliveryStreamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                'sts:ExternalId': !Ref 'AWS::AccountId'
+  {% endif %}  # streams
+
+  GatewayDynamoRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+      Policies:
+        - PolicyName: APIGatewayDynamoDBPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:Query'
+                  - 'dynamodb:GetItem'
+## Todo: provide only required resources list
+                Resource: '*'
+
+  GatewaySQSRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - apigateway.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+      - PolicyName: AllowSqsIntegration
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'sqs:SendMessage'
+                - 'sqs:GetQueueUrl'
+                - 'sqs:SendMessageBatch'
+## Todo: provide only required resources list
+              Resource: '*'
+      - PolicyName: AuthorizerPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource: 
+                - !GetAtt twitchxv1authorizerFunction.Arn
+                - !GetAtt backofficev1authorizerFunction.Arn
+                - !GetAtt backofficev1authorizerFunction.Arn
+
+  {% if streams is defined %}
+  {% for stream_name, stream in streams.items() %}
+  {{ lprefix }}{{ stream_name.replace('-', '') }}Stream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub "{{ lprefix }}-{{ stream_name }}-${Stage}"
+      RetentionPeriodHours: 24
+      StreamModeDetails:
+        StreamMode: ON_DEMAND
+  {{ lprefix }}{{ stream_name.replace('-', '') }}Delivery:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    DependsOn:
+      - {{ lprefix }}DeliveryStreamPolicy    
+    Properties:
+      DeliveryStreamName: !Sub "{{ lprefix }}-{{ stream_name }}-${Stage}"
+      DeliveryStreamType: "KinesisStreamAsSource"
+      KinesisStreamSourceConfiguration:
+        KinesisStreamARN: !GetAtt {{ lprefix }}{{ stream_name.replace('-', '') }}Stream.Arn
+        RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !GetAtt {{ lprefix }}{{ stream.bucketname }}Bucket.Arn
+        BufferingHints:
+          SizeInMBs: 128
+          IntervalInSeconds: 10
+        CompressionFormat: "GZIP"
+        EncryptionConfiguration:
+          NoEncryptionConfig: "NoEncryption"
+        Prefix: "{{ stream.bucketprefix }}"
+        RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
+  {% endfor %}
+  {% endif %}  # streams
+
+  {% if buckets is defined %}
+  {% for bucket_name, bucket in buckets.items() %}
+  {{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "{{ lprefix }}{{ bucket_name }}-${Stage}"
+  {% if bucket.public %}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - PUT
+              - HEAD
+              - POST
+              - DELETE
+            AllowedOrigins:
+              - "*"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+
+  {{ lprefix }}{{ bucket_name.replace('-', '') }}BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref {{ lprefix }}{{ bucket_name }}Bucket
+      PolicyDocument:
+        Id: PublicReadPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
+          - Sid: PublicPutForBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:PutObject'
+            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
+          - Sid: PublicGetObjectAttributes
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObjectAttributes'
+            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*            
+  {% endif %}
+
+  {% if bucket.extaccesspolicy is defined %}
+  {{ lprefix }}{{ bucket_name.replace('-', '') }}ReadPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      ManagedPolicyName: !Sub "{{ bucket.extaccesspolicy }}-${Stage}"
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
+          - Action: s3:ListBucket
+            Effect: Allow
+            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}
+
+  {% endif %}
+  {% endfor %}
+  {% endif %}  # buckets
+  
+  {% if queues is defined %}
+  {% for queue_name, queue in queues.items() %}
+  {{ lprefix }}{{ queue_name.replace('-', '') }}Queue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "{{ lprefix }}-{{ queue_name }}-${Stage}"
+  {% endfor %}
+  {% endif %}  # queues
+
+  {% if tables is defined %}
+  {% for table_name, table in tables.items() %}
+  {{ prefix }}{{ table_name }}:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub {{ lprefix }}{{ table_name }}-${Stage}
+      AttributeDefinitions:
+        {% for attribute in table.attributes %}
+        - AttributeName: {{ attribute.name }}
+        {% if 'type' in attribute %}
+          AttributeType: {{ attribute.type }}
+        {% else %}
+          AttributeType: S
+        {% endif %}
+        {% endfor %}
+      KeySchema:
+        {% for attribute in table.attributes %}
+        {% if attribute.hash %}
+        - AttributeName: {{ attribute.name }}
+          KeyType: HASH
+        {% endif %}
+        {% endfor %}
+        {% for attribute in table.attributes %}
+        {% if attribute.range %}
+        - AttributeName: {{ attribute.name }}
+          KeyType: RANGE
+        {% endif %}
+        {% endfor %}
+      {% if table.indices %}
+      GlobalSecondaryIndexes:
+        {% for index in table.indices %}
+        - IndexName: {{ index.name }}
+          KeySchema:
+            {% for attribute in index.attributes %}
+            {% if attribute.hash %}
+            - AttributeName: {{ attribute.name }}
+              KeyType: HASH
+            {% endif %}
+            {% endfor %}
+            {% for attribute in index.attributes %}
+            {% if attribute.range %}
+            - AttributeName: {{ attribute.name }}
+              KeyType: RANGE
+            {% endif %}
+            {% endfor %}
+          Projection:
+            ProjectionType: ALL
+        {% endfor %}
+      {% endif %}
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+        RecoveryPeriodInDays: 14
+    {% endfor %}
+  {% endif %}  # tables
+
+  PythonLambdaLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub pythonthrdparty-${Stage}
+      Description: Dependencies for all python lambdas
+      ContentUri: thrdparty/.
+      CompatibleRuntimes:
+        - python3.13
+    Metadata:
+      BuildMethod: python3.13
+      BuildArchitecture: x86_64
+
+  {% if functions is defined %}
+  {% for function_name, function in functions.items() %}
+  {{ function_name.replace('-', '' )}}Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      {% if function.timeout is defined%}
+      Timeout: {{ function.timeout}}
+      {% endif %}
+      FunctionName: !Sub "{{ function_name }}-${Stage}"
+      CodeUri: {{ function.uri }}
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*
+        - SSMParameterReadPolicy:
+            ParameterName: "*"
+        {% for poll in function.polls %}
+        - SQSPollerPolicy:
+            QueueName: !GetAtt {{ lprefix }}{{ poll.replace('-', '') }}Queue.QueueName
+        {% endfor %}
+        {% for table in function.tables %}
+        - DynamoDBCrudPolicy:
+            TableName: !Ref {{ prefix }}{{ table }}
+        {% endfor %}
+        {% for bucket in function.buckets %}
+        - S3CrudPolicy:
+            BucketName: !Ref {{ lprefix }}{{ bucket.replace('-', '') }}Bucket
+        {% endfor %}
+        {% for stream in function.streams %}
+        - KinesisCrudPolicy:
+            StreamName: !Ref {{ lprefix }}{{ stream.replace('-', '') }}Stream
+        {% endfor %}
+        {% for queue in function.send %}
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt {{ lprefix }}{{ queue.replace('-','') }}Queue.QueueName
+        {% endfor %}
+        {% for service in function.services %}
+          {% if service == 'comprehend' %}
+        - ComprehendBasicAccessPolicy: {}
+          {% endif %}
+        {% endfor %}        
+      Layers:
+        - !Ref PythonLambdaLayer
+      Events:
+        {% if function.schedule%}
+        InvocationLevel:
+          Type: Schedule
+          Properties:
+            Schedule: {{function.schedule}}
+        {% endif %}
+        {% for poll in function.polls %}
+        {{ poll.replace('-', '') }}SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt {{ lprefix }}{{ poll.replace('-', '') }}Queue.Arn
+            {% if function.batchsize is defined %}
+            BatchSize: {{ function.batchsize }}
+            {% endif %}
+            {% if function.batchwindow is defined %}
+            MaximumBatchingWindowInSeconds: {{ function.batchwindow }}
+            {% endif %}
+        {% endfor %}
+        {% for path_name, path in paths.items() %}
+        {% if path.function == function_name %}
+        {{ path_name.replace('/', '') }}API:
+          Type: Api
+          Properties:
+            Method: ANY
+            Path: {{ path_name }}{% if path.greedy is not defined or path.greedy%}/{proxy+}{% endif %}
+            RestApiId: !Ref ApiDeployment
+            Auth:
+            {% if path.open %}
+            {% else %}
+              Authorizer: {{ path.authorizer }}
+            {% endif %}
+        {% endif %}
+        {% endfor %}
+  {% endfor %}
+  {% endif %}  # functions
