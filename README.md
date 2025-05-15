@@ -1,4 +1,4 @@
-# Opionated AWS SAM Templating Engine (EasySAM)
+# Opionated AWS SAM Templating Engine
 
 ## Installation
 
