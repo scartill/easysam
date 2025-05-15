@@ -17,6 +17,7 @@ paths:
   {% else %}
     {% set paths = [original_path_name] %}
   {% endif %}
+
   {% for path_name in paths %}
   {{ path_name }}:
     {% if path_params.definition is defined %}

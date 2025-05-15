@@ -6,3 +6,4 @@ lambda:
   integration:
     path: /items
     open: true
+    greedy: false

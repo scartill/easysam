@@ -9,7 +9,7 @@ from easysam.commondep import commondep
 
 
 SAM_CLI_VERSION = '1.138.0'
-SAM_CLI_PATH = 'sam.cmd'  # TODO: remove this once we have a way to run sam CLI on non-Windows systems
+PIP_VERSION = '25.1.1'
 
 
 @click.command(name='deploy')
@@ -17,6 +17,7 @@ SAM_CLI_PATH = 'sam.cmd'  # TODO: remove this once we have a way to run sam CLI 
 @click.option('--region', type=str, help='AWS region')
 @click.option('--tag', type=str, multiple=True, help='AWS tags', required=True)
 @click.option('--dry-run', is_flag=True, help='Dry run the deployment')
+@click.option('--sam-tool', type=str, help='Path to the SAM CLI', default='sam')
 @click.argument('directory', type=click.Path(exists=True))
 @click.argument('stack', type=str)
 def deploy_cmd(obj, directory, stack, **kwargs):
@@ -28,7 +29,8 @@ def deploy_cmd(obj, directory, stack, **kwargs):
 
 def deploy(cliparams, directory, resources, stack):
     lg.info(f'Deploying SAM template from {directory}')
-    check_sam_cli_version()
+    check_pip_version(cliparams)
+    check_sam_cli_version(cliparams)
     remove_common_dependencies(directory)
     copy_common_dependencies(directory, resources)
     sam_build(cliparams, directory)
@@ -36,9 +38,18 @@ def deploy(cliparams, directory, resources, stack):
     remove_common_dependencies(directory)
 
 
-def check_sam_cli_version():
+def check_pip_version(cliparams):
+    lg.info('Checking pip version')
+    pip_version = subprocess.check_output(['pip', '--version']).decode('utf-8')
+
+    if pip_version < PIP_VERSION:
+        raise UserWarning(f'pip version must be {PIP_VERSION} or higher')
+
+
+def check_sam_cli_version(cliparams):
     lg.info('Checking SAM CLI version')
-    sam_version = subprocess.check_output([SAM_CLI_PATH, '--version']).decode('utf-8')
+    sam_path = cliparams['sam_tool']
+    sam_version = subprocess.check_output([sam_path, '--version']).decode('utf-8')
 
     if sam_version < SAM_CLI_VERSION:
         raise UserWarning(f'SAM CLI version must be {SAM_CLI_VERSION} or higher')
@@ -46,8 +57,7 @@ def check_sam_cli_version():
 
 def sam_build(cliparams, directory):
     lg.info(f'Building SAM template from {directory}')
-
-    build_params = [SAM_CLI_PATH, 'build']
+    build_params = [cliparams['sam_tool'], 'build']
 
     if cliparams.get('verbose'):
         build_params.append('--debug')
@@ -63,7 +73,7 @@ def sam_deploy(cliparams, directory, aws_stack):
     lg.info(f'Deploying SAM template from {directory} to {aws_stack}')
 
     deploy_params = [
-        SAM_CLI_PATH,
+        cliparams['sam_tool'],
         'deploy',
         '--parameter-overrides', f'ParameterKey=Stage,ParameterValue={aws_stack}',
         '--stack-name', aws_stack,
@@ -105,7 +115,7 @@ def remove_common_dependencies(directory):
     lg.info(f'Removing common dependencies from {directory}')
     backend = Path(directory, 'backend')
 
-    for common_dep in backend.glob('common/*'):
+    for common_dep in backend.glob('**/common'):
         lg.info(f'Removing {common_dep}')
         shutil.rmtree(common_dep)
 

@@ -1,1 +1,1 @@
- uv run easysam --verbose deploy --tag project=myapp --dry-run .\example\myapp\ myapp
+ uv run easysam --verbose deploy --tag project=myapp --sam-tool sam.cmd .\example\myapp\ myapp
