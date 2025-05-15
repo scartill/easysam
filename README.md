@@ -1,4 +1,4 @@
-# Opionated AWS SAM Templating Engine
+# Opionated Modular Cloud Deployment Tool
 
 ## Installation
 
