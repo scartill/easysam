@@ -99,6 +99,10 @@ def sam_deploy(cliparams, directory, aws_stack):
         lg.info(f'Would run: {" ".join(deploy_params)}')
         return
 
+    if cliparams.get('aws_profile'):
+        lg.info(f'Using AWS profile: {cliparams["aws_profile"]}')
+        deploy_params.extend(['--profile', cliparams['aws_profile']])
+
     result = subprocess.run(deploy_params, cwd=directory.resolve(), text=True)
 
     if result.returncode != 0:

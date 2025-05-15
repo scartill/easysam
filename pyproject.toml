@@ -1,7 +1,7 @@
 [project]
 name = "easysam"
 version = "1.0.0"
-description = "Cloud structure for simplified SAM templating (EASYSAM)"
+description = "Cloud structure for simplified SAM templating (EasySAM)"
 readme = "README.md"
 requires-python = ">=3.13"
 
@@ -10,6 +10,10 @@ dependencies = [
     "click>=8.2.0",
     "jinja2-cli[yaml]>=0.8.2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/adsight-app/easysam"
+Changelog = "https://github.com/adsight-app/easysam/blob/main/CHANGELOG.md"
 
 [project.scripts]
 easysam = "easysam.cli:main"
