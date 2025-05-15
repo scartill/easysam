@@ -1,14 +1,8 @@
 # Opionated Modular Cloud Deployment Tool
 
-## Installation
-
-```pwsh
-pip install easysam
-```
-
 ## Usage
 
-Initialize a new application. This command creates a new directory with the given name and generates the necessary files for a single lambda function and a single table.
+First, initialize a new application. This command creates a new directory with the given name and generates the necessary files for a single lambda function and table. This version only supports AWS as a backend, and Python as a language. 
 
 ```pwsh
 easysam init <app-name>
@@ -26,7 +20,20 @@ For more options, use the `--help` flag:
 easysam --help
 ```
 
+## Prerequisites  
+* Python 3
+* AWS Credentials Configured
+* AWS SAM CLI
+
+## Installation
+
+```pwsh
+pip install easysam
+```
+
 ## Resource Definitions
+
+The entry point for all cloud resources definitions in the `resources.yaml` file. See [example applications](./example) for how applications are structures.
 
 ### Table Definitions
 
@@ -82,6 +89,8 @@ streams:
       - String (e.g., my-bucket)
     send:
       - String (e.g., my-queue) - outgoing queue's name
+    services:
+      - comprehend
 ```
 
 ### API Gateway Definition
