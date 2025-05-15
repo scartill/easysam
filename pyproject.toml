@@ -28,4 +28,5 @@ packages = ["src/easysam"]
 [dependency-groups]
 dev = [
     "pip>=25.1.1",
+    "twine>=6.1.0",
 ]
