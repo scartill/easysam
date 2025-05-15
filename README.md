@@ -1,4 +1,4 @@
-# Cloud structure for simplified SAM templating (EASYSAM)
+# Opionated AWS SAM Templating Engine (EasySAM)
 
 ## Installation
 
