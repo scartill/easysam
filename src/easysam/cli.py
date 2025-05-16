@@ -4,7 +4,7 @@ import sys
 
 
 from easysam.generate import generate_cmd
-from easysam.deploy import deploy_cmd
+from easysam.deploy import deploy_cmd, delete_cmd
 from easysam.init import init_cmd
 
 
@@ -22,6 +22,7 @@ def main():
     try:
         easysam.add_command(generate_cmd)
         easysam.add_command(deploy_cmd)
+        easysam.add_command(delete_cmd)
         easysam.add_command(init_cmd)
         easysam()
 
