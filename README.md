@@ -39,9 +39,9 @@ easysam --help
 ```
 
 ## Prerequisites  
-* Python 3.12 or higher
-* uv 0.5+
-* AWS SAM CLI
+* Python 3.12 or higher with `pip` on PATH
+* uv 0.5 or higher
+* AWS SAM CLI 1.138 or higher on PATH
 * AWS Credentials Configured
 
 ## Usage

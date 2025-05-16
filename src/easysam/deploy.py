@@ -40,19 +40,31 @@ def deploy(cliparams, directory, resources, stack):
 
 def check_pip_version(cliparams):
     lg.info('Checking pip version')
-    pip_version = subprocess.check_output(['pip', '--version']).decode('utf-8')
 
-    if pip_version < PIP_VERSION:
-        raise UserWarning(f'pip version must be {PIP_VERSION} or higher')
+    try:
+        lg.debug(f'Running command: {" ".join(["pip", "--version"])}')
+        pip_version = subprocess.check_output(['pip', '--version']).decode('utf-8')
+
+        if pip_version < PIP_VERSION:
+            raise UserWarning(f'pip version must be {PIP_VERSION} or higher')
+
+    except Exception as e:
+        raise UserWarning('pip not found') from e
 
 
 def check_sam_cli_version(cliparams):
     lg.info('Checking SAM CLI version')
     sam_path = cliparams['sam_tool']
-    sam_version = subprocess.check_output([sam_path, '--version']).decode('utf-8')
 
-    if sam_version < SAM_CLI_VERSION:
-        raise UserWarning(f'SAM CLI version must be {SAM_CLI_VERSION} or higher')
+    try:
+        lg.debug(f'Running command: {" ".join([sam_path, "--version"])}')
+        sam_version = subprocess.check_output([sam_path, '--version']).decode('utf-8')
+
+        if sam_version < SAM_CLI_VERSION:
+            raise UserWarning(f'SAM CLI version must be {SAM_CLI_VERSION} or higher')
+
+    except Exception as e:
+        raise UserWarning('SAM CLI not found') from e
 
 
 def sam_build(cliparams, directory):
