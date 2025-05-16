@@ -1,9 +1,9 @@
 [project]
 name = "easysam"
 version = "1.0.0"
-description = "Opionated Modular Cloud Deployment Tool (EasySAM)"
+description = "Opinionated Modular Cloud Deployment Tool (EasySAM)"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.8"
 
 dependencies = [
     "boto3>=1.38.15",

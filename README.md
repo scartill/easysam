@@ -1,4 +1,47 @@
-# Opionated Modular Cloud Deployment Tool
+# EasySAM - Opinionated Modular Cloud Deployment Tool
+
+EasySAM is a simple, opinionated tool for deploying cloud resources with a focus on simplicity and modularity. It provides a streamlined way to define and deploy AWS resources using YAML configuration files, making cloud infrastructure management more accessible and maintainable.
+
+## Features
+
+- Simple YAML-based resource definitions
+- Modular architecture with import support
+- Comprehensive AWS resource support:
+  - Lambda functions
+  - DynamoDB tables
+  - S3 buckets
+  - SQS queues
+  - Kinesis streams
+  - API Gateway integrations
+- Easy initialization of new projects
+
+## Installation
+
+```pwsh
+pip install easysam
+```
+
+## Quick Start
+
+1. Initialize a new application:
+```pwsh
+easysam init my-app
+```
+
+2. Deploy your application:
+```pwsh
+easysam deploy my-app my-stack-name
+```
+
+For more options, use the `--help` flag:
+```pwsh
+easysam --help
+```
+
+## Prerequisites  
+* Python 3.8 or higher
+* AWS Credentials Configured
+* AWS SAM CLI
 
 ## Usage
 
@@ -18,17 +61,6 @@ For more options, use the `--help` flag:
 
 ```pwsh
 easysam --help
-```
-
-## Prerequisites  
-* Python 3
-* AWS Credentials Configured
-* AWS SAM CLI
-
-## Installation
-
-```pwsh
-pip install easysam
 ```
 
 ## Resource Definitions
@@ -178,3 +210,37 @@ prismarine:
     - package: <package-to-import>
       base: <optional-base-path>
 ```
+
+## Development
+
+### Setting up the development environment
+
+1. Clone the repository:
+```bash
+git clone https://github.com/adsight-app/easysam.git
+cd easysam
+```
+
+2. Install development dependencies and activate the virtual environment:
+```bash
+uv sync
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and suggest improvements.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+If you encounter any issues or have questions, please:
+2. Search [existing issues](https://github.com/adsight-app/easysam/issues)
+3. Create a new issue if needed
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a list of changes between versions.
