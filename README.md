@@ -237,10 +237,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-If you encounter any issues or have questions, please:
-2. Search [existing issues](https://github.com/adsight-app/easysam/issues)
-3. Create a new issue if needed
+If you encounter any issues or have questions, please:  
+1. Search [existing issues](https://github.com/adsight-app/easysam/issues)  
+2. Create a new issue if needed
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for a list of changes between versions.
+See [CHANGELOG.md](https://github.com/adsight-app/easysam/blob/main/CHANGELOG.md) for a list of changes between versions.
