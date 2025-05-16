@@ -1,11 +1,14 @@
-import click
 import logging as lg
 import shutil
 from pathlib import Path
 import subprocess
 
+import click
+
+
 from easysam.generate import generate
 from easysam.commondep import commondep
+import easysam.utils as u
 
 
 SAM_CLI_VERSION = '1.138.0'
@@ -27,6 +30,16 @@ def deploy_cmd(obj, directory, stack, **kwargs):
     deploy(obj, directory, resources, stack)
 
 
+@click.command(name='delete')
+@click.pass_obj
+@click.option('--force', is_flag=True, help='Force delete the stack')
+@click.option('--region', type=str, help='AWS region')
+@click.argument('stack', type=str)
+def delete_cmd(obj, stack, force, **kwargs):
+    obj.update(kwargs)
+    delete(obj, stack, force)
+
+
 def deploy(cliparams, directory, resources, stack):
     lg.info(f'Deploying SAM template from {directory}')
     check_pip_version(cliparams)
@@ -36,6 +49,13 @@ def deploy(cliparams, directory, resources, stack):
     sam_build(cliparams, directory)
     sam_deploy(cliparams, directory, stack)
     remove_common_dependencies(directory)
+
+
+def delete(cliparams, stack, force):
+    lg.info(f'Deleting SAM template from {stack}')
+    cf = u.get_aws_client('cloudformation', cliparams)
+    mode = 'FORCE_DELETE_STACK' if force else 'STANDARD'
+    cf.delete_stack(StackName=stack, DeletionMode=mode)  # type: ignore
 
 
 def check_pip_version(cliparams):
