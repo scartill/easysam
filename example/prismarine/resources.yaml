@@ -1,0 +1,7 @@
+prefix: MyAppWithPrismarine
+
+prismarine:
+  default-base: common
+  access-module: common.dynamo_access
+  tables:
+    - package: myobject

@@ -7,8 +7,10 @@ from jinja2 import Environment, FileSystemLoader
 import yaml
 import click
 
-# import tools.prismarine.prisma_common as prisma_common
-# import tools.prismarine.prisma_easysam as prisma_easysam
+import prismarine.prisma_common as prisma_common
+import prismarine.prisma_easysam as prisma_easysam
+
+from easysam.prismarine import generate as generate_prismarine_clients
 
 
 IMPORT_FILE = 'easysam.yaml'
@@ -28,41 +30,41 @@ def write_result(path, text):
     Path(path).write_text(sane_text)
 
 
-# def prismarine_dynamo_tables(prefix, base, package, resources_dir, path):
-#     lg.debug(f'Generating prismarine dynamo tables for {prefix}')
+def prismarine_dynamo_tables(prefix, base, package, resources_dir, path):
+    lg.debug(f'Generating prismarine dynamo tables for {prefix}')
 
-#     try:
-#         prisma_common.set_path(path)
-#         base_dir = Path(resources_dir, base).resolve()
-#         cluster = prisma_common.get_cluster(base_dir, package)
-#         return prisma_easysam.build_dynamo_tables(prefix, cluster)
-#     except Exception as e:
-#         lg.error(f'Error generating dynamo tables for {prefix}: {e}')
-#         raise UserWarning(f'Error generating prismarine dynamo tables for {base_dir}')
+    try:
+        prisma_common.set_path(path)
+        base_dir = Path(resources_dir, base).resolve()
+        cluster = prisma_common.get_cluster(base_dir, package)
+        return prisma_easysam.build_dynamo_tables(prefix, cluster)
+    except Exception as e:
+        lg.error(f'Error generating dynamo tables for {prefix}: {e}')
+        raise UserWarning(f'Error generating prismarine dynamo tables for {base_dir}')
 
 
-# def preprocess_prismarine(resources_data, resources_dir, path):
-#     prefix = resources_data['prefix']
-#     prisma = resources_data['prismarine']
-#     prisma_base = prisma.get('default-base')
-#     prisma_tables = prisma['tables'] or []
+def preprocess_prismarine(resources_data, resources_dir, path):
+    prefix = resources_data['prefix']
+    prisma = resources_data['prismarine']
+    prisma_base = prisma.get('default-base')
+    prisma_tables = prisma['tables'] or []
 
-#     for prisma_integration in prisma_tables:
-#         base = prisma_integration.get('base') or prisma_base
-#         package = prisma_integration.get('package')
+    for prisma_integration in prisma_tables:
+        base = prisma_integration.get('base') or prisma_base
+        package = prisma_integration.get('package')
 
-#         if not base:
-#             raise UserWarning(f'No base found for {package}')
+        if not base:
+            raise UserWarning(f'No base found for {package}')
 
-#         if not package:
-#             raise UserWarning(f'No package found for {base}')
+        if not package:
+            raise UserWarning(f'No package found for {base}')
 
-#         tables = prismarine_dynamo_tables(prefix, base, package, resources_dir, path)
+        tables = prismarine_dynamo_tables(prefix, base, package, resources_dir, path)
 
-#         if 'tables' not in resources_data:
-#             resources_data['tables'] = {}
+        if 'tables' not in resources_data:
+            resources_data['tables'] = {}
 
-#         resources_data['tables'].update(tables)
+        resources_data['tables'].update(tables)
 
 
 def preprocess_lambda(resources_data, resources_dir, lambda_def, entry_path, entry_dir):
@@ -154,8 +156,8 @@ def preprocess_resources(resources_data, resources_dir, path):
     def sort_dict(d):
         return dict(sorted(d.items(), key=lambda x: x[0]))
 
-    # if 'prismarine' in resources_data:
-    #     preprocess_prismarine(resources_data, resources_dir, path)
+    if 'prismarine' in resources_data:
+        preprocess_prismarine(resources_data, resources_dir, path)
 
     if 'import' in resources_data:
         preprocess_imports(resources_data, resources_dir)
@@ -199,4 +201,9 @@ def generate(directory, path, preprocess_only):
     lg.info(f'Swagger file generated: {swagger}')
     write_result(template, sam_output)
     lg.info(f'SAM template generated: {template}')
+
+    if 'prismarine' in resources_data:
+        lg.info('Generating prismarine clients')
+        generate_prismarine_clients(resources_dir, resources_data)
+
     return resources_data

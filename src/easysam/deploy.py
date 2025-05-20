@@ -10,7 +10,6 @@ from easysam.generate import generate
 from easysam.commondep import commondep
 import easysam.utils as u
 
-
 SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
 

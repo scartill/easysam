@@ -337,7 +337,7 @@ Resources:
   {{ prefix }}{{ table_name }}:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub {{ lprefix }}{{ table_name }}-${Stage}
+      TableName: !Sub {{ prefix }}{{ table_name }}-${Stage}
       AttributeDefinitions:
         {% for attribute in table.attributes %}
         - AttributeName: {{ attribute.name }}
