@@ -243,7 +243,7 @@ Resources:
         BucketARN: !GetAtt {{ lprefix }}{{ stream.bucketname }}Bucket.Arn
         BufferingHints:
           SizeInMBs: 128
-          IntervalInSeconds: 10
+          IntervalInSeconds: {{ stream.intervalinseconds | default('300') }}
         CompressionFormat: "GZIP"
         EncryptionConfiguration:
           NoEncryptionConfig: "NoEncryption"
