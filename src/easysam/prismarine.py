@@ -26,6 +26,11 @@ def generate(directory, resources):
 
         cluster = client.get_cluster(base_dir, package)
 
+        if not cluster.prefix.startswith(resources['prefix']):
+            raise UserWarning(
+                f'When using with EasySAM, a Prismarine Cluster prefix ({cluster.prefix}) must start with the master prefix ({resources["prefix"]})'
+            )
+
         content = client.build_client(
             cluster, base_dir, base, access_module
         )

@@ -97,7 +97,8 @@ def sam_build(cliparams, directory):
         lg.info(f'Would run: {" ".join(build_params)}')
         return
 
-    subprocess.run(build_params, cwd=directory.resolve(), text=True)
+    subprocess.run(build_params, cwd=directory.resolve(), text=True, check=True)
+    lg.info('Successfully built SAM template')
 
 
 def sam_deploy(cliparams, directory, aws_stack):
@@ -134,12 +135,8 @@ def sam_deploy(cliparams, directory, aws_stack):
         lg.info(f'Using AWS profile: {cliparams["aws_profile"]}')
         deploy_params.extend(['--profile', cliparams['aws_profile']])
 
-    result = subprocess.run(deploy_params, cwd=directory.resolve(), text=True)
-
-    if result.returncode != 0:
-        lg.error(f'Error deploying SAM template: {result.stderr}')
-    else:
-        lg.info(f'Successfully deployed SAM template: {result.stdout}')
+    subprocess.run(deploy_params, cwd=directory.resolve(), text=True, check=True)
+    lg.info('Successfully deployed SAM template')
 
 
 def common_dep_dir(directory):

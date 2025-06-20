@@ -233,7 +233,7 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.38.15" },
     { name = "click", specifier = ">=8.2.0" },
     { name = "jinja2-cli", extras = ["yaml"], specifier = ">=0.8.2" },
-    { name = "prismarine", editable = "../prismarine" },
+    { name = "prismarine", specifier = ">=1.0.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -534,7 +534,7 @@ wheels = [
 [[package]]
 name = "prismarine"
 version = "1.0.0"
-source = { editable = "../prismarine" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
     { name = "case-converter" },
@@ -543,21 +543,9 @@ dependencies = [
     { name = "mako" },
     { name = "types-boto3", extra = ["dynamodb"] },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "boto3", specifier = ">=1.38.19" },
-    { name = "case-converter", specifier = ">=1.2.0" },
-    { name = "click", specifier = ">=8.2.0" },
-    { name = "gray-formatter", specifier = ">=3.0.10" },
-    { name = "mako", specifier = ">=1.3.10" },
-    { name = "types-boto3", extras = ["dynamodb"], specifier = ">=1.38.19" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pip", specifier = ">=25.1.1" },
-    { name = "twine", specifier = ">=6.1.0" },
+sdist = { url = "https://files.pythonhosted.org/packages/14/87/5f754709a6f0de23005aaf7dc5ce054344c2af827d587f485bbcdceb566a/prismarine-1.0.0.tar.gz", hash = "sha256:43c3fc1baeec5c5c87cec0a1c4bb32c61210d120d6bb3855643ef1ed80e86730", size = 32655 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/eb/17/2b730a08077483e116cfa3a60bc4df0c5a7311aa5047ec66eee072d57c9c/prismarine-1.0.0-py3-none-any.whl", hash = "sha256:241915578c24752fdc39f24035b50f09ea9503fc9fed8cef8fef27f091a8504b", size = 11907 },
 ]
 
 [[package]]

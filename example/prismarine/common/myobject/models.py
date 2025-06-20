@@ -2,7 +2,7 @@ from typing import TypedDict, NotRequired
 from prismarine.runtime import Cluster
 
 
-c = Cluster('MyDatabase')
+c = Cluster('MyAppWithPrismarine')
 
 
 @c.model(PK='Foo', SK='Bar')
