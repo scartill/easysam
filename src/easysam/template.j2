@@ -391,7 +391,7 @@ Resources:
   PythonLambdaLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: !Sub pythonthrdparty-${Stage}
+      LayerName: !Sub pythonthirdparty-${Stage}
       Description: Dependencies for all python lambdas
       ContentUri: thirdparty/.
       CompatibleRuntimes:

@@ -148,7 +148,7 @@ def remove_common_dependencies(directory):
     backend = Path(directory, 'backend')
 
     for common_dep in backend.glob('**/common'):
-        lg.info(f'Removing {common_dep}')
+        lg.debug(f'Removing {common_dep}')
         shutil.rmtree(common_dep)
 
 
@@ -170,11 +170,11 @@ def copy_common_dependencies(directory, resources):
             dep_path = Path(common, dep)
 
             if dep_path.is_dir():
-                lg.info(f'Copying {dep_path} directory to {lambda_common_path}')
+                lg.debug(f'Copying {dep_path} directory to {lambda_common_path}')
                 lambda_common_dep_path = Path(lambda_common_path, dep_path.name)
                 shutil.copytree(dep_path, lambda_common_dep_path)
             else:
                 dep_filepath = dep_path.with_suffix('.py')
-                lg.info(f'Copying {dep_filepath} file to {lambda_common_path}')
+                lg.debug(f'Copying {dep_filepath} file to {lambda_common_path}')
                 lambda_common_filepath = Path(lambda_common_path, dep_filepath.name)
                 shutil.copy(dep_filepath, lambda_common_filepath)
