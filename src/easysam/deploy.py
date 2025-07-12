@@ -3,9 +3,6 @@ import shutil
 from pathlib import Path
 import subprocess
 
-import click
-
-
 from easysam.generate import generate
 from easysam.commondep import commondep
 import easysam.utils as u
@@ -14,32 +11,9 @@ SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
 
 
-@click.command(name='deploy')
-@click.pass_obj
-@click.option('--region', type=str, help='AWS region')
-@click.option('--tag', type=str, multiple=True, help='AWS tags', required=True)
-@click.option('--dry-run', is_flag=True, help='Dry run the deployment')
-@click.option('--sam-tool', type=str, help='Path to the SAM CLI', default='sam')
-@click.argument('directory', type=click.Path(exists=True))
-@click.argument('stack', type=str)
-def deploy_cmd(obj, directory, stack, **kwargs):
-    obj.update(kwargs)
-    directory = Path(directory)
+def deploy(cliparams, directory, stack):
     resources = generate(directory, [], False)
-    deploy(obj, directory, resources, stack)
 
-
-@click.command(name='delete')
-@click.pass_obj
-@click.option('--force', is_flag=True, help='Force delete the stack')
-@click.option('--region', type=str, help='AWS region')
-@click.argument('stack', type=str)
-def delete_cmd(obj, stack, force, **kwargs):
-    obj.update(kwargs)
-    delete(obj, stack, force)
-
-
-def deploy(cliparams, directory, resources, stack):
     lg.info(f'Deploying SAM template from {directory}')
     check_pip_version(cliparams)
     check_sam_cli_version(cliparams)
@@ -47,7 +21,9 @@ def deploy(cliparams, directory, resources, stack):
     copy_common_dependencies(directory, resources)
     sam_build(cliparams, directory)
     sam_deploy(cliparams, directory, stack)
-    remove_common_dependencies(directory)
+
+    if not cliparams.get('no_cleanup'):
+        remove_common_dependencies(directory)
 
 
 def delete(cliparams, stack, force):
@@ -73,39 +49,46 @@ def check_pip_version(cliparams):
 
 def check_sam_cli_version(cliparams):
     lg.info('Checking SAM CLI version')
-    sam_path = cliparams['sam_tool']
+    sam_tool = cliparams['sam_tool']
+    sam_params = sam_tool.split(' ')
+    sam_params.append('--version')
 
     try:
-        lg.debug(f'Running command: {" ".join([sam_path, "--version"])}')
-        sam_version = subprocess.check_output([sam_path, '--version']).decode('utf-8')
+        lg.debug(f'Running command: {" ".join(sam_params)}')
+        sam_version = subprocess.check_output(sam_params).decode('utf-8')
+        lg.debug(f'SAM CLI version: {sam_version}')
 
         if sam_version < SAM_CLI_VERSION:
             raise UserWarning(f'SAM CLI version must be {SAM_CLI_VERSION} or higher')
 
     except Exception as e:
-        raise UserWarning('SAM CLI not found') from e
+        raise UserWarning(f'SAM CLI not found. Error: {e}') from e
 
 
 def sam_build(cliparams, directory):
     lg.info(f'Building SAM template from {directory}')
-    build_params = [cliparams['sam_tool'], 'build']
+    sam_tool = cliparams['sam_tool']
+    sam_params = sam_tool.split(' ')
+    sam_params.append('build')
 
     if cliparams.get('verbose'):
-        build_params.append('--debug')
+        sam_params.append('--debug')
 
     if cliparams['dry_run']:
-        lg.info(f'Would run: {" ".join(build_params)}')
+        lg.info(f'Would run: {" ".join(sam_params)}')
         return
 
-    subprocess.run(build_params, cwd=directory.resolve(), text=True, check=True)
+    lg.debug(f'Running command: {" ".join(sam_params)}')
+    subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
     lg.info('Successfully built SAM template')
 
 
 def sam_deploy(cliparams, directory, aws_stack):
     lg.info(f'Deploying SAM template from {directory} to {aws_stack}')
+    sam_tool = cliparams['sam_tool']
+    sam_params = sam_tool.split(' ')
 
-    deploy_params = [
-        cliparams['sam_tool'],
+    sam_params.extend([
         'deploy',
         '--parameter-overrides', f'ParameterKey=Stage,ParameterValue={aws_stack}',
         '--stack-name', aws_stack,
@@ -113,29 +96,30 @@ def sam_deploy(cliparams, directory, aws_stack):
         '--no-confirm-changeset',
         '--resolve-s3',
         '--capabilities', 'CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'
-    ]
+    ])
 
     aws_tags = cliparams.get('tag')
     lg.info(f'Using AWS tags: {aws_tags}')
     aws_tag_string = ' '.join(aws_tags)
     lg.debug(f'AWS tag string: {aws_tag_string}')
-    deploy_params.extend(['--tags', aws_tag_string])
+    sam_params.extend(['--tags', aws_tag_string])
 
     if region := cliparams.get('region'):
-        deploy_params.extend(['--region', region])
+        sam_params.extend(['--region', region])
 
     if cliparams.get('verbose'):
-        deploy_params.append('--debug')
+        sam_params.append('--debug')
 
     if cliparams['dry_run']:
-        lg.info(f'Would run: {" ".join(deploy_params)}')
+        lg.info(f'Would run: {" ".join(sam_params)}')
         return
 
     if cliparams.get('aws_profile'):
         lg.info(f'Using AWS profile: {cliparams["aws_profile"]}')
-        deploy_params.extend(['--profile', cliparams['aws_profile']])
+        sam_params.extend(['--profile', cliparams['aws_profile']])
 
-    subprocess.run(deploy_params, cwd=directory.resolve(), text=True, check=True)
+    lg.debug(f'Running command: {" ".join(sam_params)}')
+    subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
     lg.info('Successfully deployed SAM template')
 
 

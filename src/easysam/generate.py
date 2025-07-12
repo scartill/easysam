@@ -16,14 +16,6 @@ from easysam.prismarine import generate as generate_prismarine_clients
 IMPORT_FILE = 'easysam.yaml'
 
 
-@click.command(name='generate')
-@click.option('--path', multiple=True)
-@click.option('--preprocess-only', is_flag=True, default=False)
-@click.argument('directory', type=click.Path(exists=True))
-def generate_cmd(directory, path, preprocess_only):
-    generate(directory, path, preprocess_only)
-
-
 def write_result(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
     sane_text = '\n'.join(line for line in text.splitlines() if line and line.strip())
