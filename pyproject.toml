@@ -10,7 +10,7 @@ dependencies = [
     "boto3>=1.38.15",
     "click>=8.2.0",
     "jinja2-cli[yaml]>=0.8.2",
-    "prismarine",
+    "prismarine>=1.1.0",
 ]
 
 [project.urls]
@@ -26,9 +26,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/easysam"]
-
-[tool.uv.sources]
-prismarine = { path = "../prismarine", editable = true }
 
 [dependency-groups]
 dev = [
