@@ -505,7 +505,7 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.38.15" },
     { name = "click", specifier = ">=8.2.0" },
     { name = "jinja2-cli", extras = ["yaml"], specifier = ">=0.8.2" },
-    { name = "prismarine", specifier = ">=1.0.0" },
+    { name = "prismarine", editable = "../prismarine" },
 ]
 
 [package.metadata.requires-dev]
@@ -1023,8 +1023,8 @@ wheels = [
 
 [[package]]
 name = "prismarine"
-version = "1.0.0"
-source = { registry = "https://pypi.org/simple" }
+version = "1.1.0"
+source = { editable = "../prismarine" }
 dependencies = [
     { name = "boto3" },
     { name = "case-converter" },
@@ -1033,9 +1033,21 @@ dependencies = [
     { name = "mako" },
     { name = "types-boto3", extra = ["dynamodb"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/14/87/5f754709a6f0de23005aaf7dc5ce054344c2af827d587f485bbcdceb566a/prismarine-1.0.0.tar.gz", hash = "sha256:43c3fc1baeec5c5c87cec0a1c4bb32c61210d120d6bb3855643ef1ed80e86730", size = 32655, upload-time = "2025-05-21T14:20:30.603Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/17/2b730a08077483e116cfa3a60bc4df0c5a7311aa5047ec66eee072d57c9c/prismarine-1.0.0-py3-none-any.whl", hash = "sha256:241915578c24752fdc39f24035b50f09ea9503fc9fed8cef8fef27f091a8504b", size = 11907, upload-time = "2025-05-21T14:20:28.991Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "boto3", specifier = ">=1.38.19" },
+    { name = "case-converter", specifier = ">=1.2.0" },
+    { name = "click", specifier = ">=8.2.0" },
+    { name = "gray-formatter", specifier = ">=3.0.10" },
+    { name = "mako", specifier = ">=1.3.10" },
+    { name = "types-boto3", extras = ["dynamodb"], specifier = ">=1.38.19" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pip", specifier = ">=25.1.1" },
+    { name = "twine", specifier = ">=6.1.0" },
 ]
 
 [[package]]
@@ -1501,11 +1513,11 @@ wheels = [
 
 [[package]]
 name = "tokenize-rt"
-version = "6.1.0"
+version = "6.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/6b/0a/5854d8ced8c1e00193d1353d13db82d7f813f99bd5dcb776ce3e2a4c0d19/tokenize_rt-6.1.0.tar.gz", hash = "sha256:e8ee836616c0877ab7c7b54776d2fefcc3bde714449a206762425ae114b53c86", size = 5506, upload-time = "2024-10-22T00:14:59.189Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/69/ed/8f07e893132d5051d86a553e749d5c89b2a4776eb3a579b72ed61f8559ca/tokenize_rt-6.2.0.tar.gz", hash = "sha256:8439c042b330c553fdbe1758e4a05c0ed460dbbbb24a606f11f0dee75da4cad6", size = 5476, upload-time = "2025-05-23T23:48:00.035Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/87/ba/576aac29b10dfa49a6ce650001d1bb31f81e734660555eaf144bfe5b8995/tokenize_rt-6.1.0-py2.py3-none-any.whl", hash = "sha256:d706141cdec4aa5f358945abe36b911b8cbdc844545da99e811250c0cee9b6fc", size = 6015, upload-time = "2024-10-22T00:14:57.469Z" },
+    { url = "https://files.pythonhosted.org/packages/33/f0/3fe8c6e69135a845f4106f2ff8b6805638d4e85c264e70114e8126689587/tokenize_rt-6.2.0-py2.py3-none-any.whl", hash = "sha256:a152bf4f249c847a66497a4a95f63376ed68ac6abf092a2f7cfb29d044ecff44", size = 6004, upload-time = "2025-05-23T23:47:58.812Z" },
 ]
 
 [[package]]
@@ -1548,15 +1560,15 @@ wheels = [
 
 [[package]]
 name = "types-boto3"
-version = "1.38.19"
+version = "1.39.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore-stubs" },
     { name = "types-s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/dc/0e/a2f7681a035f704e2606176094f9012d6518497d2d30fc70fbbb2bf82a8c/types_boto3-1.38.19.tar.gz", hash = "sha256:7b1008a0046471b1ffd644bab514b360de6fea663ee1e1ebfb7b79df1a1c25c0", size = 99696, upload-time = "2025-05-19T19:47:23.525Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/12/94/fd232843c2b40ab902da302078926baa9fd4130dc6fe1a21bbbf52e50d8f/types_boto3-1.39.4.tar.gz", hash = "sha256:aa1cfae9c82eed61757862b9e6804daecb60e02bf27a0de76d6b71479370d3d9", size = 100402, upload-time = "2025-07-09T19:28:52.352Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a9/65/141f509b6db270a6bc9ebde62adcd809b89ebf5b24a79cd1ba3b19758b16/types_boto3-1.38.19-py3-none-any.whl", hash = "sha256:f47f7a98964945c1adeec858dd4e1d4b9cc8e0faa851d7ec2cf7818ae7adac77", size = 68690, upload-time = "2025-05-19T19:47:20.073Z" },
+    { url = "https://files.pythonhosted.org/packages/19/b0/162f3d5b3f44108a976a2321865f1cd41ad2a2ef5100f9d672dfcb0e4cf0/types_boto3-1.39.4-py3-none-any.whl", hash = "sha256:4971e5765663444534f849fd88aa20d23d310e08fe265f154ff6604427e371a6", size = 69114, upload-time = "2025-07-09T19:28:44.104Z" },
 ]
 
 [package.optional-dependencies]
@@ -1566,11 +1578,11 @@ dynamodb = [
 
 [[package]]
 name = "types-boto3-dynamodb"
-version = "1.38.4"
+version = "1.39.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/70/46/aa386dbb0bfefb593780d56c1a4592728d285bed658e4bd650f62b257806/types_boto3_dynamodb-1.38.4.tar.gz", hash = "sha256:b863b1ecdcdda2cfe553049a5748d59ca64c06b64c19dfbc6b2588a28686fb33", size = 47121, upload-time = "2025-04-28T19:31:06.72Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e4/33/195f7340199e10578204c18d9cb099ab665711f6ba18d85a035674e58e70/types_boto3_dynamodb-1.39.0.tar.gz", hash = "sha256:994e7aa30c31317588f9ddb2f4e0086af8d524a7cb27970600c51cbe2ecaed5b", size = 47427, upload-time = "2025-06-30T19:36:48.721Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0a/04/0d9ad1d50501ecdf119f0e9899deadc6dc19e540eac78c46e5a8ec4e4330/types_boto3_dynamodb-1.38.4-py3-none-any.whl", hash = "sha256:7f3cde2850dc3af3776863a4655551fe10aeba5b778c0d3c1cbd57102caf419f", size = 56171, upload-time = "2025-04-28T19:26:12.482Z" },
+    { url = "https://files.pythonhosted.org/packages/fa/50/eede26ee4c28767ca8e494e88872caf183b8dbbb6bb0b7cd5f2c714d57b2/types_boto3_dynamodb-1.39.0-py3-none-any.whl", hash = "sha256:614439e5ff7c8a00e043050b902f383e657da299a82dbbaba59e2537b22696fd", size = 56566, upload-time = "2025-06-30T19:36:47.324Z" },
 ]
 
 [[package]]

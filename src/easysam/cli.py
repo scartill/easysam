@@ -9,6 +9,8 @@ from easysam.deploy import deploy, delete
 from easysam.deploy import remove_common_dependencies
 from easysam.init import init
 
+from easysam.inspect import inspect
+
 
 @click.group(help='EasySAM is a tool for generating SAM templates from simple YAML files')
 @click.pass_context
@@ -79,6 +81,7 @@ def init_cmd(obj, app_name):
 
 def main():
     try:
+        easysam.add_command(inspect)
         easysam()
 
     except UserWarning as e:

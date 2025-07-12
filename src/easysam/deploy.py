@@ -144,11 +144,14 @@ def copy_common_dependencies(directory, resources):
         lg.warning('No functions found in resources')
         return
 
-    for lambda_function in resources['functions'].values():
+    for lambda_name, lambda_function in resources['functions'].items():
         lambda_path = Path(directory, lambda_function['uri'])
         lambda_common_path = Path(lambda_path, 'common')
         lambda_common_path.mkdir(parents=True, exist_ok=True)
         deps = commondep(common, lambda_path)
+
+        lg.info(f'Lambda {lambda_name} has {len(deps)} common dependencies')
+        lg.debug(f'Dependencies: {" ".join(deps)}')
 
         for dep in deps:
             dep_path = Path(common, dep)

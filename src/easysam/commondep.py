@@ -83,7 +83,10 @@ def find_common_deps_in_file(target_file, common_base, commons, common_imports):
 
 
 def find_common_deps(target, common_base, commons, common_imports):
-    for target_file in sorted(target.glob('**/*.py'), key=lambda x: str(x)):
+    target_files = sorted(target.glob('**/*.py'), key=lambda x: str(x))
+    lg.debug(f'For target {target} files are: {target_files}')
+
+    for target_file in target_files:
         find_common_deps_in_file(target_file, common_base, commons, common_imports)
 
     return common_imports
