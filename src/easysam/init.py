@@ -1,7 +1,6 @@
 from pathlib import Path
 import logging as lg
 
-import click
 
 UTILS_PY = '''\
 # Common code
@@ -75,13 +74,6 @@ __pycache__/
 REQUIREMENTS_TXT = '''\
 boto3
 '''
-
-
-@click.command(name='init')
-@click.pass_obj
-@click.argument('app-name', type=click.Path(exists=False))
-def init_cmd(obj, app_name):
-    init(obj, app_name)
 
 
 def init(cliparams, app_name):

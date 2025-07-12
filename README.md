@@ -30,13 +30,19 @@ easysam init my-app
 
 2. Deploy your application:
 ```pwsh
-easysam deploy my-app my-stack-name
+easysam deploy --tag my-tag=my-value my-app my-stack-name
 ```
+
+Please note that at least one tag is required.
 
 For more options, use the `--help` flag:
 ```pwsh
 easysam --help
 ```
+
+### Windows
+
+On Windows, it may be necessary to run the `deploy` command with the `-sam-tool sam.cmd` option.
 
 ## Prerequisites  
 * Python 3.12 or higher with `pip` on PATH

@@ -337,7 +337,7 @@ Resources:
   {{ prefix }}{{ table_name }}:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub {{ lprefix }}{{ table_name }}-${Stage}
+      TableName: !Sub {{ prefix }}{{ table_name }}-${Stage}
       AttributeDefinitions:
         {% for attribute in table.attributes %}
         - AttributeName: {{ attribute.name }}
@@ -391,7 +391,7 @@ Resources:
   PythonLambdaLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: !Sub pythonthrdparty-${Stage}
+      LayerName: !Sub pythonthirdparty-${Stage}
       Description: Dependencies for all python lambdas
       ContentUri: thirdparty/.
       CompatibleRuntimes:
