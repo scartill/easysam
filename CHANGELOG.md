@@ -1,3 +1,8 @@
+# 1.2.0
+
+- Added `extra-imports` support to Prismarine
+- Added `version` command
+
 ## 1.1.0
 
 - Prismarine support

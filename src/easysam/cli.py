@@ -2,6 +2,7 @@ from pathlib import Path
 import click
 import logging as lg
 import sys
+from importlib.metadata import version
 
 
 from easysam.generate import generate
@@ -77,6 +78,11 @@ def cleanup_cmd(obj, directory):
 @click.argument('app-name', type=click.Path(exists=False))
 def init_cmd(obj, app_name):
     init(obj, app_name)
+
+
+@easysam.command(name='version', help='Print the version of EasySAM')
+def version_cmd():
+    click.echo(version('easysam'))
 
 
 def main():

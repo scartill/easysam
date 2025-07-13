@@ -213,10 +213,15 @@ import:
 ```yaml
 prismarine:
   default-base: <base-path>
+  access-module: <access-module-path>
+  extra-imports:
+    - <path.to.module:ClassName>
   tables:
     - package: <package-to-import>
       base: <optional-base-path>
 ```
+
+For more information, see [Prismarine README](https://github.com/adsight-app/prismarine/blob/main/README.md).
 
 ## Development
 
