@@ -249,7 +249,7 @@ AUTHORIZER_SCHEMA = {
         'token': {'type': 'string'},
         'query': {'type': 'string'},
         'headers': {'type': 'array', 'items': {'type': 'string'}},
-        'ttl': {'type': 'integer'},
+        'ttl': {'type': 'integer', 'minimum': 0, 'maximum': 3600},
     },
     'required': ['function'],
     'optional': ['token', 'query', 'headers', 'ttl'],
@@ -346,6 +346,7 @@ def validate(resources_data: dict, errors: list[str]):
     validate_paths(resources_data, errors)
     validate_import(resources_data, errors)
     validate_prismarine(resources_data, errors)
+    validate_authorizers(resources_data, errors)
 
 
 def validate_buckets(resources_data: dict, errors: list[str]):
@@ -477,3 +478,14 @@ def validate_prismarine(resources_data: dict, errors: list[str]):
                 errors.append('Prismarine tables must be a list')
         else:
             errors.append('Prismarine must have tables defined')
+
+
+def validate_authorizers(resources_data: dict, errors: list[str]):
+    for authorizer, details in resources_data.get('authorizers', {}).items():
+        present_types = ['token' in details, 'query' in details, 'headers' in details]
+
+        if present_types.count(True) != 1:
+            errors.append(f"Authorizer '{authorizer}' cannot have multiple types")
+
+        if details['function'] not in resources_data['functions']:
+            errors.append(f"Authorizer '{authorizer}' function must be a valid function")
