@@ -10,7 +10,7 @@ import yaml
 import prismarine.prisma_common as prisma_common
 import prismarine.prisma_easysam as prisma_easysam
 
-from easysam.validate import validate
+from easysam.validate_schema import validate_schema
 from easysam.prismarine import generate as generate_prismarine_clients
 
 
@@ -266,7 +266,7 @@ def generate(resources_dir: Path, pypath: list[Path], preprocess_only: bool) -> 
     preprocess_resources(resources_data, resources_dir, pypath, errors)
 
     lg.info('Validating resources')
-    validate(resources_data, errors)
+    validate_schema(resources_data, errors)
 
     if preprocess_only or errors:
         return resources_data, errors
