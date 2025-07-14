@@ -36,6 +36,21 @@ STREAMS_SCHEMA = {
     'additionalProperties': False
 }
 
+LAMBDA_POLL_SCHEMA = {
+    'type': 'array',
+    'items': {
+        'type': 'object',
+        'properties': {
+            'name': {'type': 'string'},
+            'batchsize': {'type': 'integer'},
+            'batchwindow': {'type': 'integer'},
+        },
+        'required': ['name'],
+        'optional': ['batchsize', 'batchwindow'],
+        'additionalProperties': False
+    }
+}
+
 LAMBDA_SCHEMA = {
     'type': 'object',
     'properties': {
@@ -50,6 +65,7 @@ LAMBDA_SCHEMA = {
         'streams': {'type': 'array', 'items': {'type': 'string'}},
         'tables': {'type': 'array', 'items': {'type': 'string'}},
         'queues': {'type': 'array', 'items': {'type': 'string'}},
+        'polls': LAMBDA_POLL_SCHEMA,
         'services': {
             'type': 'array',
             'items': {
@@ -57,47 +73,100 @@ LAMBDA_SCHEMA = {
                 'enum': ['comprehend']
             }
         },
-        'uri': {'type': 'string'}
+        'uri': {'type': 'string'},
+        'schedule': {'type': 'string'},
     },
     'required': ['uri'],
-    'optional': ['timeout', 'send', 'streams', 'tables'],
+    'optional': [
+        'timeout',
+        'send',
+        'streams',
+        'tables',
+        'queues',
+        'polls',
+        'services',
+        'schedule',
+    ],
     'additionalProperties': False
 }
 
-PATH_SCHEMA = {
+LAMBDA_PATH_SCHEMA = {
     'type': 'object',
     'properties': {
         'integration': {
             'type': 'string',
-            'enum': ['lambda', 'dynamo', 'sqs']
+            'enum': ['lambda']
+        },
+        'function': {'type': 'string'},
+        'authorizer': {'type': 'string'},
+        'greedy': {'type': 'boolean'},
+        'open': {'type': 'boolean'}
+    },
+    'required': ['integration', 'function'],
+    'optional': ['authorizer', 'greedy', 'open'],
+    'additionalProperties': False
+}
+
+DYNAMO_PATH_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'integration': {
+            'type': 'string',
+            'enum': ['dynamo']
         },
         'method': {
             'type': 'string',
             'enum': ['get', 'post']
         },
-        'function': {'type': 'string'},
         'parameters': {'type': 'array', 'items': {'type': 'string'}},
         'action': {'type': 'string'},
+        'role': {'type': 'string'},
+        'requestTemplate': {'type': 'string'},
+        'responseTemplateFile': {'type': 'string'},
+    },
+    'required': [
+        'integration',
+        'method',
+        'parameters',
+        'action',
+        'role',
+        'requestTemplate',
+        'responseTemplateFile'
+    ],
+    'additionalProperties': False
+}
+
+SQS_PATH_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'integration': {
+            'type': 'string',
+            'enum': ['sqs']
+        },
+        'method': {
+            'type': 'string',
+            'enum': ['get', 'post']
+        },
         'role': {'type': 'string'},
         'queue': {'type': 'string'},
         'requestTemplate': {'type': 'string'},
         'responseTemplateFile': {'type': 'string'},
         'authorizer': {'type': 'string'},
-        'greedy': {'type': 'boolean'},
-        'open': {'type': 'boolean'}
     },
-    'optional': [
+    'required': [
         'integration',
         'method',
         'role',
         'queue',
         'requestTemplate',
         'responseTemplateFile',
-        'authorizer',
-        'greedy',
-        'open'
     ],
+    'optional': ['authorizer'],
     'additionalProperties': False
+}
+
+PATH_SCHEMA = {
+    'oneOf': [LAMBDA_PATH_SCHEMA, DYNAMO_PATH_SCHEMA, SQS_PATH_SCHEMA]
 }
 
 RESOURCES_SCHEMA = {
@@ -161,7 +230,7 @@ RESOURCES_SCHEMA = {
 }
 
 
-def validate_schema(resources_data: dict, errors: list[str]):
+def validate(resources_data: dict, errors: list[str]):
     try:
         validate_schema(resources_data, RESOURCES_SCHEMA)
 
@@ -199,30 +268,51 @@ def validate_streams(resources_data: dict, errors: list[str]):
 
 
 def validate_lambda(resources_data: dict, errors: list[str]):
-    for lambda_func, details in resources_data['functions'].items():
-        if 'buckets' in details:
-            for bucket in details['buckets']:
-                if bucket not in resources_data['buckets']:
-                    errors.append(f"Lambda '{lambda_func}' bucket must be a valid bucket")
-                    continue
+    for lambda_name, details in resources_data['functions'].items():
+        for bucket in details.get('buckets', []):
+            if bucket not in resources_data['buckets']:
+                errors.append(
+                    f'Lambda {lambda_name}: '
+                    f'Bucket {bucket} must be a valid bucket'
+                )
 
-        if 'tables' in details:
-            for table in details['tables']:
-                if table not in resources_data['tables']:
-                    errors.append(f"Lambda '{lambda_func}' table must be a valid table")
-                    continue
+                continue
 
-        if 'queues' in details:
-            for queue in details['queues']:
-                if queue not in resources_data['queues']:
-                    errors.append(f"Lambda '{lambda_func}' queue must be a valid queue")
-                    continue
+        for table in details.get('tables', []):
+            if table not in resources_data['tables']:
+                errors.append(
+                    f'Lambda {lambda_name}: '
+                    f'Table {table} must be a valid table'
+                )
 
-        if 'streams' in details:
-            for stream in details['streams']:
-                if stream not in resources_data['streams']:
-                    errors.append(f"Lambda '{lambda_func}' stream must be a valid stream")
-                    continue
+                continue
+
+        for poll in details.get('polls', []):
+            if poll['name'] not in resources_data['queues']:
+                errors.append(
+                    f'Lambda {lambda_name}: '
+                    f'Queue {poll["name"]} must be a valid queue'
+                )
+
+                continue
+
+        for send in details.get('send', []):
+            if send not in resources_data['queues']:
+                errors.append(
+                    f'Lambda {lambda_name}: '
+                    f'Send {send} must be a valid queue'
+                )
+
+                continue
+
+        for stream in details.get('streams', []):
+            if stream not in resources_data['streams']:
+                errors.append(
+                    f'Lambda {lambda_name}: '
+                    f'Stream {stream} must be a valid stream'
+                )
+
+                continue
 
 
 def validate_paths(resources_data: dict, errors: list[str]):
@@ -237,10 +327,6 @@ def validate_paths(resources_data: dict, errors: list[str]):
 
 
 def validate_lambda_path(resources_data: dict, path: str, details: dict, errors: list[str]):
-    for key in details.keys():
-        if key not in ['integration', 'function', 'authorizer', 'greedy']:
-            errors.append(f"Lambda path '{path}' has invalid key: {key}")
-
     if 'authorizer' in details and 'open' in details:
         errors.append('Lambda path cannot have both authorizer and open')
 

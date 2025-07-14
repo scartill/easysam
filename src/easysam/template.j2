@@ -450,15 +450,15 @@ Resources:
             Schedule: {{function.schedule}}
         {% endif %}
         {% for poll in function.polls %}
-        {{ poll.replace('-', '') }}SQSEvent:
+        {{ poll.name.replace('-', '') }}SQSEvent:
           Type: SQS
           Properties:
-            Queue: !GetAtt {{ lprefix }}{{ poll.replace('-', '') }}Queue.Arn
-            {% if function.batchsize is defined %}
-            BatchSize: {{ function.batchsize }}
+            Queue: !GetAtt {{ lprefix }}{{ poll.name.replace('-', '') }}Queue.Arn
+            {% if poll.batchsize is defined %}
+            BatchSize: {{ poll.batchsize }}
             {% endif %}
-            {% if function.batchwindow is defined %}
-            MaximumBatchingWindowInSeconds: {{ function.batchwindow }}
+            {% if poll.batchwindow is defined %}
+            MaximumBatchingWindowInSeconds: {{ poll.batchwindow }}
             {% endif %}
         {% endfor %}
         {% for path_name, path in paths.items() %}

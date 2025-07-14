@@ -10,7 +10,7 @@ import yaml
 import prismarine.prisma_common as prisma_common
 import prismarine.prisma_easysam as prisma_easysam
 
-from easysam.validate_schema import validate_schema
+from easysam.validate_schema import validate as validate_schema
 from easysam.prismarine import generate as generate_prismarine_clients
 
 
@@ -145,6 +145,7 @@ def preprocess_lambda(
             return
 
         integration['function'] = lambda_name
+        integration['integration'] = 'lambda'
         del integration['path']
         lg.debug(f'Adding path {path} to resources')
         resources_data['paths'][path] = integration
@@ -213,6 +214,20 @@ def preprocess_imports(resources_data: dict, resources_dir: Path, errors: list[s
             preprocess_file(resources_data, resources_dir, entry_path, errors)
 
 
+def preprocess_defaults(resources_data: dict, errors: list[str]):
+    def transform_lambda_poll(poll: str | dict):
+        if isinstance(poll, str):
+            return {'name': poll}
+        else:
+            return poll
+
+    if 'functions' in resources_data:
+        for function in resources_data['functions'].values():
+            function['polls'] = [
+                transform_lambda_poll(poll) for poll in function.get('polls', [])
+            ]
+
+
 def preprocess_resources(
     resources_data: dict,
     resources_dir: Path,
@@ -227,6 +242,8 @@ def preprocess_resources(
 
     if 'import' in resources_data:
         preprocess_imports(resources_data, resources_dir, errors)
+
+    preprocess_defaults(resources_data, errors)
 
     for section in SUPPORTED_SECTIONS:
         if section in resources_data:
