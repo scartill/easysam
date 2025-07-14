@@ -12,7 +12,7 @@ PIP_VERSION = '25.1.1'
 
 
 def deploy(cliparams, directory, stack):
-    resources, errors = generate(directory, [], False)
+    resources, errors = generate(directory, [])
 
     if errors:
         lg.error(f'There were {len(errors)} errors:')
