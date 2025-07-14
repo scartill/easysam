@@ -104,8 +104,8 @@ LAMBDA_PATH_SCHEMA = {
         'greedy': {'type': 'boolean'},
         'open': {'type': 'boolean'}
     },
-    'required': ['integration', 'function'],
-    'optional': ['authorizer', 'greedy', 'open'],
+    'required': ['integration', 'function', 'greedy'],
+    'optional': ['authorizer', 'open'],
     'additionalProperties': False
 }
 

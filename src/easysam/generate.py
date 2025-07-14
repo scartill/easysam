@@ -231,11 +231,14 @@ def preprocess_defaults(resources_data: dict, errors: list[str]):
         if 'integration' not in path:
             path['integration'] = 'lambda'
 
-        if path.get('integration') == 'dynamo':
-            path['action'] = path.get('action', 'GetItem')
-
-        if path.get('integration') == 'sqs':
-            path['method'] = path.get('method', 'post')
+        match path.get('integration'):
+            case 'dynamo':
+                path['action'] = path.get('action', 'GetItem')
+            case 'sqs':
+                path['method'] = path.get('method', 'post')
+            case 'lambda':
+                if 'greedy' not in path:
+                    path['greedy'] = True
 
 
 def preprocess_resources(

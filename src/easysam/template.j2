@@ -417,7 +417,7 @@ Resources:
             ParameterName: "*"
         {% for poll in function.polls %}
         - SQSPollerPolicy:
-            QueueName: !GetAtt {{ lprefix }}{{ poll.replace('-', '') }}Queue.QueueName
+            QueueName: !GetAtt {{ lprefix }}{{ poll.name.replace('-', '') }}Queue.QueueName
         {% endfor %}
         {% for table in function.tables %}
         - DynamoDBCrudPolicy:
@@ -467,7 +467,7 @@ Resources:
           Type: Api
           Properties:
             Method: ANY
-            Path: {{ path_name }}{% if path.greedy is not defined or path.greedy%}/{proxy+}{% endif %}
+            Path: {{ path_name }}{% if path.greedy %}/{proxy+}{% endif %}
             RestApiId: !Ref ApiDeployment
             Auth:
             {% if path.open %}
