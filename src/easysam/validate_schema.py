@@ -117,10 +117,16 @@ DYNAMO_PATH_SCHEMA = {
         },
         'method': {
             'type': 'string',
-            'enum': ['get', 'post']
+            'enum': ['get']
         },
-        'parameters': {'type': 'array', 'items': {'type': 'string'}},
-        'action': {'type': 'string', 'enum': ['GetItem']},
+        'parameters': {
+            'type': 'array',
+            'items': {'type': 'string'}
+        },
+        'action': {
+            'type': 'string',
+            'enum': ['GetItem']
+        },
         'role': {'type': 'string'},
         'requestTemplate': {'type': 'string'},
         'responseTemplateFile': {'type': 'string'},
@@ -146,7 +152,7 @@ SQS_PATH_SCHEMA = {
         },
         'method': {
             'type': 'string',
-            'enum': ['get', 'post']
+            'enum': ['post']
         },
         'role': {'type': 'string'},
         'queue': {'type': 'string'},
@@ -420,31 +426,31 @@ def validate_paths(resources_data: dict, errors: list[str]):
             case 'dynamo':
                 validate_dynamo_path(details, errors)
             case 'sqs':
-                validate_sqs_path(details, errors)
+                validate_sqs_path(resources_data, path, details, errors)
 
 
 def validate_lambda_path(resources_data: dict, path: str, details: dict, errors: list[str]):
-    if 'authorizer' in details and 'open' in details:
+    authorizer = details.get('authorizer')
+    open_path = details.get('open')
+
+    if authorizer and open_path:
         errors.append('Lambda path cannot have both authorizer and open')
 
-    if 'authorizer' not in details and 'open' not in details:
-        errors.append('Lambda path must have either authorizer or open')
+    if not authorizer and not open_path:
+        errors.append('Lambda path must have either authorizer or be open')
 
-    if 'authorizer' in details:
-        if details['authorizer'] not in resources_data.get('authorizers', {}):
+    if authorizer:
+        if authorizer not in resources_data.get('authorizers', {}):
             errors.append(f"Lambda path '{path}' authorizer must be a valid authorizer")
 
 
 def validate_dynamo_path(details: dict, errors: list[str]):
-    if details['method'] not in ['get', 'post']:
-        errors.append('Dynamo path method must be get or post')
-
-    if details['action'] not in ['GetItem']:
-        errors.append('Dynamo path action must be GetItem')
-
-
-def validate_sqs_path(details: dict, errors: list[str]):
     pass
+
+
+def validate_sqs_path(resources_data: dict, path: str, details: dict, errors: list[str]):
+    if details['queue'] not in resources_data['queues']:
+        errors.append(f"SQS path '{path}' queue must be a valid queue")
 
 
 def validate_import(resources_data: dict, errors: list[str]):

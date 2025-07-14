@@ -43,9 +43,8 @@ def schema(directory, path):
     errors = []
     resources_data = load_resources(directory, pypath, errors)
 
-    rich.print(f'[red]There were {len(errors)} validation errors.[/red]')
-
     if errors:
+        rich.print(f'[red]There were {len(errors)} validation errors.[/red]')
         for error in errors:
             rich.print(f'[red]{error}[/red]')
 

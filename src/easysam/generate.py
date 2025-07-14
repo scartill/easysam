@@ -234,6 +234,9 @@ def preprocess_defaults(resources_data: dict, errors: list[str]):
         if path.get('integration') == 'dynamo':
             path['action'] = path.get('action', 'GetItem')
 
+        if path.get('integration') == 'sqs':
+            path['method'] = 'post'
+
 
 def preprocess_resources(
     resources_data: dict,

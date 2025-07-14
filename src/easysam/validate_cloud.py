@@ -16,25 +16,6 @@ def validate(cliparams: dict, resources_data: dict, stack: str, errors: list[str
 
     iam = get_aws_client('iam', cliparams)
     validate_bucket_policy(iam, resources_data, stack, errors)
-    validate_path_roles(iam, resources_data, errors)
-
-
-def validate_path_roles(iam, resources_data, errors):
-    for path in resources_data.get('paths', {}).values():
-        if role := path.get('role'):
-            lg.info(f'Validating path role: {role}')
-
-            try:
-                role = iam.get_role(RoleName=role)
-
-                if not role:
-                    errors.append(
-                        f"Path role '{role}' not found. "
-                        'Please ensure the role exists.'
-                    )
-
-            except Exception as e:
-                errors.append(f'Error validating path role "{role}": {e}')
 
 
 def validate_bucket_policy(iam, resources_data, stack, errors):
