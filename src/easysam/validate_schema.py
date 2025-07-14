@@ -169,6 +169,30 @@ PATH_SCHEMA = {
     'oneOf': [LAMBDA_PATH_SCHEMA, DYNAMO_PATH_SCHEMA, SQS_PATH_SCHEMA]
 }
 
+PRISMARINE_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'default-base': {'type': 'string'},
+        'access-module': {'type': 'string'},
+        'tables': {
+            'type': 'array',
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'package': {'type': 'string'},
+                    'base': {'type': 'string'},
+                },
+                'required': ['package'],
+                'optional': ['base'],
+                'additionalProperties': False
+            }
+        }
+    },
+    'required': ['tables'],
+    'optional': ['default-base', 'access-module'],
+    'additionalProperties': False
+}
+
 RESOURCES_SCHEMA = {
     'type': 'object',
     'properties': {
@@ -208,8 +232,8 @@ RESOURCES_SCHEMA = {
             },
             'additionalProperties': False
         },
-        'import': {'type': 'array'},
-        'prismarine': {'type': 'object'},
+        'import': {'type': 'array', 'items': {'type': 'string'}},
+        'prismarine': PRISMARINE_SCHEMA,
         'tables': {'type': 'object'},
         'authorizers': {'type': 'object'},
     },
