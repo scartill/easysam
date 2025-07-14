@@ -34,12 +34,11 @@ def easysam(ctx, verbose, aws_profile, aws_region):
 
 @easysam.command(name='generate', help='Generate a SAM template from a directory')
 @click.option('--path', multiple=True)
-@click.option('--preprocess-only', is_flag=True, default=False)
 @click.argument('directory', type=click.Path(exists=True))
-def generate_cmd(directory, path, preprocess_only):
+def generate_cmd(directory, path):
     directory = Path(directory)
     pypath = [Path(p) for p in path]
-    resources_data, errors = generate(directory, pypath, preprocess_only)
+    resources_data, errors = generate(directory, pypath)
 
     if errors:
         for error in errors:

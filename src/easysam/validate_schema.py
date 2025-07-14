@@ -343,7 +343,7 @@ def validate(resources_data: dict, errors: list[str]):
 
 
 def validate_buckets(resources_data: dict, errors: list[str]):
-    for bucket, details in resources_data['buckets'].items():
+    for bucket, details in resources_data.get('buckets', {}).items():
         if bucket == 'private' and details['public']:
             errors.append(f"Bucket '{bucket}' cannot be public")
 
@@ -353,7 +353,7 @@ def validate_queues(resources_data: dict, errors: list[str]):
 
 
 def validate_streams(resources_data: dict, errors: list[str]):
-    for stream, details in resources_data['streams'].items():
+    for stream, details in resources_data.get('streams', {}).items():
         bucketname = details['bucketname']
 
         if resources_data['buckets'].get(bucketname) is None:
@@ -365,7 +365,7 @@ def validate_streams(resources_data: dict, errors: list[str]):
 
 
 def validate_lambda(resources_data: dict, errors: list[str]):
-    for lambda_name, details in resources_data['functions'].items():
+    for lambda_name, details in resources_data.get('functions', {}).items():
         for bucket in details.get('buckets', []):
             if bucket not in resources_data['buckets']:
                 errors.append(
@@ -413,7 +413,7 @@ def validate_lambda(resources_data: dict, errors: list[str]):
 
 
 def validate_paths(resources_data: dict, errors: list[str]):
-    for path, details in resources_data['paths'].items():
+    for path, details in resources_data.get('paths', {}).items():
         match details.get('integration', 'lambda'):
             case 'lambda':
                 validate_lambda_path(resources_data, path, details, errors)
@@ -431,7 +431,7 @@ def validate_lambda_path(resources_data: dict, path: str, details: dict, errors:
         errors.append('Lambda path must have either authorizer or open')
 
     if 'authorizer' in details:
-        if details['authorizer'] not in resources_data['authorizers']:
+        if details['authorizer'] not in resources_data.get('authorizers', {}):
             errors.append(f"Lambda path '{path}' authorizer must be a valid authorizer")
 
 

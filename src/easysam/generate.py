@@ -255,21 +255,7 @@ def preprocess_resources(
     resources_data = sort_dict(resources_data)
 
 
-def generate(resources_dir: Path, pypath: list[Path], preprocess_only: bool) -> ProcessingResult:
-    '''
-    Generate a SAM template from a directory.
-
-    Args:
-        resources_dir: The directory containing the resources.
-        pypath: The Python path to use.
-        preprocess_only: Whether to return the processed resources
-            without generating a template.
-
-    Returns:
-        A tuple containing the processed resources and any errors as a list.
-    '''
-
-    errors = []
+def load_resources(resources_dir: Path, pypath: list[Path], errors: list[str]) -> dict:
     pypath = [resources_dir] + list(pypath)
     resources = Path(resources_dir, 'resources.yaml')
 
@@ -277,7 +263,7 @@ def generate(resources_dir: Path, pypath: list[Path], preprocess_only: bool) -> 
         resources_data = yaml.safe_load(Path(resources).read_text())
     except Exception as e:
         errors.append(f'Error loading resources file {resources}: {e}')
-        return {}, errors
+        return {}
 
     lg.info('Processing resources')
     preprocess_resources(resources_data, resources_dir, pypath, errors)
@@ -285,8 +271,23 @@ def generate(resources_dir: Path, pypath: list[Path], preprocess_only: bool) -> 
     lg.info('Validating resources')
     validate_schema(resources_data, errors)
 
-    if preprocess_only or errors:
-        return resources_data, errors
+    return resources_data
+
+
+def generate(resources_dir: Path, pypath: list[Path]) -> ProcessingResult:
+    '''
+    Generate a SAM template from a directory.
+
+    Args:
+        resources_dir: The directory containing the resources.
+        pypath: The Python path to use.
+
+    Returns:
+        A tuple containing the processed resources and any errors as a list.
+    '''
+
+    errors = []
+    resources_data = load_resources(resources_dir, pypath, errors)
 
     lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
 
