@@ -3,6 +3,7 @@ from pathlib import Path
 
 import yaml
 import click
+import rich
 
 from easysam.commondep import commondep
 from easysam.generate import load_resources
@@ -42,14 +43,15 @@ def schema(directory, path):
     errors = []
     resources_data = load_resources(directory, pypath, errors)
 
+    rich.print(f'[red]There were {len(errors)} validation errors.[/red]')
+
     if errors:
         for error in errors:
-            click.echo(error)
+            rich.print(f'[red]{error}[/red]')
 
-        click.echo(f'There were {len(errors)} validation errors. Please fix them.')
     else:
-        click.echo(yaml.dump(resources_data, indent=4))
-        click.echo('No validation errors found.')
+        rich.print(yaml.dump(resources_data, indent=4))
+        rich.print('[green]No validation errors found.[/green]')
 
 
 @inspect.command(help='Inspect the resources.yaml file in-depth')
@@ -64,8 +66,8 @@ def cloud(obj, directory, path, stack):
     resources_data = load_resources(directory, pypath, errors)
 
     if errors:
-        click.echo(
-            'There were validation errors. '
+        rich.print(
+            '[red]There were validation errors.[/red] '
             'Please run `easysam inspect schema` to fix them.'
         )
 
@@ -79,8 +81,8 @@ def cloud(obj, directory, path, stack):
             click.echo(error)
 
         if len(errors) > 1:
-            click.echo(f'There were {len(errors)} errors.')
+            rich.print(f'[red]There were {len(errors)} errors.[/red]')
         else:
-            click.echo('There was an error.')
+            rich.print('[red]There was an error.[/red]')
     else:
-        click.echo('Cloud resources are ready.')
+        rich.print('[green]Cloud resources are ready.[/green]')

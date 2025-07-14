@@ -120,7 +120,7 @@ DYNAMO_PATH_SCHEMA = {
             'enum': ['get', 'post']
         },
         'parameters': {'type': 'array', 'items': {'type': 'string'}},
-        'action': {'type': 'string'},
+        'action': {'type': 'string', 'enum': ['GetItem']},
         'role': {'type': 'string'},
         'requestTemplate': {'type': 'string'},
         'responseTemplateFile': {'type': 'string'},
@@ -436,7 +436,11 @@ def validate_lambda_path(resources_data: dict, path: str, details: dict, errors:
 
 
 def validate_dynamo_path(details: dict, errors: list[str]):
-    pass
+    if details['method'] not in ['get', 'post']:
+        errors.append('Dynamo path method must be get or post')
+
+    if details['action'] not in ['GetItem']:
+        errors.append('Dynamo path action must be GetItem')
 
 
 def validate_sqs_path(details: dict, errors: list[str]):

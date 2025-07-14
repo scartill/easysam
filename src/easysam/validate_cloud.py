@@ -4,14 +4,44 @@ from easysam.utils import get_aws_client
 
 
 def validate(cliparams: dict, resources_data: dict, stack: str, errors: list[str]):
-    iam = None
+    '''
+    Validate the cloud resources.
 
+    Args:
+        cliparams (dict): The CLI parameters (used: aws_profile, aws_region)
+        resources_data (dict): The resources data.
+        stack (str): The stack/environment name.
+        errors (list[str]): The list of errors.
+    '''
+
+    iam = get_aws_client('iam', cliparams)
+    validate_bucket_policy(iam, resources_data, stack, errors)
+    validate_path_roles(iam, resources_data, errors)
+
+
+def validate_path_roles(iam, resources_data, errors):
+    for path in resources_data.get('paths', {}).values():
+        if role := path.get('role'):
+            lg.info(f'Validating path role: {role}')
+
+            try:
+                role = iam.get_role(RoleName=role)
+
+                if not role:
+                    errors.append(
+                        f"Path role '{role}' not found. "
+                        'Please ensure the role exists.'
+                    )
+
+            except Exception as e:
+                errors.append(f'Error validating path role "{role}": {e}')
+
+
+def validate_bucket_policy(iam, resources_data, stack, errors):
     for bucket, details in resources_data.get('buckets', {}).items():
         if policy_name := details.get('extaccesspolicy'):
             full_policy_name = f'{policy_name}-{stack}'
-
-            if iam is None:
-                iam = get_aws_client('iam', cliparams)
+            lg.info(f"Validating bucket policy: {full_policy_name}")
 
             try:
                 paginator = iam.get_paginator('list_policies')

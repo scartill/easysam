@@ -227,6 +227,13 @@ def preprocess_defaults(resources_data: dict, errors: list[str]):
                 transform_lambda_poll(poll) for poll in function.get('polls', [])
             ]
 
+    for path in resources_data.get('paths', {}).values():
+        if 'integration' not in path:
+            path['integration'] = 'lambda'
+
+        if path.get('integration') == 'dynamo':
+            path['action'] = path.get('action', 'GetItem')
+
 
 def preprocess_resources(
     resources_data: dict,
