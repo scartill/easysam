@@ -1,6 +1,7 @@
 import logging as lg
 
-from jsonschema import validate as validate_schema, ValidationError
+from jsonschema import Draft7Validator
+
 
 BUCKETS_SCHEMA = {
     'type': 'object',
@@ -174,6 +175,7 @@ PRISMARINE_SCHEMA = {
     'properties': {
         'default-base': {'type': 'string'},
         'access-module': {'type': 'string'},
+        'extra-imports': {'type': 'array', 'items': {'type': 'string'}},
         'tables': {
             'type': 'array',
             'items': {
@@ -189,7 +191,62 @@ PRISMARINE_SCHEMA = {
         }
     },
     'required': ['tables'],
-    'optional': ['default-base', 'access-module'],
+    'optional': ['default-base', 'access-module', 'extra-imports'],
+    'additionalProperties': False
+}
+
+TABLE_ATTRIBUTE_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'name': {'type': 'string'},
+        'hash': {'type': 'boolean'},
+        'range': {'type': 'boolean'},
+    },
+    'required': ['name'],
+    'optional': ['hash', 'range'],
+    'additionalProperties': False
+}
+
+TABLES_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'attributes': {
+            'type': 'array',
+            'items': TABLE_ATTRIBUTE_SCHEMA
+        },
+        'indices': {
+            'type': 'array',
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'name': {'type': 'string'},
+                    'attributes': {
+                        'type': 'array',
+                        'items': TABLE_ATTRIBUTE_SCHEMA,
+                        'additionalProperties': False
+                    },
+                },
+                'required': ['name', 'attributes'],
+                'additionalProperties': False
+            }
+        }
+    },
+    'required': ['attributes'],
+    'optional': ['indices'],
+    'additionalProperties': False
+}
+
+AUTHORIZER_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'function': {'type': 'string'},
+        'token': {'type': 'string'},
+        'query': {'type': 'string'},
+        'headers': {'type': 'array', 'items': {'type': 'string'}},
+        'ttl': {'type': 'integer'},
+    },
+    'required': ['function'],
+    'optional': ['token', 'query', 'headers', 'ttl'],
     'additionalProperties': False
 }
 
@@ -234,8 +291,20 @@ RESOURCES_SCHEMA = {
         },
         'import': {'type': 'array', 'items': {'type': 'string'}},
         'prismarine': PRISMARINE_SCHEMA,
-        'tables': {'type': 'object'},
-        'authorizers': {'type': 'object'},
+        'tables': {
+            'type': 'object',
+            'patternProperties': {
+                '^[\\$a-zA-Z0-9-]+$': TABLES_SCHEMA
+            },
+            'additionalProperties': False
+        },
+        'authorizers': {
+            'type': 'object',
+            'patternProperties': {
+                '^[\\$a-z0-9-]+$': AUTHORIZER_SCHEMA
+            },
+            'additionalProperties': False
+        },
     },
     'required': ['prefix'],
     'optional': [
@@ -255,14 +324,15 @@ RESOURCES_SCHEMA = {
 
 
 def validate(resources_data: dict, errors: list[str]):
-    try:
-        validate_schema(resources_data, RESOURCES_SCHEMA)
+    # General schema validation
+    validator = Draft7Validator(RESOURCES_SCHEMA)
+    validation_errors = sorted(validator.iter_errors(resources_data), key=str)
 
-    except ValidationError as e:
-        lg.error(f'Invalid resources data: {e}')
-        errors.append(f"Invalid resources data: {e.message}")
-        return
+    for error in validation_errors:
+        lg.error(f'Validation error: {error}')
+        errors.append(f"Invalid resources data: {error.message} in {list(error.path)}")
 
+    # More specific validations
     validate_buckets(resources_data, errors)
     validate_queues(resources_data, errors)
     validate_streams(resources_data, errors)
