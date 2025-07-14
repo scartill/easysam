@@ -1,3 +1,7 @@
+# 1.3.0
+
+(TBD)
+
 # 1.2.0
 
 - Added `extra-imports` support to Prismarine

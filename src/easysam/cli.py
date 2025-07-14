@@ -1,9 +1,10 @@
 from pathlib import Path
-import click
 import logging as lg
 import sys
 from importlib.metadata import version
 
+import click
+import yaml
 
 from easysam.generate import generate
 from easysam.deploy import deploy, delete
@@ -28,7 +29,25 @@ def easysam(ctx, verbose, aws_profile):
 @click.option('--preprocess-only', is_flag=True, default=False)
 @click.argument('directory', type=click.Path(exists=True))
 def generate_cmd(directory, path, preprocess_only):
-    generate(directory, path, preprocess_only)
+    directory = Path(directory)
+    pypath = [Path(p) for p in path]
+    resources_data, errors = generate(directory, pypath, preprocess_only)
+
+    if errors:
+        for error in errors:
+            lg.error(error)
+
+        if len(errors) > 1:
+            lg.error(f'There were {len(errors)} errors:')
+        else:
+            lg.error('There was an error')
+
+        sys.exit(1)
+
+    else:
+        click.echo(yaml.dump(resources_data, indent=4))
+        lg.info('Resources generated successfully')
+        sys.exit(0)
 
 
 @easysam.command(name='deploy', help='Deploy the application to an AWS stack')

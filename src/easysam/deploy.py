@@ -12,7 +12,15 @@ PIP_VERSION = '25.1.1'
 
 
 def deploy(cliparams, directory, stack):
-    resources = generate(directory, [], False)
+    resources, errors = generate(directory, [], False)
+
+    if errors:
+        lg.error(f'There were {len(errors)} errors:')
+
+        for error in errors:
+            lg.error(error)
+
+        raise UserWarning('There were errors - aborting deployment')
 
     lg.info(f'Deploying SAM template from {directory}')
     check_pip_version(cliparams)
