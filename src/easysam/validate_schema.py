@@ -263,7 +263,10 @@ def validate_streams(resources_data: dict, errors: list[str]):
         bucketname = details['bucketname']
 
         if resources_data['buckets'].get(bucketname) is None:
-            errors.append(f"Stream '{stream}' bucketname must be a valid bucket")
+            errors.append(
+                f"Stream '{stream}': '{bucketname}' must be a valid bucket"
+            )
+
             continue
 
 
