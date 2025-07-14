@@ -1,8 +1,7 @@
 # 1.3.0
 
 - Added `inspect schema` command to validate the resources.yaml file
-- Added `inspect resources` command to inspect required cloud resources
-- Added `inspect common-deps` command to inspect the common dependencies
+- Added `inspect cloud` command to inspect required cloud resources
 
 # 1.2.0
 
