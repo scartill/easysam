@@ -235,7 +235,7 @@ def preprocess_defaults(resources_data: dict, errors: list[str]):
             path['action'] = path.get('action', 'GetItem')
 
         if path.get('integration') == 'sqs':
-            path['method'] = 'post'
+            path['method'] = path.get('method', 'post')
 
 
 def preprocess_resources(
