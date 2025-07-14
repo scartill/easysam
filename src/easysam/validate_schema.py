@@ -1,4 +1,5 @@
 import logging as lg
+from pathlib import Path
 
 from jsonschema import Draft7Validator
 
@@ -329,7 +330,7 @@ RESOURCES_SCHEMA = {
 }
 
 
-def validate(resources_data: dict, errors: list[str]):
+def validate(resources_dir: Path, resources_data: dict, errors: list[str]):
     # General schema validation
     validator = Draft7Validator(RESOURCES_SCHEMA)
     validation_errors = sorted(validator.iter_errors(resources_data), key=str)
@@ -345,7 +346,7 @@ def validate(resources_data: dict, errors: list[str]):
     validate_lambda(resources_data, errors)
     validate_paths(resources_data, errors)
     validate_import(resources_data, errors)
-    validate_prismarine(resources_data, errors)
+    validate_prismarine(resources_dir, resources_data, errors)
     validate_authorizers(resources_data, errors)
 
 
@@ -455,29 +456,30 @@ def validate_sqs_path(resources_data: dict, path: str, details: dict, errors: li
 
 
 def validate_import(resources_data: dict, errors: list[str]):
-    if 'import' in resources_data:
-        if not isinstance(resources_data['import'], list):
-            errors.append('Import must be a list')
-            return
-        for import_item in resources_data['import']:
-            if not isinstance(import_item, str):
-                errors.append('Each import item must be a string')
+    pass
 
 
-def validate_prismarine(resources_data: dict, errors: list[str]):
-    if 'prismarine' in resources_data:
-        if not isinstance(resources_data['prismarine'], dict):
-            errors.append('Prismarine must be a dictionary')
-            return
-        if 'default-base' not in resources_data['prismarine']:
-            errors.append('Prismarine must have a default-base')
-        if 'access-module' not in resources_data['prismarine']:
-            errors.append('Prismarine must have an access-module')
-        if 'tables' in resources_data['prismarine']:
-            if not isinstance(resources_data['prismarine']['tables'], list):
-                errors.append('Prismarine tables must be a list')
-        else:
-            errors.append('Prismarine must have tables defined')
+def validate_prismarine(resources_dir: Path, resources_data: dict, errors: list[str]):
+    prismarine = resources_data.get('prismarine', {})
+
+    if not prismarine:
+        return
+
+    default_base = prismarine.get('default-base')
+    default_base_dir = Path(resources_dir, default_base).resolve()
+
+    if not default_base_dir.exists():
+        errors.append(f"Prismarine default-base '{default_base}' must be a valid directory")
+        return
+
+    for table in prismarine.get('tables', []):
+        table_base = table.get('base') or default_base
+        table_base_dir = Path(resources_dir, table_base).resolve()
+
+        if not table_base_dir.exists():
+            errors.append(
+                f"Prismarine table package '{table_base}' must have a valid bsee directory"
+            )
 
 
 def validate_authorizers(resources_data: dict, errors: list[str]):

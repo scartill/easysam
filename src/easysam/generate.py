@@ -279,7 +279,7 @@ def load_resources(resources_dir: Path, pypath: list[Path], errors: list[str]) -
     preprocess_resources(resources_data, resources_dir, pypath, errors)
 
     lg.info('Validating resources')
-    validate_schema(resources_data, errors)
+    validate_schema(resources_dir, resources_data, errors)
 
     return resources_data
 
