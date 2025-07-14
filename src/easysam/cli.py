@@ -19,10 +19,15 @@ from easysam.inspect import inspect
 @click.group(help='EasySAM is a tool for generating SAM templates from simple YAML files')
 @click.version_option(version('easysam'))
 @click.pass_context
-@click.option('--aws-profile', type=str, help='AWS profile to use')
+@click.option(
+    '--aws-profile', type=str, help='AWS profile to use'
+)
+@click.option(
+    '--aws-region', type=str, help='AWS region'
+)
 @click.option('--verbose', is_flag=True)
-def easysam(ctx, verbose, aws_profile):
-    ctx.obj = {'verbose': verbose, 'aws_profile': aws_profile}
+def easysam(ctx, verbose, aws_profile, aws_region):
+    ctx.obj = {'verbose': verbose, 'aws_profile': aws_profile, 'aws_region': aws_region}
     lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
     lg.debug(f'Verbose: {verbose}')
 
@@ -56,9 +61,6 @@ def generate_cmd(directory, path, preprocess_only):
 @easysam.command(name='deploy', help='Deploy the application to an AWS stack')
 @click.pass_obj
 @click.option(
-    '--region', type=str, help='AWS region'
-)
-@click.option(
     '--tag', type=str, multiple=True, help='AWS tags', required=True
 )
 @click.option(
@@ -81,10 +83,9 @@ def deploy_cmd(obj, directory, stack, **kwargs):
 @easysam.command(name='delete', help='Delete the stack from AWS')
 @click.pass_obj
 @click.option('--force', is_flag=True, help='Force delete the stack')
-@click.option('--region', type=str, help='AWS region')
 @click.argument('stack', type=str)
 def delete_cmd(obj, stack, force, **kwargs):
-    obj.update(kwargs)
+    obj.update(kwargs)  # noqa: F821
     delete(obj, stack, force)
 
 

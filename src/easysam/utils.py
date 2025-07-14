@@ -4,7 +4,7 @@ import boto3
 def get_aws_client(service, cliparams, resource=False):
     '''Create and return an AWS client with optional profile and region'''
     profile = cliparams.get('aws_profile')
-    region = cliparams.get('region')
+    region = cliparams.get('aws_region')
     session = boto3.Session(profile_name=profile) if profile else boto3.Session()
     params = {}
 

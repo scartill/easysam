@@ -112,7 +112,7 @@ def sam_deploy(cliparams, directory, aws_stack):
     lg.debug(f'AWS tag string: {aws_tag_string}')
     sam_params.extend(['--tags', aws_tag_string])
 
-    if region := cliparams.get('region'):
+    if region := cliparams.get('aws_region'):
         sam_params.extend(['--region', region])
 
     if cliparams.get('verbose'):
