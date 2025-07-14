@@ -1,3 +1,4 @@
+import logging as lg
 from pathlib import Path
 
 import yaml
@@ -54,8 +55,9 @@ def schema(directory, path):
 @inspect.command(help='Inspect the resources.yaml file in-depth')
 @click.pass_obj
 @click.option('--path', multiple=True)
+@click.option('--stack', type=str, required=True)
 @click.argument('directory', type=click.Path(exists=True))
-def cloud(obj, directory, path):
+def cloud(obj, directory, path, stack):
     directory = Path(directory)
     pypath = [Path(p) for p in path]
     errors = []
@@ -69,7 +71,8 @@ def cloud(obj, directory, path):
 
         return
 
-    validate_cloud(obj, resources_data, errors)
+    lg.info(f"Validating cloud resources for {stack}")
+    validate_cloud(obj, resources_data, stack, errors)
 
     if errors:
         for error in errors:
