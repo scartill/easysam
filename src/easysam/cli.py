@@ -2,6 +2,8 @@ from pathlib import Path
 import logging as lg
 import sys
 from importlib.metadata import version
+import traceback
+from argparse import ArgumentParser
 
 import click
 import yaml
@@ -15,6 +17,7 @@ from easysam.inspect import inspect
 
 
 @click.group(help='EasySAM is a tool for generating SAM templates from simple YAML files')
+@click.version_option(version('easysam'))
 @click.pass_context
 @click.option('--aws-profile', type=str, help='AWS profile to use')
 @click.option('--verbose', is_flag=True)
@@ -99,22 +102,25 @@ def init_cmd(obj, app_name):
     init(obj, app_name)
 
 
-@easysam.command(name='version', help='Print the version of EasySAM')
-def version_cmd():
-    click.echo(version('easysam'))
-
-
 def main():
+    parser = ArgumentParser()
+    parser.add_argument('--verbose', action='store_true')
+    args, _ = parser.parse_known_args()
+
     try:
         easysam.add_command(inspect)
         easysam()
 
     except UserWarning as e:
+        if args.verbose:
+            lg.error(traceback.format_exc())
+
         lg.error(e)
         sys.exit(1)
 
     except Exception as e:
-        lg.error(e)
+        lg.error(traceback.format_exc())
+        lg.error(f'An unexpected error occurred: {e}')
         sys.exit(2)
 
 

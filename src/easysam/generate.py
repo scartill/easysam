@@ -10,6 +10,7 @@ import yaml
 import prismarine.prisma_common as prisma_common
 import prismarine.prisma_easysam as prisma_easysam
 
+from easysam.validate import validate
 from easysam.prismarine import generate as generate_prismarine_clients
 
 
@@ -17,6 +18,17 @@ type ProcessingResult = tuple[dict[str, Any], list[str]]
 
 
 IMPORT_FILE = 'easysam.yaml'
+
+SUPPORTED_SECTIONS = [
+    'tables',
+    'paths',
+    'functions',
+    'buckets',
+    'authorizers',
+    'prismarine',
+    'import',
+    'lambda',
+]
 
 
 def write_result(path, text):
@@ -216,9 +228,12 @@ def preprocess_resources(
     if 'import' in resources_data:
         preprocess_imports(resources_data, resources_dir, errors)
 
-    for section in ['tables', 'paths', 'functions', 'buckets', 'authorizers']:
+    for section in SUPPORTED_SECTIONS:
         if section in resources_data:
-            resources_data[section] = sort_dict(resources_data[section])
+            if isinstance(resources_data[section], dict):
+                resources_data[section] = sort_dict(resources_data[section])
+            elif isinstance(resources_data[section], list):
+                resources_data[section] = sorted(resources_data[section])
 
     resources_data = sort_dict(resources_data)
 
@@ -249,6 +264,9 @@ def generate(resources_dir: Path, pypath: list[Path], preprocess_only: bool) -> 
 
     lg.info('Processing resources')
     preprocess_resources(resources_data, resources_dir, pypath, errors)
+
+    lg.info('Validating resources')
+    validate(resources_data, errors)
 
     if preprocess_only or errors:
         return resources_data, errors
