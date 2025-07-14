@@ -158,6 +158,8 @@ SQS_PATH_SCHEMA = {
         'role': {'type': 'string'},
         'queue': {'type': 'string'},
         'requestTemplate': {'type': 'string'},
+        'requestTemplateFile': {'type': 'string'},
+        'responseTemplate': {'type': 'string'},
         'responseTemplateFile': {'type': 'string'},
         'authorizer': {'type': 'string'},
     },
@@ -166,10 +168,14 @@ SQS_PATH_SCHEMA = {
         'method',
         'role',
         'queue',
+    ],
+    'optional': [
+        'authorizer',
         'requestTemplate',
+        'requestTemplateFile',
+        'responseTemplate',
         'responseTemplateFile',
     ],
-    'optional': ['authorizer'],
     'additionalProperties': False
 }
 
@@ -344,8 +350,8 @@ def validate(resources_dir: Path, resources_data: dict, errors: list[str]):
     validate_queues(resources_data, errors)
     validate_streams(resources_data, errors)
     validate_lambda(resources_data, errors)
-    validate_paths(resources_data, errors)
-    validate_import(resources_data, errors)
+    validate_paths(resources_dir, resources_data, errors)
+    validate_import(resources_dir, resources_data, errors)
     validate_prismarine(resources_dir, resources_data, errors)
     validate_authorizers(resources_data, errors)
 
@@ -420,15 +426,15 @@ def validate_lambda(resources_data: dict, errors: list[str]):
                 continue
 
 
-def validate_paths(resources_data: dict, errors: list[str]):
+def validate_paths(resources_dir: Path, resources_data: dict, errors: list[str]):
     for path, details in resources_data.get('paths', {}).items():
         match details.get('integration', 'lambda'):
             case 'lambda':
                 validate_lambda_path(resources_data, path, details, errors)
             case 'dynamo':
-                validate_dynamo_path(details, errors)
+                validate_dynamo_path(resources_dir, path, details, errors)
             case 'sqs':
-                validate_sqs_path(resources_data, path, details, errors)
+                validate_sqs_path(resources_dir, resources_data, path, details, errors)
 
 
 def validate_lambda_path(resources_data: dict, path: str, details: dict, errors: list[str]):
@@ -446,17 +452,83 @@ def validate_lambda_path(resources_data: dict, path: str, details: dict, errors:
             errors.append(f"Lambda path '{path}' authorizer must be a valid authorizer")
 
 
-def validate_dynamo_path(details: dict, errors: list[str]):
-    pass
+def validate_dynamo_path(
+        resources_dir: Path,
+        path: str,
+        details: dict,
+        errors: list[str]
+):
+    validate_request_response_templates(resources_dir, path, details, errors)
 
 
-def validate_sqs_path(resources_data: dict, path: str, details: dict, errors: list[str]):
+def validate_sqs_path(
+        resources_dir: Path,
+        resources_data: dict,
+        path: str,
+        details: dict,
+        errors: list[str]
+):
     if details['queue'] not in resources_data['queues']:
         errors.append(f"SQS path '{path}' queue must be a valid queue")
 
+    validate_request_response_templates(resources_dir, path, details, errors)
 
-def validate_import(resources_data: dict, errors: list[str]):
-    pass
+
+def validate_request_response_templates(
+        resources_dir: Path,
+        path: str,
+        details: dict,
+        errors: list[str]
+):
+    request = False
+    response = False
+
+    if request_template_file := details.get('requestTemplateFile'):
+        request_template_path = Path(resources_dir, request_template_file).resolve()
+
+        if not request_template_path.exists():
+            errors.append(f"SQS path '{path}' request template must be a valid file")
+
+        if 'requestTemplate' in details:
+            errors.append(
+                f"Path '{path}' cannot have both requestTemplate and requestTemplateFile"
+            )
+
+        request = True
+
+    if 'requestTemplate' in details:
+        request = True
+
+    if response_template_file := details.get('responseTemplateFile'):
+        response_template_path = Path(resources_dir, response_template_file).resolve()
+
+        if not response_template_path.exists():
+            errors.append(f"SQS path '{path}' response template must be a valid file")
+
+        if 'responseTemplate' in details:
+            errors.append(
+                f"Path '{path}' cannot have both responseTemplate and responseTemplateFile"
+            )
+
+        response = True
+
+    if 'responseTemplate' in details:
+        response = True
+
+    if not request:
+        errors.append(f"Path '{path}' must have a request template")
+
+    if not response:
+        errors.append(f"Path '{path}' must have a response template")
+
+
+def validate_import(resources_dir: Path, resources_data: dict, errors: list[str]):
+    if import_list := resources_data.get('import'):
+        for import_item in import_list:
+            import_path = Path(resources_dir, import_item).resolve()
+
+            if not import_path.exists():
+                errors.append(f"Import '{import_item}' must be a valid directory")
 
 
 def validate_prismarine(resources_dir: Path, resources_data: dict, errors: list[str]):
@@ -489,5 +561,5 @@ def validate_authorizers(resources_data: dict, errors: list[str]):
         if present_types.count(True) != 1:
             errors.append(f"Authorizer '{authorizer}' cannot have multiple types")
 
-        if details['function'] not in resources_data['functions']:
+        if details['function'] not in resources_data.get('functions', {}):
             errors.append(f"Authorizer '{authorizer}' function must be a valid function")

@@ -1,6 +1,10 @@
 version = 1
 revision = 2
 requires-python = ">=3.12"
+resolution-markers = [
+    "python_full_version >= '3.13'",
+    "python_full_version < '3.13'",
+]
 
 [[package]]
 name = "annotated-types"
@@ -951,11 +955,11 @@ wheels = [
 
 [[package]]
 name = "networkx"
-version = "3.5"
+version = "2.8.8"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/6c/4f/ccdb8ad3a38e583f214547fd2f7ff1fc160c43a75af88e6aec213404b96a/networkx-3.5.tar.gz", hash = "sha256:d4c6f9cf81f52d69230866796b82afbccdec3db7ae4fbd1b65ea750feed50037", size = 2471065, upload-time = "2025-05-29T11:35:07.804Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cd/16/c44e8550012735b8f21b3df7f39e8ba5a987fb764ac017ad5f3589735889/networkx-2.8.8.tar.gz", hash = "sha256:230d388117af870fce5647a3c52401fcf753e94720e6ea6b4197a5355648885e", size = 1960828, upload-time = "2022-11-01T20:31:52.02Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/8d/776adee7bbf76365fdd7f2552710282c79a4ead5d2a46408c9043a2b70ba/networkx-3.5-py3-none-any.whl", hash = "sha256:0030d386a9a06dee3565298b4a734b68589749a544acbb6c412dc9e2489ec6ec", size = 2034406, upload-time = "2025-05-29T11:35:04.961Z" },
+    { url = "https://files.pythonhosted.org/packages/42/31/d2f89f1ae42718f8c8a9e440ebe38d7d5fe1e0d9eb9178ce779e365b3ab0/networkx-2.8.8-py3-none-any.whl", hash = "sha256:e435dfa75b1d7195c7b8378c3859f0445cd88c6b0375c181ed66823a9ceb7524", size = 2025192, upload-time = "2022-11-01T20:31:49.035Z" },
 ]
 
 [[package]]
