@@ -1,9 +1,8 @@
-# SAM Template Generator and Swagger support for API Gateway
-
 from pathlib import Path
 import logging as lg
 from typing import Any
 
+from benedict import benedict
 from jinja2 import Environment, FileSystemLoader
 import yaml
 
@@ -374,7 +373,7 @@ def check_condition(condition: str, value: str, deploy_ctx: dict[str, str]):
 
 
 def resolve_conditionals(resources_data: dict, deploy_ctx: dict[str, str]):
-    resolved = {}
+    resolved = benedict()
 
     for key, value in resources_data.items():
         if isinstance(value, dict):
@@ -407,7 +406,7 @@ def load_resources(
 
     try:
         yaml.SafeLoader.add_constructor('!Conditional', conditional_constructor)
-        raw_resources_data = yaml.safe_load(Path(resources).read_text())
+        raw_resources_data = benedict(yaml.safe_load(Path(resources).read_text()))
     except Exception as e:
         errors.append(f'Error loading resources file {resources}: {e}')
         return {}

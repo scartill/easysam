@@ -1,9 +1,9 @@
 import logging as lg
 from pathlib import Path
 
-import yaml
 import click
 import rich
+from benedict import benedict
 
 from easysam.commondep import commondep
 from easysam.generate import load_resources
@@ -48,8 +48,9 @@ def common_deps(common_dir, lambda_dir):
 @inspect.command(help='Validate the resources.yaml file')
 @click.pass_obj
 @click.option('--path', multiple=True)
+@click.option('--select', type=str)
 @click.argument('directory', type=click.Path(exists=True))
-def schema(obj, directory, path):
+def schema(obj, directory, path, select):
     directory = Path(directory)
     pypath = [Path(p) for p in path]
     errors = []
@@ -62,7 +63,11 @@ def schema(obj, directory, path):
             rich.print(f'[red]{error}[/red]')
 
     else:
-        rich.print(yaml.dump(resources_data, indent=4))
+        slice = resources_data.get(select) if select else resources_data
+
+        if isinstance(slice, benedict):
+            rich.print(slice.to_yaml())
+
         rich.print('[green]No validation errors found.[/green]')
 
 
