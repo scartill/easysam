@@ -30,7 +30,7 @@ easysam init my-app
 
 2. Deploy your application:
 ```pwsh
-easysam deploy --tag my-tag=my-value my-app my-stack-name
+easysam deploy --tag my-tag=my-value my-app my-environment-name
 ```
 
 Please note that at least one tag is required.
@@ -61,7 +61,7 @@ easysam init <app-name>
 Deploy the application:
 
 ```pwsh
-easysam deploy <app-directory> <aws-stack-name>
+easysam deploy <app-directory> <aws-environment-name>
 ```
 
 For more options, use the `--help` flag:

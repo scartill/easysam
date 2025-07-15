@@ -11,8 +11,22 @@ SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
 
 
-def deploy(cliparams, directory, stack):
-    resources, errors = generate(directory, [])
+def deploy(cliparams, directory, environment):
+    '''
+    Deploy a SAM template to AWS.
+
+    Args:
+        cliparams: The CLI parameters.
+        directory: The directory containing the SAM template.
+        environment: The AWS environment name.
+    '''
+
+    deploy_ctx = {
+        'environment': environment,
+        'region': cliparams.get('aws_region'),
+    }
+
+    resources, errors = generate(directory, [], deploy_ctx)
 
     if errors:
         lg.error(f'There were {len(errors)} errors:')
@@ -28,17 +42,17 @@ def deploy(cliparams, directory, stack):
     remove_common_dependencies(directory)
     copy_common_dependencies(directory, resources)
     sam_build(cliparams, directory)
-    sam_deploy(cliparams, directory, stack)
+    sam_deploy(cliparams, directory, environment)
 
     if not cliparams.get('no_cleanup'):
         remove_common_dependencies(directory)
 
 
-def delete(cliparams, stack, force):
-    lg.info(f'Deleting SAM template from {stack}')
+def delete(cliparams, environment, force):
+    lg.info(f'Deleting SAM template from {environment}')
     cf = u.get_aws_client('cloudformation', cliparams)
     mode = 'FORCE_DELETE_STACK' if force else 'STANDARD'
-    cf.delete_stack(StackName=stack, DeletionMode=mode)  # type: ignore
+    cf.delete_stack(StackName=environment, DeletionMode=mode)  # type: ignore
 
 
 def check_pip_version(cliparams):

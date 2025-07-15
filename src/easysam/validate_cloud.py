@@ -3,25 +3,25 @@ import logging as lg
 from easysam.utils import get_aws_client
 
 
-def validate(cliparams: dict, resources_data: dict, stack: str, errors: list[str]):
+def validate(cliparams: dict, resources_data: dict, environment: str, errors: list[str]):
     '''
     Validate the cloud resources.
 
     Args:
         cliparams (dict): The CLI parameters (used: aws_profile, aws_region)
         resources_data (dict): The resources data.
-        stack (str): The stack/environment name.
+        environment (str): The environment name.
         errors (list[str]): The list of errors.
     '''
 
     iam = get_aws_client('iam', cliparams)
-    validate_bucket_policy(iam, resources_data, stack, errors)
+    validate_bucket_policy(iam, resources_data, environment, errors)
 
 
-def validate_bucket_policy(iam, resources_data, stack, errors):
+def validate_bucket_policy(iam, resources_data, environment, errors):
     for bucket, details in resources_data.get('buckets', {}).items():
         if policy_name := details.get('extaccesspolicy'):
-            full_policy_name = f'{policy_name}-{stack}'
+            full_policy_name = f'{policy_name}-{environment}'
             lg.info(f"Validating bucket policy: {full_policy_name}")
 
             try:

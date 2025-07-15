@@ -33,12 +33,29 @@ def easysam(ctx, verbose, aws_profile, aws_region):
 
 
 @easysam.command(name='generate', help='Generate a SAM template from a directory')
-@click.option('--path', multiple=True)
+@click.option(
+    '--path', multiple=True, help='A additional Python path to use for generation'
+)
+@click.option(
+    '--environment', type=str, help='An environment (AWS stack) to use in generation'
+)
+@click.option(
+    '--region', type=str, help='A region to use for generation'
+)
 @click.argument('directory', type=click.Path(exists=True))
-def generate_cmd(directory, path):
+def generate_cmd(directory, path, environment, region):
     directory = Path(directory)
     pypath = [Path(p) for p in path]
-    resources_data, errors = generate(directory, pypath)
+
+    deploy_ctx = {}
+
+    if environment:
+        deploy_ctx['environment'] = environment
+
+    if region:
+        deploy_ctx['region'] = region
+
+    resources_data, errors = generate(directory, pypath, deploy_ctx)
 
     if errors:
         for error in errors:
@@ -57,7 +74,7 @@ def generate_cmd(directory, path):
         sys.exit(0)
 
 
-@easysam.command(name='deploy', help='Deploy the application to an AWS stack')
+@easysam.command(name='deploy', help='Deploy the application to an AWS environment')
 @click.pass_obj
 @click.option(
     '--tag', type=str, multiple=True, help='AWS tags', required=True
@@ -72,20 +89,20 @@ def generate_cmd(directory, path):
     '--no-cleanup', is_flag=True, help='Do not clean the directory before deploying'
 )
 @click.argument('directory', type=click.Path(exists=True))
-@click.argument('stack', type=str)
-def deploy_cmd(obj, directory, stack, **kwargs):
+@click.argument('environment', type=str)
+def deploy_cmd(obj, directory, environment, **kwargs):
     obj.update(kwargs)
     directory = Path(directory)
-    deploy(obj, directory, stack)
+    deploy(obj, directory, environment)
 
 
-@easysam.command(name='delete', help='Delete the stack from AWS')
+@easysam.command(name='delete', help='Delete the environment from AWS')
 @click.pass_obj
-@click.option('--force', is_flag=True, help='Force delete the stack')
-@click.argument('stack', type=str)
-def delete_cmd(obj, stack, force, **kwargs):
+@click.option('--force', is_flag=True, help='Force delete the environment')
+@click.argument('environment', type=str)
+def delete_cmd(obj, environment, force, **kwargs):
     obj.update(kwargs)  # noqa: F821
-    delete(obj, stack, force)
+    delete(obj, environment, force)
 
 
 @easysam.command(name='cleanup', help='Remove common dependencies from the directory')

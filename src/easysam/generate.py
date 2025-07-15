@@ -31,6 +31,60 @@ SUPPORTED_SECTIONS = [
 ]
 
 
+def generate(
+    resources_dir: Path,
+    pypath: list[Path],
+    deploy_ctx: dict[str, str]
+) -> ProcessingResult:
+    '''
+    Generate a SAM template from a directory.
+
+    Args:
+        resources_dir: The directory containing the resources.
+        pypath: The Python path to use.
+        deploy_ctx: The additional deployment context, including:
+        - environment: the name of the environment (AWS stack) to deploy to
+        - region: the region to deploy to (AWS region)
+
+        A tuple containing the processed resources and any errors as a list.
+    '''
+
+    errors = []
+    resources_data = load_resources(resources_dir, pypath, deploy_ctx, errors)
+
+    lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
+
+    try:
+        build_dir = Path(resources_dir, 'build')
+        swagger = Path(build_dir, 'swagger.yaml')
+        template = Path(resources_dir, 'template.yml')
+
+        loader = FileSystemLoader(searchpath=[
+            str(Path(__file__).parent.resolve()),
+            str(resources_dir.resolve()),
+        ])
+
+        jenv = Environment(loader=loader)
+        swagger_template = jenv.get_template('swagger.j2')
+        sam_template = jenv.get_template('template.j2')
+        swagger_output = swagger_template.render(resources_data)
+        sam_output = sam_template.render(resources_data)
+        write_result(swagger, swagger_output)
+        lg.info(f'Swagger file generated: {swagger}')
+        write_result(template, sam_output)
+        lg.info(f'SAM template generated: {template}')
+
+    except Exception as e:
+        errors.append(f'Error generating template: {e}')
+        return resources_data, errors
+
+    if 'prismarine' in resources_data:
+        lg.info('Generating prismarine clients')
+        generate_prismarine_clients(resources_dir, resources_data, errors)
+
+    return resources_data, errors
+
+
 def write_result(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
     sane_text = '\n'.join(line for line in text.splitlines() if line and line.strip())
@@ -214,6 +268,11 @@ def preprocess_imports(resources_data: dict, resources_dir: Path, errors: list[s
             preprocess_file(resources_data, resources_dir, entry_path, errors)
 
 
+def preprocess_deploy_ctx(resources_data: dict, deploy_ctx: dict[str, str]):
+    if 'deploy' in resources_data:
+        resources_data['deploy'] = deploy_ctx
+
+
 def preprocess_defaults(resources_data: dict, errors: list[str]):
     def transform_lambda_poll(poll: str | dict):
         if isinstance(poll, str):
@@ -245,6 +304,7 @@ def preprocess_resources(
     resources_data: dict,
     resources_dir: Path,
     pypath: list[Path],
+    deploy_ctx: dict[str, str],
     errors: list[str]
 ):
     def sort_dict(d):
@@ -256,6 +316,7 @@ def preprocess_resources(
     if 'import' in resources_data:
         preprocess_imports(resources_data, resources_dir, errors)
 
+    preprocess_deploy_ctx(resources_data, deploy_ctx)
     preprocess_defaults(resources_data, errors)
 
     for section in SUPPORTED_SECTIONS:
@@ -268,7 +329,12 @@ def preprocess_resources(
     resources_data = sort_dict(resources_data)
 
 
-def load_resources(resources_dir: Path, pypath: list[Path], errors: list[str]) -> dict:
+def load_resources(
+    resources_dir: Path,
+    pypath: list[Path],
+    deploy_ctx: dict[str, str],
+    errors: list[str]
+) -> dict:
     pypath = [resources_dir] + list(pypath)
     resources = Path(resources_dir, 'resources.yaml')
 
@@ -279,57 +345,9 @@ def load_resources(resources_dir: Path, pypath: list[Path], errors: list[str]) -
         return {}
 
     lg.info('Processing resources')
-    preprocess_resources(resources_data, resources_dir, pypath, errors)
+    preprocess_resources(resources_data, resources_dir, pypath, deploy_ctx, errors)
 
     lg.info('Validating resources')
     validate_schema(resources_dir, resources_data, errors)
 
     return resources_data
-
-
-def generate(resources_dir: Path, pypath: list[Path]) -> ProcessingResult:
-    '''
-    Generate a SAM template from a directory.
-
-    Args:
-        resources_dir: The directory containing the resources.
-        pypath: The Python path to use.
-
-    Returns:
-        A tuple containing the processed resources and any errors as a list.
-    '''
-
-    errors = []
-    resources_data = load_resources(resources_dir, pypath, errors)
-
-    lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
-
-    try:
-        build_dir = Path(resources_dir, 'build')
-        swagger = Path(build_dir, 'swagger.yaml')
-        template = Path(resources_dir, 'template.yml')
-
-        loader = FileSystemLoader(searchpath=[
-            str(Path(__file__).parent.resolve()),
-            str(resources_dir.resolve()),
-        ])
-
-        jenv = Environment(loader=loader)
-        swagger_template = jenv.get_template('swagger.j2')
-        sam_template = jenv.get_template('template.j2')
-        swagger_output = swagger_template.render(resources_data)
-        sam_output = sam_template.render(resources_data)
-        write_result(swagger, swagger_output)
-        lg.info(f'Swagger file generated: {swagger}')
-        write_result(template, sam_output)
-        lg.info(f'SAM template generated: {template}')
-
-    except Exception as e:
-        errors.append(f'Error generating template: {e}')
-        return resources_data, errors
-
-    if 'prismarine' in resources_data:
-        lg.info('Generating prismarine clients')
-        generate_prismarine_clients(resources_dir, resources_data, errors)
-
-    return resources_data, errors
