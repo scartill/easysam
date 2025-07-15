@@ -413,7 +413,7 @@ def load_resources(
         return {}
 
     lg.info('Resolving conditional resources')
-    lg.info(f'Deployment context: {deploy_ctx}')
+    lg.debug(f'Deployment context: {deploy_ctx}')
     resources_data = resolve_conditionals(raw_resources_data, deploy_ctx)
     lg.debug('Resources data after resolving conditionals:')
     lg.debug(yaml.dump(resources_data, indent=4))
