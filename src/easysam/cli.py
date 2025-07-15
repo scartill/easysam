@@ -32,9 +32,11 @@ def easysam(ctx, verbose, aws_profile, context_file):
     ctx.obj = {
         'verbose': verbose,
         'aws_profile': aws_profile,
-        'context_file': context_file,
         'deploy_ctx': {}
     }
+
+    if context_file:
+        ctx.obj['context_file'] = Path(context_file)
 
     lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
     lg.debug(f'Verbose: {verbose}')
@@ -100,7 +102,8 @@ def generate_cmd(obj, directory, path, environment, region):
 )
 @click.argument('directory', type=click.Path(exists=True))
 @click.argument('environment', type=str)
-def deploy_cmd(obj, directory, environment):
+def deploy_cmd(obj, directory, environment, **kwargs):
+    obj.update(kwargs)  # noqa: F821
     directory = Path(directory)
     context_file = obj.get('context_file')
     deploy(obj, directory, environment, context_file)
