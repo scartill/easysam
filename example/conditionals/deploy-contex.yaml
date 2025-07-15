@@ -1,0 +1,8 @@
+# This is a example of a deploy-context.yaml file is used to futher control resources
+# the resources.yaml file with the values in CI.
+
+overrides:
+  # Make the simple-bucket public
+  buckets/simple-bucket/public: true
+  buckets/new-bucket:
+    public: false
