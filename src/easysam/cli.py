@@ -120,15 +120,15 @@ def init_cmd(obj, app_name):
 
 
 def main():
-    parser = ArgumentParser()
-    parser.add_argument('--verbose', action='store_true')
-    args, _ = parser.parse_known_args()
-
     try:
         easysam.add_command(inspect)
         easysam()
 
     except UserWarning as e:
+        parser = ArgumentParser()
+        parser.add_argument('--verbose', action='store_true')
+        args, _ = parser.parse_known_args()
+
         if args.verbose:
             lg.error(traceback.format_exc())
 

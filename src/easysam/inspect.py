@@ -14,7 +14,12 @@ from easysam.validate_cloud import validate as validate_cloud
 @click.pass_obj
 @click.option('--environment', type=str)
 @click.option('--target-region', type=str)
-def inspect(obj, environment, target_region):
+@click.option(
+    '--context-file', type=click.Path(exists=True),
+    help='A YAML file containing additional context for the resources.yaml file. '
+         'For example, overrides for resource properties.'
+)
+def inspect(obj, environment, target_region, context_file):
     deploy_ctx = {}
 
     if environment:
@@ -22,6 +27,10 @@ def inspect(obj, environment, target_region):
 
     if target_region:
         deploy_ctx['region'] = target_region
+
+    if context_file:
+        deploy_ctx.update(benedict.from_yaml(context_file))
+        lg.info(f'Loaded context from {context_file}')
 
     obj.update({'deploy_ctx': deploy_ctx})
 
@@ -47,8 +56,14 @@ def common_deps(common_dir, lambda_dir):
 
 @inspect.command(help='Validate the resources.yaml file')
 @click.pass_obj
-@click.option('--path', multiple=True)
-@click.option('--select', type=str)
+@click.option(
+    '--path', multiple=True, help='Add a path to the Python path'
+)
+@click.option(
+    '--select', type=str,
+    help='Select a specific resource to render after the schema is validated. '
+         'Uses the keystring syntax to select the resource'
+)
 @click.argument('directory', type=click.Path(exists=True))
 def schema(obj, directory, path, select):
     directory = Path(directory)

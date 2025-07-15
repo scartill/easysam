@@ -25,3 +25,6 @@ buckets:
   :
     extaccesspolicy: CommonPolicy
     public: false
+
+  simple-bucket:
+    public: false

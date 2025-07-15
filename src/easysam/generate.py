@@ -395,6 +395,15 @@ def resolve_conditionals(resources_data: dict, deploy_ctx: dict[str, str]):
     return resolved
 
 
+def apply_overrides(resources_data: dict, deploy_ctx: dict[str, Any]):
+    if 'overrides' in deploy_ctx:
+        for override_path, override_value in deploy_ctx['overrides'].items():
+            key = override_path.replace('/', '.')
+            lg.info(f'Applying override: {key} = {override_value}')
+            print(resources_data)
+            resources_data[key] = override_value
+
+
 def load_resources(
     resources_dir: Path,
     pypath: list[Path],
@@ -416,6 +425,9 @@ def load_resources(
     resources_data = resolve_conditionals(raw_resources_data, deploy_ctx)
     lg.debug('Resources data after resolving conditionals:')
     lg.debug(yaml.dump(resources_data, indent=4))
+
+    lg.info('Applying overrides')
+    apply_overrides(resources_data, deploy_ctx)
 
     lg.info('Processing resources')
     preprocess_resources(resources_data, resources_dir, pypath, deploy_ctx, errors)
