@@ -76,7 +76,7 @@ def schema(obj, directory, path, select):
         rich.print('[green]No validation errors found.[/green]')
 
 
-@inspect.command(help='Inspect the resources.yaml file in-depth')
+@inspect.command(help='Inspect the resources in-depth')
 @click.pass_obj
 @click.option('--path', multiple=True)
 @click.option('--environment', type=str, required=True)
