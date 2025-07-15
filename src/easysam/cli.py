@@ -23,16 +23,25 @@ from easysam.inspect import inspect
     '--aws-profile', type=str, help='AWS profile to use'
 )
 @click.option(
-    '--aws-region', type=str, help='AWS region'
+    '--context-file', type=click.Path(exists=True),
+    help='A YAML file containing additional context for the resources.yaml file. '
+         'For example, overrides for resource properties.'
 )
 @click.option('--verbose', is_flag=True)
-def easysam(ctx, verbose, aws_profile, aws_region):
-    ctx.obj = {'verbose': verbose, 'aws_profile': aws_profile, 'aws_region': aws_region}
+def easysam(ctx, verbose, aws_profile, context_file):
+    ctx.obj = {
+        'verbose': verbose,
+        'aws_profile': aws_profile,
+        'context_file': context_file,
+        'deploy_ctx': {}
+    }
+
     lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
     lg.debug(f'Verbose: {verbose}')
 
 
 @easysam.command(name='generate', help='Generate a SAM template from a directory')
+@click.pass_obj
 @click.option(
     '--path', multiple=True, help='A additional Python path to use for generation'
 )
@@ -43,7 +52,7 @@ def easysam(ctx, verbose, aws_profile, aws_region):
     '--region', type=str, help='A region to use for generation'
 )
 @click.argument('directory', type=click.Path(exists=True))
-def generate_cmd(directory, path, environment, region):
+def generate_cmd(obj, directory, path, environment, region):
     directory = Path(directory)
     pypath = [Path(p) for p in path]
 
@@ -55,7 +64,8 @@ def generate_cmd(directory, path, environment, region):
     if region:
         deploy_ctx['region'] = region
 
-    resources_data, errors = generate(directory, pypath, deploy_ctx)
+    context_file = obj.get('context_file')
+    resources_data, errors = generate(directory, pypath, deploy_ctx, context_file)
 
     if errors:
         for error in errors:
@@ -90,10 +100,10 @@ def generate_cmd(directory, path, environment, region):
 )
 @click.argument('directory', type=click.Path(exists=True))
 @click.argument('environment', type=str)
-def deploy_cmd(obj, directory, environment, **kwargs):
-    obj.update(kwargs)
+def deploy_cmd(obj, directory, environment):
     directory = Path(directory)
-    deploy(obj, directory, environment)
+    context_file = obj.get('context_file')
+    deploy(obj, directory, environment, context_file)
 
 
 @easysam.command(name='delete', help='Delete the environment from AWS')

@@ -248,6 +248,22 @@ The `~` prefix negates the condition.
   region: ~eu-west-2
 ```
 
+### Deploy Context File
+
+The deploy context file is used to override the resources.yaml file with the values in CI.
+
+```yaml
+overrides:
+  buckets/my-bucket/public: true
+```
+
+Use the `--context-file` option to specify the deploy context file.
+
+```pwsh
+easysam deploy <app-directory> <aws-environment-name> --context-file deploy-context.yaml
+```
+The deploy context file is a YAML file that contains the overrides.
+
 ## Development
 
 ### Setting up the development environment

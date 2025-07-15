@@ -11,7 +11,7 @@ SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
 
 
-def deploy(cliparams, directory, environment):
+def deploy(cliparams: dict, directory: Path, environment: str, context_file: Path):
     '''
     Deploy a SAM template to AWS.
 
@@ -19,14 +19,14 @@ def deploy(cliparams, directory, environment):
         cliparams: The CLI parameters.
         directory: The directory containing the SAM template.
         environment: The AWS environment name.
+        context_file: The path to the deployment context file.
     '''
 
     deploy_ctx = {
-        'environment': environment,
-        'region': cliparams.get('aws_region'),
+        'environment': environment
     }
 
-    resources, errors = generate(directory, [], deploy_ctx)
+    resources, errors = generate(directory, [], deploy_ctx, context_file)
 
     if errors:
         lg.error(f'There were {len(errors)} errors:')
@@ -125,9 +125,6 @@ def sam_deploy(cliparams, directory, aws_stack):
     aws_tag_string = ' '.join(aws_tags)
     lg.debug(f'AWS tag string: {aws_tag_string}')
     sam_params.extend(['--tags', aws_tag_string])
-
-    if region := cliparams.get('aws_region'):
-        sam_params.extend(['--region', region])
 
     if cliparams.get('verbose'):
         sam_params.append('--debug')

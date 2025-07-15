@@ -8,7 +8,7 @@ def validate(cliparams: dict, resources_data: dict, environment: str, errors: li
     Validate the cloud resources.
 
     Args:
-        cliparams (dict): The CLI parameters (used: aws_profile, aws_region)
+        cliparams (dict): The CLI parameters (used: aws_profile)
         resources_data (dict): The resources data.
         environment (str): The environment name.
         errors (list[str]): The list of errors.

@@ -14,25 +14,14 @@ from easysam.validate_cloud import validate as validate_cloud
 @click.pass_obj
 @click.option('--environment', type=str)
 @click.option('--target-region', type=str)
-@click.option(
-    '--context-file', type=click.Path(exists=True),
-    help='A YAML file containing additional context for the resources.yaml file. '
-         'For example, overrides for resource properties.'
-)
-def inspect(obj, environment, target_region, context_file):
-    deploy_ctx = {}
+def inspect(obj, environment, target_region):
+    deploy_ctx = obj['deploy_ctx']
 
     if environment:
         deploy_ctx['environment'] = environment
 
     if target_region:
         deploy_ctx['region'] = target_region
-
-    if context_file:
-        deploy_ctx.update(benedict.from_yaml(context_file))
-        lg.info(f'Loaded context from {context_file}')
-
-    obj.update({'deploy_ctx': deploy_ctx})
 
 
 @inspect.command(name='common-deps', help='Inspect a lambda function')
@@ -70,7 +59,8 @@ def schema(obj, directory, path, select):
     pypath = [Path(p) for p in path]
     errors = []
     deploy_ctx = obj['deploy_ctx']
-    resources_data = load_resources(directory, pypath, deploy_ctx, errors)
+    context_file = obj.get('context_file')
+    resources_data = load_resources(directory, pypath, deploy_ctx, context_file, errors)
 
     if errors:
         rich.print(f'[red]There were {len(errors)} validation errors.[/red]')
@@ -95,12 +85,16 @@ def cloud(obj, directory, path, environment):
     directory = Path(directory)
     pypath = [Path(p) for p in path]
     errors = []
-    deploy_ctx = obj['deploy_ctx']
 
     if 'environment' not in obj:
         raise click.UsageError('Environment is required for cloud inspection')
 
-    resources_data = load_resources(directory, pypath, deploy_ctx, errors)
+    deploy_ctx = {
+        'environment': environment,
+    }
+
+    context_file = obj.get('context_file')
+    resources_data = load_resources(directory, pypath, deploy_ctx, context_file, errors)
 
     if errors:
         rich.print(

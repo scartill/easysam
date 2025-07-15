@@ -33,7 +33,8 @@ SUPPORTED_SECTIONS = [
 def generate(
     resources_dir: Path,
     pypath: list[Path],
-    deploy_ctx: dict[str, str]
+    deploy_ctx: dict[str, str],
+    context_file: Path
 ) -> ProcessingResult:
     '''
     Generate a SAM template from a directory.
@@ -49,7 +50,7 @@ def generate(
     '''
 
     errors = []
-    resources_data = load_resources(resources_dir, pypath, deploy_ctx, errors)
+    resources_data = load_resources(resources_dir, pypath, deploy_ctx, context_file, errors)
 
     lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
 
@@ -408,9 +409,27 @@ def load_resources(
     resources_dir: Path,
     pypath: list[Path],
     deploy_ctx: dict[str, str],
+    context_file: Path,
     errors: list[str]
 ) -> dict:
-    pypath = [resources_dir] + list(pypath)
+    '''
+    Load the resources from the resources.yaml file.
+
+    Args:
+        resources_dir: The directory containing the resources.yaml file.
+        pypath: The Python path to use.
+        deploy_ctx: The deployment context.
+        context_file: The path to the additional deployment context file.
+        errors: The list of errors.
+
+    Returns:
+        A dictionary containing the resources.
+    '''
+
+    if context_file:
+        deploy_ctx.update(benedict.from_yaml(context_file))
+        lg.info(f'Loaded context from {context_file}')
+
     resources = Path(resources_dir, 'resources.yaml')
 
     try:
@@ -430,6 +449,7 @@ def load_resources(
     apply_overrides(resources_data, deploy_ctx)
 
     lg.info('Processing resources')
+    pypath = [resources_dir] + list(pypath)
     preprocess_resources(resources_data, resources_dir, pypath, deploy_ctx, errors)
 
     lg.info('Validating resources')
