@@ -1,0 +1,5 @@
+tables:
+  MyItem:
+    attributes:
+    - hash: true
+      name: ItemID

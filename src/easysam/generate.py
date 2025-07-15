@@ -329,6 +329,73 @@ def preprocess_resources(
     resources_data = sort_dict(resources_data)
 
 
+class Conditional(yaml.YAMLObject):
+    def __init__(self, key, environment='any', region='any'):
+        self.key = key
+        self.environment = environment
+        self.region = region
+
+    def __repr__(self):
+        fields = [
+            f'key={self.key}',
+            f'environment={self.environment}',
+            f'region={self.region}',
+        ]
+
+        return f'Conditional({", ".join(fields)})'
+
+
+def conditional_constructor(loader, node):
+    mapping = loader.construct_mapping(node)
+
+    if 'key' not in mapping:
+        raise ValueError('All !Conditional keys must have a key')
+
+    attributes = {'key': mapping['key']}
+
+    if 'environment' in mapping:
+        attributes['environment'] = mapping['environment']
+
+    if 'region' in mapping:
+        attributes['region'] = mapping['region']
+
+    return Conditional(**attributes)
+
+
+def check_condition(condition: str, value: str, deploy_ctx: dict[str, str]):
+    if value == 'any':
+        return True
+
+    negate = value.startswith('~')
+    value = value.lstrip('~')
+    include = value == deploy_ctx.get(condition)
+    result = include if not negate else not include
+    return result
+
+
+def resolve_conditionals(resources_data: dict, deploy_ctx: dict[str, str]):
+    resolved = {}
+
+    for key, value in resources_data.items():
+        if isinstance(value, dict):
+            resolved_value = resolve_conditionals(value, deploy_ctx)
+        else:
+            resolved_value = value
+
+        if isinstance(key, Conditional):
+            include = all([
+                check_condition('environment', key.environment, deploy_ctx),
+                check_condition('region', key.region, deploy_ctx),
+            ])
+
+            if include:
+                resolved[key.key] = resolved_value
+        else:
+            resolved[key] = resolved_value
+
+    return resolved
+
+
 def load_resources(
     resources_dir: Path,
     pypath: list[Path],
@@ -339,10 +406,17 @@ def load_resources(
     resources = Path(resources_dir, 'resources.yaml')
 
     try:
-        resources_data = yaml.safe_load(Path(resources).read_text())
+        yaml.SafeLoader.add_constructor('!Conditional', conditional_constructor)
+        raw_resources_data = yaml.safe_load(Path(resources).read_text())
     except Exception as e:
         errors.append(f'Error loading resources file {resources}: {e}')
         return {}
+
+    lg.info('Resolving conditional resources')
+    lg.info(f'Deployment context: {deploy_ctx}')
+    resources_data = resolve_conditionals(raw_resources_data, deploy_ctx)
+    lg.debug('Resources data after resolving conditionals:')
+    lg.debug(yaml.dump(resources_data, indent=4))
 
     lg.info('Processing resources')
     preprocess_resources(resources_data, resources_dir, pypath, deploy_ctx, errors)

@@ -223,6 +223,31 @@ prismarine:
 
 For more information, see [Prismarine README](https://github.com/adsight-app/prismarine/blob/main/README.md).
 
+### Conditional Resources
+
+Conditional resources are defined using the `!Conditional` tag.
+
+```yaml
+? !Conditional
+  key: my-bucket
+  environment: prod
+  region: eu-west-2
+:
+  extaccesspolicy: ProdPolicy
+  public: true
+```
+
+#### Negation
+
+The `~` prefix negates the condition.
+
+```yaml
+? !Conditional
+  key: my-bucket
+  environment: ~prod
+  region: ~eu-west-2
+```
+
 ## Development
 
 ### Setting up the development environment
@@ -238,10 +263,6 @@ cd easysam
 uv sync
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and suggest improvements.
 
 ## License
 
