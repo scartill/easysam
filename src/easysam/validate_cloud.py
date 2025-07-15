@@ -5,7 +5,7 @@ from easysam.utils import get_aws_client
 
 def validate(cliparams: dict, resources_data: dict, environment: str, errors: list[str]):
     '''
-    Validate the cloud resources.
+    Validate required external cloud resources.
 
     Args:
         cliparams (dict): The CLI parameters (used: aws_profile)
