@@ -126,7 +126,10 @@ Resources:
               - 's3:PutObject'
             Resource:
             {% for stream_name, stream in streams.items() %}
-              - !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ stream.bucketname.replace('-', '') }}Bucket}/*
+            {% for bucket_name, bucket in buckets.items() %}
+#ToDo add condition for direct arn
+              - !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket.bucketname.replace('-', '') }}Bucket}/*
+            {% endfor%}
             {% endfor%}
           - Effect: Allow
             Action:
@@ -229,7 +232,8 @@ Resources:
       RetentionPeriodHours: 24
       StreamModeDetails:
         StreamMode: ON_DEMAND
-  {{ lprefix }}{{ stream_name.replace('-', '') }}Delivery:
+  {% for bucket_name, bucket in buckets.items() %}
+  {{ lprefix }}{{ stream_name.replace('-', '') }}{{ bucket_name.replace('-', '') }}Delivery:
     Type: AWS::KinesisFirehose::DeliveryStream
     DependsOn:
       - {{ lprefix }}DeliveryStreamPolicy    
@@ -240,15 +244,17 @@ Resources:
         KinesisStreamARN: !GetAtt {{ lprefix }}{{ stream_name.replace('-', '') }}Stream.Arn
         RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
       ExtendedS3DestinationConfiguration:
-        BucketARN: !GetAtt {{ lprefix }}{{ stream.bucketname }}Bucket.Arn
+#ToDo add condition for direct arn
+        BucketARN: !GetAtt {{ lprefix }}{{ bucket.bucketname }}Bucket.Arn
         BufferingHints:
           SizeInMBs: 128
-          IntervalInSeconds: {{ stream.intervalinseconds | default('300') }}
+          IntervalInSeconds: {{ bucket.intervalinseconds | default('300') }}
         CompressionFormat: "GZIP"
         EncryptionConfiguration:
           NoEncryptionConfig: "NoEncryption"
-        Prefix: "{{ stream.bucketprefix }}"
+        Prefix: "{{ bucket.bucketprefix }}"
         RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
+  {% endfor %}
   {% endfor %}
   {% endif %}  # streams
 
