@@ -1,9 +1,10 @@
 lambda:
   name: myfunction
   resources:
-    tables:
-    - MyItem
+    streams:
+    - simple
+    - complex
   integration:
-    path: /items
+    path: /stats
     open: true
     greedy: false

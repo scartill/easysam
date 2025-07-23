@@ -22,7 +22,7 @@ QUEUES_SCHEMA = {
     'additionalProperties': False
 }
 
-STREAMS_SCHEMA = {
+STREAM_BUCKET_SCHEMA = {
     'type': 'object',
     'properties': {
         'bucketname': {'type': 'string'},
@@ -36,6 +36,15 @@ STREAMS_SCHEMA = {
     'required': ['bucketname', 'bucketprefix'],
     'optional': ['intervalinseconds'],
     'additionalProperties': False
+}
+
+STREAMS_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'buckets': {'type': 'object', 'patternProperties': {
+            '^[\\$a-z0-9-]+$': STREAM_BUCKET_SCHEMA
+        }},
+    },
 }
 
 LAMBDA_POLL_SCHEMA = {
@@ -368,14 +377,15 @@ def validate_queues(resources_data: dict, errors: list[str]):
 
 def validate_streams(resources_data: dict, errors: list[str]):
     for stream, details in resources_data.get('streams', {}).items():
-        bucketname = details['bucketname']
+        for bucket in details.get('buckets', {}).values():
+            if 'bucketname' not in bucket:
+                errors.append(f"Stream '{stream}': 'bucketname' is required")
+                continue
 
-        if resources_data['buckets'].get(bucketname) is None:
-            errors.append(
-                f"Stream '{stream}': '{bucketname}' must be a valid bucket"
-            )
-
-            continue
+            if resources_data['buckets'].get(bucket['bucketname']) is None:
+                errors.append(
+                    f"Stream '{stream}': '{bucket['bucketname']}' must be a valid bucket"
+                )
 
 
 def validate_lambda(resources_data: dict, errors: list[str]):

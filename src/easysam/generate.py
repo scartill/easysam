@@ -273,7 +273,7 @@ def preprocess_deploy_ctx(resources_data: dict, deploy_ctx: dict[str, str]):
         resources_data['deploy'] = deploy_ctx
 
 
-def preprocess_defaults(resources_data: dict, errors: list[str]):
+def process_default_functions(resources_data: dict, errors: list[str]):
     def transform_lambda_poll(poll: str | dict):
         if isinstance(poll, str):
             return {'name': poll}
@@ -286,6 +286,35 @@ def preprocess_defaults(resources_data: dict, errors: list[str]):
                 transform_lambda_poll(poll) for poll in function.get('polls', [])
             ]
 
+
+def process_default_streams(resources_data: dict, errors: list[str]):
+    new_streams = {}
+
+    for stream_name, stream in resources_data.get('streams', {}).items():
+        if 'buckets' in stream and 'bucketname' in stream:
+            errors.append(f'Stream {stream} cannot have both buckets and bucketname')
+            continue
+
+        if 'bucketname' in stream:
+            if 'bucketprefix' not in stream:
+                stream['bucketprefix'] = ''
+
+            stream['buckets'] = {
+                'private': {
+                    'bucketname': stream['bucketname'],
+                    'bucketprefix': stream['bucketprefix'],
+                }
+            }
+
+            del stream['bucketname']
+            del stream['bucketprefix']
+
+        new_streams[stream_name] = stream
+
+    resources_data['streams'] = new_streams
+
+
+def process_default_paths(resources_data: dict, errors: list[str]):
     for path in resources_data.get('paths', {}).values():
         if 'integration' not in path:
             path['integration'] = 'lambda'
@@ -298,6 +327,12 @@ def preprocess_defaults(resources_data: dict, errors: list[str]):
             case 'lambda':
                 if 'greedy' not in path:
                     path['greedy'] = True
+
+
+def preprocess_defaults(resources_data: dict, errors: list[str]):
+    process_default_functions(resources_data, errors)
+    process_default_streams(resources_data, errors)
+    process_default_paths(resources_data, errors)
 
 
 def preprocess_resources(

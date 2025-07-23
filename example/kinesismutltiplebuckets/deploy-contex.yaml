@@ -3,4 +3,4 @@
 
 overrides:
   # Set external bucket arn
-  streams/stats/buckets/external/bucketname: "arn:aws:s3:::someexternalbucket"
+  streams/complex/buckets/external/extbucketarn: "arn:aws:s3:::someexternalbucket"

@@ -1,3 +1,5 @@
+prefix: MyApp
+
 import:
   - backend
 
@@ -6,27 +8,19 @@ buckets:
     public: false
 
 streams:
-  stats:
+  simple:
+    bucketname: private
+    bucketprefix: "stats/"
+
+  complex:
     buckets:
       private:
         bucketname: private
         bucketprefix: "stats/"
         intervalinseconds: 300
-      external:
-        bucketname: external
-        bucketprefix: ""
-        intervalinseconds: 300
 
-functions:
-  myfunction:
-    streams:
-    - stats
-    resources:
-      tables:
-      - MyItem
-
-paths:
-  /items:
-    integration:
-      function: myfunction
-      open: true
+      ? !Conditional
+        key: external
+        environment: prod
+      :
+        extbucketarn: <overriden value>
