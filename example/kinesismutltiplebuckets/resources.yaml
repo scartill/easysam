@@ -1,4 +1,4 @@
-prefix: MyApp
+prefix: KinesisMultipleBucketsApp
 
 import:
   - backend
