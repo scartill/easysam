@@ -6,7 +6,6 @@ import traceback
 from argparse import ArgumentParser
 
 import click
-import yaml
 
 from easysam.generate import generate
 from easysam.deploy import deploy, delete
@@ -81,7 +80,7 @@ def generate_cmd(obj, directory, path, environment, region):
         sys.exit(1)
 
     else:
-        click.echo(yaml.dump(resources_data, indent=4))
+        click.echo(resources_data.to_yaml())
         lg.info('Resources generated successfully')
         sys.exit(0)
 

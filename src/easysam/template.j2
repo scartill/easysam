@@ -473,6 +473,7 @@ Resources:
             MaximumBatchingWindowInSeconds: {{ poll.batchwindow }}
             {% endif %}
         {% endfor %}
+        {% if paths is defined %}
         {% for path_name, path in paths.items() %}
         {% if path.function == function_name %}
         {{ path_name.replace('/', '') }}API:
@@ -488,5 +489,6 @@ Resources:
             {% endif %}
         {% endif %}
         {% endfor %}
+        {% endif %}
   {% endfor %}
   {% endif %}  # functions

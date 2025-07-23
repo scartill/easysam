@@ -13,7 +13,7 @@ from easysam.validate_schema import validate as validate_schema
 from easysam.prismarine import generate as generate_prismarine_clients
 
 
-type ProcessingResult = tuple[dict[str, Any], list[str]]
+type ProcessingResult = tuple[benedict, list[str]]
 
 
 IMPORT_FILE = 'easysam.yaml'
@@ -447,7 +447,7 @@ def load_resources(
     deploy_ctx: dict[str, str],
     context_file: Path,
     errors: list[str]
-) -> dict:
+) -> benedict:
     '''
     Load the resources from the resources.yaml file.
 
@@ -473,13 +473,13 @@ def load_resources(
         raw_resources_data = benedict(yaml.safe_load(Path(resources).read_text()))
     except Exception as e:
         errors.append(f'Error loading resources file {resources}: {e}')
-        return {}
+        return benedict()
 
     lg.info('Resolving conditional resources')
     lg.debug(f'Deployment context: {deploy_ctx}')
     resources_data = resolve_conditionals(raw_resources_data, deploy_ctx)
     lg.debug('Resources data after resolving conditionals:')
-    lg.debug(yaml.dump(resources_data, indent=4))
+    lg.debug(resources_data.to_yaml())
 
     lg.info('Applying overrides')
     apply_overrides(resources_data, deploy_ctx)

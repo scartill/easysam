@@ -21,6 +21,6 @@ streams:
 
       ? !Conditional
         key: external
-        environment: prod
+        environment: kinesissampledev
       :
         extbucketarn: <overriden>
