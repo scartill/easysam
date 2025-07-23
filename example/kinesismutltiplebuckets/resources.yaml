@@ -1,0 +1,32 @@
+import:
+  - backend
+
+buckets:
+  private:
+    public: false
+
+streams:
+  stats:
+    buckets:
+      private:
+        bucketname: private
+        bucketprefix: "stats/"
+        intervalinseconds: 300
+      external:
+        bucketname: external
+        bucketprefix: ""
+        intervalinseconds: 300
+
+functions:
+  myfunction:
+    streams:
+    - stats
+    resources:
+      tables:
+      - MyItem
+
+paths:
+  /items:
+    integration:
+      function: myfunction
+      open: true
