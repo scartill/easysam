@@ -22,20 +22,30 @@ QUEUES_SCHEMA = {
     'additionalProperties': False
 }
 
-STREAMS_SCHEMA = {
+STREAM_BUCKET_SCHEMA = {
     'type': 'object',
     'properties': {
         'bucketname': {'type': 'string'},
         'bucketprefix': {'type': 'string'},
+        'extbucketarn': {'type': 'string'},
         'intervalinseconds': {
             'type': 'integer',
             'minimum': 60,
             'maximum': 900
         },
     },
-    'required': ['bucketname', 'bucketprefix'],
-    'optional': ['intervalinseconds'],
+    'required': ['bucketprefix'],
+    'optional': ['bucketname', 'intervalinseconds', 'extbucketarn'],
     'additionalProperties': False
+}
+
+STREAMS_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'buckets': {'type': 'object', 'patternProperties': {
+            '^[\\$a-z0-9-]+$': STREAM_BUCKET_SCHEMA
+        }},
+    },
 }
 
 LAMBDA_POLL_SCHEMA = {
@@ -368,14 +378,34 @@ def validate_queues(resources_data: dict, errors: list[str]):
 
 def validate_streams(resources_data: dict, errors: list[str]):
     for stream, details in resources_data.get('streams', {}).items():
-        bucketname = details['bucketname']
+        for bucket in details.get('buckets', {}).values():
+            if 'bucketname' not in bucket and 'extbucketarn' not in bucket:
+                errors.append(f"Stream '{stream}': 'bucketname' or 'extbucketarn' is required")
+                continue
 
-        if resources_data['buckets'].get(bucketname) is None:
-            errors.append(
-                f"Stream '{stream}': '{bucketname}' must be a valid bucket"
-            )
+            if 'bucketname' in bucket and 'extbucketarn' in bucket:
+                errors.append(
+                    f"Stream '{stream}': "
+                    "'bucketname' and 'extbucketarn' cannot be used together"
+                )
+                continue
 
-            continue
+            if 'bucketname' in bucket:
+                bucketname = bucket['bucketname']
+
+                if resources_data['buckets'].get(bucketname) is None:
+                    errors.append(
+                        f"Stream '{stream}': '{bucketname}' must be a valid bucket"
+                    )
+
+                continue
+
+            if 'extbucketarn' in bucket:
+                if (
+                    not bucket['extbucketarn'].startswith('arn:aws:s3:::') and
+                    bucket['extbucketarn'] != '<overriden>'
+                ):
+                    errors.append(f"Stream '{stream}': 'extbucketarn' must be a valid ARN")
 
 
 def validate_lambda(resources_data: dict, errors: list[str]):

@@ -1,10 +1,26 @@
+import os
 import json
 
-import common.utils as u
+import boto3
 
 
 def handler(event, context):
-    data = u.my_common_function()
+    message = json.loads(event['body'])
+    print('Message received: ', message)
+    env = os.getenv('ENV')
+    simple_stream_name = f'simple-{env}'
+    complex_stream_name = f'complex-{env}'
+    kinesis = boto3.client('kinesis')
+
+    kinesis.put_record(
+        StreamName=complex_stream_name,
+        Data=json.dumps(message),
+    )
+
+    kinesis.put_record(
+        StreamName=simple_stream_name,
+        Data=json.dumps(message),
+    )
 
     return {
         'statusCode': 200,
@@ -13,5 +29,5 @@ def handler(event, context):
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': '*'
         },
-        'body': json.dumps({'data': data})
+        'body': json.dumps({'Result': 'OK'})
     }

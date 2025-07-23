@@ -1,6 +1,3 @@
-# This is a example of a deploy-context.yaml file is used to futher control resources
-# the resources.yaml file with the values in CI.
-
 overrides:
   # Set external bucket arn
-  streams/stats/buckets/external/bucketname: "arn:aws:s3:::someexternalbucket"
+  streams/complex/buckets/external/extbucketarn: "arn:aws:s3:::someexternalbucket"

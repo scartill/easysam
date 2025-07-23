@@ -248,9 +248,11 @@ The `~` prefix negates the condition.
   region: ~eu-west-2
 ```
 
-### Deploy Context File
+### Deployment Context File
 
-The deploy context file is used to override the resources.yaml file with the values in CI.
+The deployment context file is used to further control resources, especially in CI. This version has the following features:
+
+* override the resources.yaml file with the values in CI with `<path>: <value>` pairs.
 
 ```yaml
 overrides:
@@ -279,6 +281,15 @@ cd easysam
 uv sync
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
+
+## Examples
+
+See `example` folder for examples:
+
+* `myapp`- a simple [application](example/myapp) with a lambda function and a table.
+* `prismarine`- a simple [application](example/prismarine) with a lambda function and a table, using Prismarine.
+* `appwitherrors`- an [application](example/appwitherrors) with some errors in the resources.yaml file, to test the error handling.
+* `conditionals`- an [application](example/conditionals) with conditional resources.
 
 ## License
 
