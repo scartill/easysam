@@ -296,9 +296,6 @@ def process_default_streams(resources_data: dict, errors: list[str]):
             continue
 
         if 'bucketname' in stream:
-            if 'bucketprefix' not in stream:
-                stream['bucketprefix'] = ''
-
             stream['buckets'] = {
                 'private': {
                     'bucketname': stream['bucketname'],
@@ -308,6 +305,10 @@ def process_default_streams(resources_data: dict, errors: list[str]):
 
             del stream['bucketname']
             del stream['bucketprefix']
+
+        for bucket in stream.get('buckets', {}).values():
+            if 'bucketprefix' not in bucket:
+                bucket['bucketprefix'] = ''
 
         new_streams[stream_name] = stream
 

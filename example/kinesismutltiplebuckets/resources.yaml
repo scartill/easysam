@@ -23,4 +23,4 @@ streams:
         key: external
         environment: prod
       :
-        extbucketarn: <overriden value>
+        extbucketarn: <overriden>
