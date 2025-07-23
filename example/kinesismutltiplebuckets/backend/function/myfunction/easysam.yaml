@@ -4,7 +4,3 @@ lambda:
     streams:
     - simple
     - complex
-  integration:
-    path: /stats
-    open: true
-    greedy: false
