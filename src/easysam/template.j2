@@ -126,9 +126,12 @@ Resources:
               - 's3:PutObject'
             Resource:
             {% for stream_name, stream in streams.items() %}
-            {% for bucket_name, bucket in buckets.items() %}
-#ToDo add condition for direct arn
+            {% for bucket_name, bucket in stream.buckets.items() %}
+            {% if bucket.bucketname is defined %}
               - !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket.bucketname.replace('-', '') }}Bucket}/*
+            {% else %}
+              - {{ bucket.extbucketarn }}/*
+            {% endif %}
             {% endfor%}
             {% endfor%}
           - Effect: Allow
@@ -232,7 +235,7 @@ Resources:
       RetentionPeriodHours: 24
       StreamModeDetails:
         StreamMode: ON_DEMAND
-  {% for bucket_name, bucket in buckets.items() %}
+  {% for bucket_name, bucket in stream.buckets.items() %}
   {{ lprefix }}{{ stream_name.replace('-', '') }}{{ bucket_name.replace('-', '') }}Delivery:
     Type: AWS::KinesisFirehose::DeliveryStream
     DependsOn:
@@ -244,8 +247,11 @@ Resources:
         KinesisStreamARN: !GetAtt {{ lprefix }}{{ stream_name.replace('-', '') }}Stream.Arn
         RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
       ExtendedS3DestinationConfiguration:
-#ToDo add condition for direct arn
+        {% if bucket.bucketname is defined %}
         BucketARN: !GetAtt {{ lprefix }}{{ bucket.bucketname }}Bucket.Arn
+        {% else %}
+        BucketARN: {{ bucket.extbucketarn }}
+        {% endif %}
         BufferingHints:
           SizeInMBs: 128
           IntervalInSeconds: {{ bucket.intervalinseconds | default('300') }}
