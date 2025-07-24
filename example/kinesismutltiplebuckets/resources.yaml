@@ -19,8 +19,8 @@ streams:
         bucketprefix: "complex/"
         intervalinseconds: 300
 
-      ? !Conditional
-        key: external
-        environment: kinesissampledev
-      :
-        extbucketarn: <overriden>
+      # ? !Conditional
+      #   key: external
+      #   environment: kinesissampledev
+      # :
+      #   extbucketarn: <overriden>

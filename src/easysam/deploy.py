@@ -96,10 +96,6 @@ def sam_build(cliparams, directory):
     if cliparams.get('verbose'):
         sam_params.append('--debug')
 
-    if cliparams['dry_run']:
-        lg.info(f'Would run: {" ".join(sam_params)}')
-        return
-
     lg.debug(f'Running command: {" ".join(sam_params)}')
     subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
     lg.info('Successfully built SAM template')
