@@ -317,9 +317,7 @@ def process_default_streams(resources_data: dict, errors: list[str]):
                 'private': {
                     'bucketname': stream['bucketname'],
                     'bucketprefix': stream.get('bucketprefix', ''),
-                    'intervalinseconds': stream.get(
-                        'intervalinseconds', STREAM_INTERVAL_SECONDS
-                    ),
+                    'intervalinseconds': stream.get('intervalinseconds')
                 }
             }
 
@@ -334,6 +332,9 @@ def process_default_streams(resources_data: dict, errors: list[str]):
         for bucket in stream.get('buckets', {}).values():
             if 'bucketprefix' not in bucket:
                 bucket['bucketprefix'] = ''
+
+            if 'intervalinseconds' not in bucket:
+                bucket['intervalinseconds'] = STREAM_INTERVAL_SECONDS
 
         new_streams[stream_name] = stream
 
