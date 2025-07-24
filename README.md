@@ -30,7 +30,7 @@ easysam init my-app
 
 2. Deploy your application:
 ```pwsh
-easysam deploy --tag my-tag=my-value my-app my-environment-name
+easysam deploy --tag my-tag=my-value --environment my-environment-name my-app
 ```
 
 Please note that at least one tag is required.
@@ -262,7 +262,7 @@ overrides:
 Use the `--context-file` option to specify the deploy context file.
 
 ```pwsh
-easysam deploy <app-directory> <aws-environment-name> --context-file deploy-context.yaml
+easysam deploy <app-directory> --environment <aws-environment-name> --context-file deploy-context.yaml
 ```
 The deploy context file is a YAML file that contains the overrides.
 

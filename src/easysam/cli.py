@@ -99,8 +99,11 @@ def generate_cmd(obj, directory, path, environment, region):
 @click.option(
     '--no-cleanup', is_flag=True, help='Do not clean the directory before deploying'
 )
+@click.option(
+    '--environment', type=str, help='An environment (AWS stack) to use in deployment',
+    required=True,
+)
 @click.argument('directory', type=click.Path(exists=True))
-@click.argument('environment', type=str)
 def deploy_cmd(obj, directory, environment, **kwargs):
     obj.update(kwargs)  # noqa: F821
     directory = Path(directory)
