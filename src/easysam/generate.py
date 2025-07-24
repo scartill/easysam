@@ -74,14 +74,16 @@ def generate(
             ])
 
             jenv = Environment(loader=loader)
-            swagger_template = jenv.get_template('swagger.j2')
             sam_template = jenv.get_template('template.j2')
-            swagger_output = swagger_template.render(resources_data)
             sam_output = sam_template.render(resources_data)
-            write_result(swagger, swagger_output)
-            lg.info(f'Swagger file generated: {swagger}')
             write_result(template, sam_output)
             lg.info(f'SAM template generated: {template}')
+
+            if resources_data.get('paths'):
+                swagger_template = jenv.get_template('swagger.j2')
+                swagger_output = swagger_template.render(resources_data)
+                write_result(swagger, swagger_output)
+                lg.info(f'Swagger file generated: {swagger}')
 
         except Exception as e:
             errors.append(f'Error generating template: {e}')
