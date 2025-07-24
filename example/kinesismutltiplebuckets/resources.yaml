@@ -11,16 +11,18 @@ streams:
   simple:
     bucketname: private
     bucketprefix: "simple/"
+    intervalinseconds: 60
 
   complex:
     buckets:
       private:
         bucketname: private
         bucketprefix: "complex/"
-        intervalinseconds: 300
+        intervalinseconds: 60
 
-      # ? !Conditional
-      #   key: external
-      #   environment: kinesissampledev
-      # :
-      #   extbucketarn: <overriden>
+      ? !Conditional
+        key: external
+        environment: kinesissampledev
+      :
+        extbucketarn: <overriden>
+        intervalinseconds: 60

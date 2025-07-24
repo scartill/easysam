@@ -1,25 +1,30 @@
 import os
+import uuid
 import json
 
 import boto3
 
 
 def handler(event, context):
-    message = json.loads(event['body'])
+    message = json.loads(event)
     print('Message received: ', message)
     env = os.getenv('ENV')
-    simple_stream_name = f'simple-{env}'
-    complex_stream_name = f'complex-{env}'
+    simple_stream_name = f'kinesismultiplebucketsapp-simple-{env}'
+    complex_stream_name = f'kinesismultiplebucketsapp-complex-{env}'
     kinesis = boto3.client('kinesis')
+
+    uid = str(uuid.uuid4())
 
     kinesis.put_record(
         StreamName=complex_stream_name,
-        Data=json.dumps(message),
+        PartitionKey=uid,
+        Data=json.dumps(message).encode('utf-8'),
     )
 
     kinesis.put_record(
         StreamName=simple_stream_name,
-        Data=json.dumps(message),
+        PartitionKey=uid,
+        Data=json.dumps(message).encode('utf-8'),
     )
 
     return {

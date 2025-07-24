@@ -5,8 +5,8 @@ import click
 
 
 @click.command()
-@click.argument('message')
 @click.option('--env', default='kinesissampledev')
+@click.argument('message', default='{"message": "Hello, World!"}')
 def send_message(message, env):
     lambda_client = boto3.client('lambda')
 

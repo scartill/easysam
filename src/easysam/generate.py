@@ -476,7 +476,6 @@ def apply_overrides(resources_data: dict, deploy_ctx: dict[str, Any]):
         for override_path, override_value in deploy_ctx['overrides'].items():
             key = override_path.replace('/', '.')
             lg.info(f'Applying override: {key} = {override_value}')
-            print(resources_data)
             resources_data[key] = override_value
 
 
