@@ -38,6 +38,9 @@ SUPPORTED_SECTIONS = [
 ]
 
 
+STREAM_INTERVAL_SECONDS = 300
+
+
 def generate(
     resources_dir: Path,
     pypath: list[Path],
@@ -313,12 +316,20 @@ def process_default_streams(resources_data: dict, errors: list[str]):
             stream['buckets'] = {
                 'private': {
                     'bucketname': stream['bucketname'],
-                    'bucketprefix': stream['bucketprefix'],
+                    'bucketprefix': stream.get('bucketprefix', ''),
+                    'intervalinseconds': stream.get(
+                        'intervalinseconds', STREAM_INTERVAL_SECONDS
+                    ),
                 }
             }
 
             del stream['bucketname']
-            del stream['bucketprefix']
+
+            if 'bucketprefix' in stream:
+                del stream['bucketprefix']
+
+            if 'intervalinseconds' in stream:
+                del stream['intervalinseconds']
 
         for bucket in stream.get('buckets', {}).values():
             if 'bucketprefix' not in bucket:
