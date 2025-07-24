@@ -96,9 +96,14 @@ def sam_build(cliparams, directory):
     if cliparams.get('verbose'):
         sam_params.append('--debug')
 
-    lg.debug(f'Running command: {" ".join(sam_params)}')
-    subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
-    lg.info('Successfully built SAM template')
+    try:
+        lg.debug(f'Running command: {" ".join(sam_params)}')
+        subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
+        lg.info('Successfully built SAM template')
+
+    except subprocess.CalledProcessError as e:
+        lg.error(f'Failed to build SAM template: {e}')
+        raise UserWarning('Failed to build SAM template') from e
 
 
 def sam_deploy(cliparams, directory, aws_stack):
@@ -133,9 +138,14 @@ def sam_deploy(cliparams, directory, aws_stack):
         lg.info(f'Using AWS profile: {cliparams["aws_profile"]}')
         sam_params.extend(['--profile', cliparams['aws_profile']])
 
-    lg.debug(f'Running command: {" ".join(sam_params)}')
-    subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
-    lg.info('Successfully deployed SAM template')
+    try:
+        lg.debug(f'Running command: {" ".join(sam_params)}')
+        subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
+        lg.info('Successfully deployed SAM template')
+
+    except subprocess.CalledProcessError as e:
+        lg.error(f'Failed to deploy SAM template: {e}')
+        raise UserWarning('Failed to deploy SAM template') from e
 
 
 def common_dep_dir(directory):
