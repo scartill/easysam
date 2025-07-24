@@ -16,6 +16,14 @@ from easysam.prismarine import generate as generate_prismarine_clients
 type ProcessingResult = tuple[benedict, list[str]]
 
 
+class FatalError(Exception):
+    def __init__(self, errors: list[str]):
+        self.errors = errors
+
+    def __str__(self):
+        return f'There were {len(self.errors)} errors. One was fatal.'
+
+
 IMPORT_FILE = 'easysam.yaml'
 
 SUPPORTED_SECTIONS = [
@@ -49,40 +57,44 @@ def generate(
         A tuple containing the processed resources and any errors as a list.
     '''
 
-    errors = []
-    resources_data = load_resources(resources_dir, pypath, deploy_ctx, context_file, errors)
-
-    lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
-
     try:
-        build_dir = Path(resources_dir, 'build')
-        swagger = Path(build_dir, 'swagger.yaml')
-        template = Path(resources_dir, 'template.yml')
+        errors = []
+        resources_data = load_resources(resources_dir, pypath, deploy_ctx, context_file, errors)
 
-        loader = FileSystemLoader(searchpath=[
-            str(Path(__file__).parent.resolve()),
-            str(resources_dir.resolve()),
-        ])
+        lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
 
-        jenv = Environment(loader=loader)
-        swagger_template = jenv.get_template('swagger.j2')
-        sam_template = jenv.get_template('template.j2')
-        swagger_output = swagger_template.render(resources_data)
-        sam_output = sam_template.render(resources_data)
-        write_result(swagger, swagger_output)
-        lg.info(f'Swagger file generated: {swagger}')
-        write_result(template, sam_output)
-        lg.info(f'SAM template generated: {template}')
+        try:
+            build_dir = Path(resources_dir, 'build')
+            swagger = Path(build_dir, 'swagger.yaml')
+            template = Path(resources_dir, 'template.yml')
 
-    except Exception as e:
-        errors.append(f'Error generating template: {e}')
+            loader = FileSystemLoader(searchpath=[
+                str(Path(__file__).parent.resolve()),
+                str(resources_dir.resolve()),
+            ])
+
+            jenv = Environment(loader=loader)
+            swagger_template = jenv.get_template('swagger.j2')
+            sam_template = jenv.get_template('template.j2')
+            swagger_output = swagger_template.render(resources_data)
+            sam_output = sam_template.render(resources_data)
+            write_result(swagger, swagger_output)
+            lg.info(f'Swagger file generated: {swagger}')
+            write_result(template, sam_output)
+            lg.info(f'SAM template generated: {template}')
+
+        except Exception as e:
+            errors.append(f'Error generating template: {e}')
+            return resources_data, errors
+
+        if 'prismarine' in resources_data:
+            lg.info('Generating prismarine clients')
+            generate_prismarine_clients(resources_dir, resources_data, errors)
+
         return resources_data, errors
 
-    if 'prismarine' in resources_data:
-        lg.info('Generating prismarine clients')
-        generate_prismarine_clients(resources_dir, resources_data, errors)
-
-    return resources_data, errors
+    except FatalError as e:
+        return benedict(), e.errors
 
 
 def write_result(path, text):
@@ -398,30 +410,55 @@ def conditional_constructor(loader, node):
     return Conditional(**attributes)
 
 
-def check_condition(condition: str, value: str, deploy_ctx: dict[str, str]):
+def check_condition(
+    condition: str,
+    value: str,
+    deploy_ctx: dict[str, str],
+    errors: list[str]
+):
     if value == 'any':
         return True
 
+    context_value = deploy_ctx.get(condition)
+
+    if context_value is None:
+        errors.append(
+            f'Fatal error: Condition "{condition}" not found in deployment context. '
+            f'Unable to resolve conditional resources. Consider adding "--{condition}"'
+        )
+
+        raise FatalError(errors)
+
     negate = value.startswith('~')
     value = value.lstrip('~')
-    include = value == deploy_ctx.get(condition)
+
+    lg.info(
+        f'Checking condition "{condition}" '
+        f'{value} (condition) == {context_value} (context) (negate={negate})'
+    )
+
+    include = value == context_value
     result = include if not negate else not include
     return result
 
 
-def resolve_conditionals(resources_data: dict, deploy_ctx: dict[str, str]):
+def resolve_conditionals(
+    resources_data: dict,
+    deploy_ctx: dict[str, str],
+    errors: list[str]
+):
     resolved = benedict()
 
     for key, value in resources_data.items():
         if isinstance(value, dict):
-            resolved_value = resolve_conditionals(value, deploy_ctx)
+            resolved_value = resolve_conditionals(value, deploy_ctx, errors)
         else:
             resolved_value = value
 
         if isinstance(key, Conditional):
             include = all([
-                check_condition('environment', key.environment, deploy_ctx),
-                check_condition('region', key.region, deploy_ctx),
+                check_condition('environment', key.environment, deploy_ctx, errors),
+                check_condition('region', key.region, deploy_ctx, errors),
             ])
 
             if include:
@@ -477,7 +514,7 @@ def load_resources(
 
     lg.info('Resolving conditional resources')
     lg.debug(f'Deployment context: {deploy_ctx}')
-    resources_data = resolve_conditionals(raw_resources_data, deploy_ctx)
+    resources_data = resolve_conditionals(raw_resources_data, deploy_ctx, errors)
     lg.debug('Resources data after resolving conditionals:')
     lg.debug(resources_data.to_yaml())
 
