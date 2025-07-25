@@ -1,0 +1,30 @@
+prefix: MyApp
+
+import:
+  - backend
+
+buckets:
+  ? !Conditional
+    key: my-bucket
+    environment: prod
+  :
+    extaccesspolicy: ProdPolicy
+    public: true
+
+  ? !Conditional
+    key: my-bucket
+    region: eu-west-2
+  :
+    extaccesspolicy: EUWest2Policy
+    public: false
+
+  ? !Conditional
+    key: my-bucket
+    environment: ~prod
+    region: ~eu-west-2
+  :
+    extaccesspolicy: CommonPolicy
+    public: false
+
+  simple-bucket:
+    public: false

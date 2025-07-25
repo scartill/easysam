@@ -11,8 +11,30 @@ SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
 
 
-def deploy(cliparams, directory, stack):
-    resources = generate(directory, [], False)
+def deploy(cliparams: dict, directory: Path, environment: str, context_file: Path):
+    '''
+    Deploy a SAM template to AWS.
+
+    Args:
+        cliparams: The CLI parameters.
+        directory: The directory containing the SAM template.
+        environment: The AWS environment name.
+        context_file: The path to the deployment context file.
+    '''
+
+    deploy_ctx = {
+        'environment': environment
+    }
+
+    resources, errors = generate(directory, [], deploy_ctx, context_file)
+
+    if errors:
+        lg.error(f'There were {len(errors)} errors:')
+
+        for error in errors:
+            lg.error(error)
+
+        raise UserWarning('There were errors - aborting deployment')
 
     lg.info(f'Deploying SAM template from {directory}')
     check_pip_version(cliparams)
@@ -20,17 +42,17 @@ def deploy(cliparams, directory, stack):
     remove_common_dependencies(directory)
     copy_common_dependencies(directory, resources)
     sam_build(cliparams, directory)
-    sam_deploy(cliparams, directory, stack)
+    sam_deploy(cliparams, directory, environment)
 
     if not cliparams.get('no_cleanup'):
         remove_common_dependencies(directory)
 
 
-def delete(cliparams, stack, force):
-    lg.info(f'Deleting SAM template from {stack}')
+def delete(cliparams, environment, force):
+    lg.info(f'Deleting SAM template from {environment}')
     cf = u.get_aws_client('cloudformation', cliparams)
     mode = 'FORCE_DELETE_STACK' if force else 'STANDARD'
-    cf.delete_stack(StackName=stack, DeletionMode=mode)  # type: ignore
+    cf.delete_stack(StackName=environment, DeletionMode=mode)  # type: ignore
 
 
 def check_pip_version(cliparams):
@@ -74,13 +96,14 @@ def sam_build(cliparams, directory):
     if cliparams.get('verbose'):
         sam_params.append('--debug')
 
-    if cliparams['dry_run']:
-        lg.info(f'Would run: {" ".join(sam_params)}')
-        return
+    try:
+        lg.debug(f'Running command: {" ".join(sam_params)}')
+        subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
+        lg.info('Successfully built SAM template')
 
-    lg.debug(f'Running command: {" ".join(sam_params)}')
-    subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
-    lg.info('Successfully built SAM template')
+    except subprocess.CalledProcessError as e:
+        lg.error(f'Failed to build SAM template: {e}')
+        raise UserWarning('Failed to build SAM template') from e
 
 
 def sam_deploy(cliparams, directory, aws_stack):
@@ -104,9 +127,6 @@ def sam_deploy(cliparams, directory, aws_stack):
     lg.debug(f'AWS tag string: {aws_tag_string}')
     sam_params.extend(['--tags', aws_tag_string])
 
-    if region := cliparams.get('region'):
-        sam_params.extend(['--region', region])
-
     if cliparams.get('verbose'):
         sam_params.append('--debug')
 
@@ -118,9 +138,14 @@ def sam_deploy(cliparams, directory, aws_stack):
         lg.info(f'Using AWS profile: {cliparams["aws_profile"]}')
         sam_params.extend(['--profile', cliparams['aws_profile']])
 
-    lg.debug(f'Running command: {" ".join(sam_params)}')
-    subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
-    lg.info('Successfully deployed SAM template')
+    try:
+        lg.debug(f'Running command: {" ".join(sam_params)}')
+        subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
+        lg.info('Successfully deployed SAM template')
+
+    except subprocess.CalledProcessError as e:
+        lg.error(f'Failed to deploy SAM template: {e}')
+        raise UserWarning('Failed to deploy SAM template') from e
 
 
 def common_dep_dir(directory):

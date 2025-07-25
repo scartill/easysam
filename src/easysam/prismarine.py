@@ -4,7 +4,7 @@ import logging as lg
 import prismarine.prisma_client as client
 
 
-def generate(directory, resources):
+def generate(directory: Path, resources: dict, errors: list[str]):
     prisma = resources['prismarine']
 
     if not prisma:
@@ -21,6 +21,7 @@ def generate(directory, resources):
         lg.info('Prismarine imports collected')
         for i in extra_imports:
             lg.info(f'Class {i[0]}:{i[1]}')
+
     else:
         extra_imports = []
         lg.info('No extra prismarine imports')
@@ -31,21 +32,27 @@ def generate(directory, resources):
         base_dir = Path(directory, base)
 
         if not base:
-            raise UserWarning(f'No base found for {package}')
+            errors.append(f'No base found for {package}')
+            continue
 
         if not package:
-            raise UserWarning(f'No package found for {base}')
+            errors.append(f'No package found for {base}')
+            continue
 
         cluster = client.get_cluster(base_dir, package)
 
         if not cluster.prefix.startswith(resources['prefix']):
-            raise UserWarning(
+            errors.append(
                 f'When using with EasySAM, a Prismarine Cluster prefix ({cluster.prefix}) must start with the master prefix ({resources["prefix"]})'
             )
+            continue
 
         content = client.build_client(
             cluster, base_dir, base, access_module,
             extra_imports=extra_imports
         )
 
-        client.write_client(content, base_dir, package)
+        if not errors:
+            client.write_client(content, base_dir, package)
+        else:
+            lg.warning(f'Not writing client for {package} due to errors')

@@ -1,6 +1,10 @@
 version = 1
 revision = 2
 requires-python = ">=3.12"
+resolution-markers = [
+    "python_full_version >= '3.13'",
+    "python_full_version < '3.13'",
+]
 
 [[package]]
 name = "annotated-types"
@@ -483,14 +487,17 @@ wheels = [
 
 [[package]]
 name = "easysam"
-version = "1.2.0"
+version = "1.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "aws-sam-cli" },
     { name = "boto3" },
     { name = "click" },
     { name = "jinja2-cli", extra = ["yaml"] },
+    { name = "jsonschema" },
     { name = "prismarine" },
+    { name = "python-benedict", extra = ["yaml"] },
+    { name = "rich" },
 ]
 
 [package.dev-dependencies]
@@ -505,7 +512,10 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.38.15" },
     { name = "click", specifier = ">=8.2.0" },
     { name = "jinja2-cli", extras = ["yaml"], specifier = ">=0.8.2" },
+    { name = "jsonschema", specifier = ">=4.23.0" },
     { name = "prismarine", specifier = ">=1.3.0" },
+    { name = "python-benedict", extras = ["yaml"], specifier = ">=0.34.1" },
+    { name = "rich", specifier = ">=13.9.4" },
 ]
 
 [package.metadata.requires-dev]
@@ -947,11 +957,11 @@ wheels = [
 
 [[package]]
 name = "networkx"
-version = "3.5"
+version = "2.8.8"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/6c/4f/ccdb8ad3a38e583f214547fd2f7ff1fc160c43a75af88e6aec213404b96a/networkx-3.5.tar.gz", hash = "sha256:d4c6f9cf81f52d69230866796b82afbccdec3db7ae4fbd1b65ea750feed50037", size = 2471065, upload-time = "2025-05-29T11:35:07.804Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cd/16/c44e8550012735b8f21b3df7f39e8ba5a987fb764ac017ad5f3589735889/networkx-2.8.8.tar.gz", hash = "sha256:230d388117af870fce5647a3c52401fcf753e94720e6ea6b4197a5355648885e", size = 1960828, upload-time = "2022-11-01T20:31:52.02Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/8d/776adee7bbf76365fdd7f2552710282c79a4ead5d2a46408c9043a2b70ba/networkx-3.5-py3-none-any.whl", hash = "sha256:0030d386a9a06dee3565298b4a734b68589749a544acbb6c412dc9e2489ec6ec", size = 2034406, upload-time = "2025-05-29T11:35:04.961Z" },
+    { url = "https://files.pythonhosted.org/packages/42/31/d2f89f1ae42718f8c8a9e440ebe38d7d5fe1e0d9eb9178ce779e365b3ab0/networkx-2.8.8-py3-none-any.whl", hash = "sha256:e435dfa75b1d7195c7b8378c3859f0445cd88c6b0375c181ed66823a9ceb7524", size = 2025192, upload-time = "2022-11-01T20:31:49.035Z" },
 ]
 
 [[package]]
@@ -1126,6 +1136,25 @@ wheels = [
 ]
 
 [[package]]
+name = "python-benedict"
+version = "0.34.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "python-fsutil" },
+    { name = "python-slugify" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b3/a8/744dce47aeba978a516f13c0d728fa1236217fa9e75e2619891df8100e85/python_benedict-0.34.1.tar.gz", hash = "sha256:0a81784c826c8983c485bb647ed5e6c8fad139c3921ea1844b21e41da0ff0dc0", size = 53340, upload-time = "2025-01-18T14:52:04.684Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/94/65/c59fb6eec8859047394ccd73eaf1623ce9fd82c48d880d9a072045669bc5/python_benedict-0.34.1-py3-none-any.whl", hash = "sha256:f09711ca2d8e716ca40440f1e26dfa3ccff15e08f1baa88de594fbba799cf87a", size = 51308, upload-time = "2025-01-18T14:52:01.886Z" },
+]
+
+[package.optional-dependencies]
+yaml = [
+    { name = "pyyaml" },
+]
+
+[[package]]
 name = "python-dateutil"
 version = "2.9.0.post0"
 source = { registry = "https://pypi.org/simple" }
@@ -1135,6 +1164,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3", size = 342432, upload-time = "2024-03-01T18:36:20.211Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427", size = 229892, upload-time = "2024-03-01T18:36:18.57Z" },
+]
+
+[[package]]
+name = "python-fsutil"
+version = "0.15.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f9/4a/494de3f8b079f077d687f7b3e32b963f7613eaae2d7b5c1be34d7eafd19a/python_fsutil-0.15.0.tar.gz", hash = "sha256:b51d8ab7ee218314480ea251fff7fef513be4fbccfe72a5af4ff2954f8a4a2c4", size = 29669, upload-time = "2025-02-06T17:47:55.769Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/33/de/fc2c3fa9d1f29c017c8eba2448efe86495b762111cf613a4c6d860158970/python_fsutil-0.15.0-py3-none-any.whl", hash = "sha256:8ae31def522916e35caf67723b8526fe6e5fcc1e160ea2dc23c845567708ca6e", size = 20915, upload-time = "2025-02-06T17:47:53.658Z" },
 ]
 
 [[package]]

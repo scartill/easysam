@@ -30,7 +30,7 @@ easysam init my-app
 
 2. Deploy your application:
 ```pwsh
-easysam deploy --tag my-tag=my-value my-app my-stack-name
+easysam deploy --tag my-tag=my-value --environment my-environment-name my-app
 ```
 
 Please note that at least one tag is required.
@@ -61,7 +61,7 @@ easysam init <app-name>
 Deploy the application:
 
 ```pwsh
-easysam deploy <app-directory> <aws-stack-name>
+easysam deploy <app-directory> <aws-environment-name>
 ```
 
 For more options, use the `--help` flag:
@@ -223,6 +223,49 @@ prismarine:
 
 For more information, see [Prismarine README](https://github.com/adsight-app/prismarine/blob/main/README.md).
 
+### Conditional Resources
+
+Conditional resources are defined using the `!Conditional` tag.
+
+```yaml
+? !Conditional
+  key: my-bucket
+  environment: prod
+  region: eu-west-2
+:
+  extaccesspolicy: ProdPolicy
+  public: true
+```
+
+#### Negation
+
+The `~` prefix negates the condition.
+
+```yaml
+? !Conditional
+  key: my-bucket
+  environment: ~prod
+  region: ~eu-west-2
+```
+
+### Deployment Context File
+
+The deployment context file is used to further control resources, especially in CI. This version has the following features:
+
+* override the resources.yaml file with the values in CI with `<path>: <value>` pairs.
+
+```yaml
+overrides:
+  buckets/my-bucket/public: true
+```
+
+Use the `--context-file` option to specify the deploy context file.
+
+```pwsh
+easysam deploy <app-directory> --environment <aws-environment-name> --context-file deploy-context.yaml
+```
+The deploy context file is a YAML file that contains the overrides.
+
 ## Development
 
 ### Setting up the development environment
@@ -239,9 +282,14 @@ uv sync
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
-## Contributing
+## Examples
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and suggest improvements.
+See `example` folder for examples:
+
+* `myapp`- a simple [application](example/myapp) with a lambda function and a table.
+* `prismarine`- a simple [application](example/prismarine) with a lambda function and a table, using Prismarine.
+* `appwitherrors`- an [application](example/appwitherrors) with some errors in the resources.yaml file, to test the error handling.
+* `conditionals`- an [application](example/conditionals) with conditional resources.
 
 ## License
 

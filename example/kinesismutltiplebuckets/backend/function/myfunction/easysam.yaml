@@ -1,0 +1,6 @@
+lambda:
+  name: myfunction
+  resources:
+    streams:
+    - simple
+    - complex

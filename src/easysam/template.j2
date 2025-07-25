@@ -126,7 +126,13 @@ Resources:
               - 's3:PutObject'
             Resource:
             {% for stream_name, stream in streams.items() %}
-              - !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ stream.bucketname.replace('-', '') }}Bucket}/*
+            {% for bucket_name, bucket in stream.buckets.items() %}
+            {% if bucket.bucketname is defined %}
+              - !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket.bucketname.replace('-', '') }}Bucket}/*
+            {% else %}
+              - {{ bucket.extbucketarn }}/*
+            {% endif %}
+            {% endfor%}
             {% endfor%}
           - Effect: Allow
             Action:
@@ -142,6 +148,8 @@ Resources:
   {{ lprefix }}DeliveryStreamRole:
     Type: AWS::IAM::Role
     Properties:
+#ToDo 
+#      RoleName: !Sub "DeliveryStreamRole-${Stage}"
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -229,26 +237,32 @@ Resources:
       RetentionPeriodHours: 24
       StreamModeDetails:
         StreamMode: ON_DEMAND
-  {{ lprefix }}{{ stream_name.replace('-', '') }}Delivery:
+  {% for bucket_name, bucket in stream.buckets.items() %}
+  {{ lprefix }}{{ stream_name.replace('-', '') }}{{ bucket_name.replace('-', '') }}Delivery:
     Type: AWS::KinesisFirehose::DeliveryStream
     DependsOn:
       - {{ lprefix }}DeliveryStreamPolicy    
     Properties:
-      DeliveryStreamName: !Sub "{{ lprefix }}-{{ stream_name }}-${Stage}"
+      DeliveryStreamName: !Sub "{{ lprefix }}-{{ stream_name }}{{ bucket_name }}-${Stage}"
       DeliveryStreamType: "KinesisStreamAsSource"
       KinesisStreamSourceConfiguration:
         KinesisStreamARN: !GetAtt {{ lprefix }}{{ stream_name.replace('-', '') }}Stream.Arn
         RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
       ExtendedS3DestinationConfiguration:
-        BucketARN: !GetAtt {{ lprefix }}{{ stream.bucketname }}Bucket.Arn
+        {% if bucket.bucketname is defined %}
+        BucketARN: !GetAtt {{ lprefix }}{{ bucket.bucketname }}Bucket.Arn
+        {% else %}
+        BucketARN: {{ bucket.extbucketarn }}
+        {% endif %}
         BufferingHints:
           SizeInMBs: 128
-          IntervalInSeconds: {{ stream.intervalinseconds | default('300') }}
+          IntervalInSeconds: {{ bucket.intervalinseconds | default('300') }}
         CompressionFormat: "GZIP"
         EncryptionConfiguration:
           NoEncryptionConfig: "NoEncryption"
-        Prefix: "{{ stream.bucketprefix }}"
+        Prefix: "{{ bucket.bucketprefix }}"
         RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
+  {% endfor %}
   {% endfor %}
   {% endif %}  # streams
 
@@ -417,7 +431,7 @@ Resources:
             ParameterName: "*"
         {% for poll in function.polls %}
         - SQSPollerPolicy:
-            QueueName: !GetAtt {{ lprefix }}{{ poll.replace('-', '') }}Queue.QueueName
+            QueueName: !GetAtt {{ lprefix }}{{ poll.name.replace('-', '') }}Queue.QueueName
         {% endfor %}
         {% for table in function.tables %}
         - DynamoDBCrudPolicy:
@@ -450,24 +464,25 @@ Resources:
             Schedule: {{function.schedule}}
         {% endif %}
         {% for poll in function.polls %}
-        {{ poll.replace('-', '') }}SQSEvent:
+        {{ poll.name.replace('-', '') }}SQSEvent:
           Type: SQS
           Properties:
-            Queue: !GetAtt {{ lprefix }}{{ poll.replace('-', '') }}Queue.Arn
-            {% if function.batchsize is defined %}
-            BatchSize: {{ function.batchsize }}
+            Queue: !GetAtt {{ lprefix }}{{ poll.name.replace('-', '') }}Queue.Arn
+            {% if poll.batchsize is defined %}
+            BatchSize: {{ poll.batchsize }}
             {% endif %}
-            {% if function.batchwindow is defined %}
-            MaximumBatchingWindowInSeconds: {{ function.batchwindow }}
+            {% if poll.batchwindow is defined %}
+            MaximumBatchingWindowInSeconds: {{ poll.batchwindow }}
             {% endif %}
         {% endfor %}
+        {% if paths is defined %}
         {% for path_name, path in paths.items() %}
         {% if path.function == function_name %}
         {{ path_name.replace('/', '') }}API:
           Type: Api
           Properties:
             Method: ANY
-            Path: {{ path_name }}{% if path.greedy is not defined or path.greedy%}/{proxy+}{% endif %}
+            Path: {{ path_name }}{% if path.greedy %}/{proxy+}{% endif %}
             RestApiId: !Ref ApiDeployment
             Auth:
             {% if path.open %}
@@ -476,5 +491,6 @@ Resources:
             {% endif %}
         {% endif %}
         {% endfor %}
+        {% endif %}
   {% endfor %}
   {% endif %}  # functions

@@ -1,0 +1,28 @@
+prefix: KinesisMultipleBucketsApp
+
+import:
+  - backend
+
+buckets:
+  private:
+    public: false
+
+streams:
+  simple:
+    bucketname: private
+    bucketprefix: "simple/"
+    intervalinseconds: 60
+
+  complex:
+    buckets:
+      private:
+        bucketname: private
+        bucketprefix: "complex/"
+        intervalinseconds: 60
+
+      ? !Conditional
+        key: external
+        environment: kinesissampledev
+      :
+        extbucketarn: <overriden>
+        intervalinseconds: 60

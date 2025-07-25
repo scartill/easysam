@@ -1,0 +1,14 @@
+import:
+  - backend
+
+functions:
+  myfunction:
+    resources:
+      tables:
+      - MyItem
+
+paths:
+  /items:
+    integration:
+      function: myfunction
+      open: true
