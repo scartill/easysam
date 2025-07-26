@@ -89,7 +89,7 @@ def generate_cmd(obj, directory, path, environment, region):
 @easysam.command(name='deploy', help='Deploy the application to an AWS environment')
 @click.pass_obj
 @click.option(
-    '--tag', type=str, multiple=True, help='AWS tags', required=True
+    '--tag', type=str, multiple=True, help='AWS Tags'
 )
 @click.option(
     '--dry-run', is_flag=True, help='Dry run the deployment'

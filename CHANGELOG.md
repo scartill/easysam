@@ -1,6 +1,6 @@
 # 1.4.0
 
-[TBD]
+- Added `tags` support to the resources.yaml file
 
 # 1.3.0
 

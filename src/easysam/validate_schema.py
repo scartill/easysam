@@ -277,6 +277,13 @@ RESOURCES_SCHEMA = {
     'type': 'object',
     'properties': {
         'prefix': {'type': 'string'},
+        'tags': {
+            'type': 'object',
+            'patternProperties': {
+                '^[\\$a-z0-9-]+$': {'type': 'string'}
+            },
+            'additionalProperties': False
+        },
         'buckets': {
             'type': 'object',
             'patternProperties': {

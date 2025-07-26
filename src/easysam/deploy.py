@@ -42,7 +42,7 @@ def deploy(cliparams: dict, directory: Path, environment: str, context_file: Pat
     remove_common_dependencies(directory)
     copy_common_dependencies(directory, resources)
     sam_build(cliparams, directory)
-    sam_deploy(cliparams, directory, environment)
+    sam_deploy(cliparams, directory, environment, resources)
 
     if not cliparams.get('no_cleanup'):
         remove_common_dependencies(directory)
@@ -106,7 +106,7 @@ def sam_build(cliparams, directory):
         raise UserWarning('Failed to build SAM template') from e
 
 
-def sam_deploy(cliparams, directory, aws_stack):
+def sam_deploy(cliparams, directory, aws_stack, resources):
     lg.info(f'Deploying SAM template from {directory} to {aws_stack}')
     sam_tool = cliparams['sam_tool']
     sam_params = sam_tool.split(' ')
@@ -121,10 +121,16 @@ def sam_deploy(cliparams, directory, aws_stack):
         '--capabilities', 'CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'
     ])
 
-    aws_tags = cliparams.get('tag')
-    lg.info(f'Using AWS tags: {aws_tags}')
+    aws_tags = list(cliparams.get('tag', []))
+
+    if 'tags' in resources:
+        aws_tags.extend(
+            f'{name}={value}'
+            for name, value in resources['tags'].items()
+        )
+
     aws_tag_string = ' '.join(aws_tags)
-    lg.debug(f'AWS tag string: {aws_tag_string}')
+    lg.info(f'AWS tag string: {aws_tag_string}')
     sam_params.extend(['--tags', aws_tag_string])
 
     if cliparams.get('verbose'):

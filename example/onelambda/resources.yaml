@@ -1,4 +1,7 @@
 prefix: Onelambda
 
+tags:
+  mytag: myvalue
+
 import:
   - backend
