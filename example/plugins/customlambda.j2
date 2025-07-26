@@ -1,0 +1,7 @@
+Resources:
+  {{funname}}Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "{{funname}}-${Stage}"
+      CodeUri: custombackend
+      Events:

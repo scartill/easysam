@@ -303,8 +303,21 @@
         "^[a-z0-9-]+$": {"$ref": "#/definitions/authorizer_schema"}
       },
       "additionalProperties": false
+    },
+    "plugins": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {
+          "type": "object",
+          "properties": {
+            "template": {"type": "string"},
+            "aux": {"type": "object"}
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "required": ["prefix"],
   "additionalProperties": false
-} 
+}

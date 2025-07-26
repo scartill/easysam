@@ -407,6 +407,7 @@ Resources:
     {% endfor %}
   {% endif %}  # tables
 
+  {% if enable_lambda_layer %}
   PythonLambdaLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -418,6 +419,7 @@ Resources:
     Metadata:
       BuildMethod: python3.13
       BuildArchitecture: x86_64
+  {% endif %}  # enable_lambda_layer
 
   {% if functions is defined %}
   {% for function_name, function in functions.items() %}
@@ -459,8 +461,10 @@ Resources:
         - ComprehendBasicAccessPolicy: {}
           {% endif %}
         {% endfor %}        
+      {% if enable_lambda_layer %}
       Layers:
         - !Ref PythonLambdaLayer
+      {% endif %}
       Events:
         {% if function.schedule%}
         InvocationLevel:
