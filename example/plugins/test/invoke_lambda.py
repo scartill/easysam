@@ -11,7 +11,7 @@ def send_message(message, env):
     lambda_client = boto3.client('lambda')
 
     response = lambda_client.invoke(
-        FunctionName=f'myfunction-{env}',
+        FunctionName=f'mycustomfun-{env}',
         Payload=json.dumps(message),
     )
 
