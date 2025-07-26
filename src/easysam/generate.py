@@ -471,7 +471,7 @@ def resolve_conditionals(
         if isinstance(key, Conditional):
             include = all([
                 check_condition('environment', key.environment, deploy_ctx, errors),
-                check_condition('region', key.region, deploy_ctx, errors),
+                check_condition('target_region', key.region, deploy_ctx, errors),
             ])
 
             if include:

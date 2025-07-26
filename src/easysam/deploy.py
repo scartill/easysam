@@ -46,8 +46,7 @@ def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
     sam_build(cliparams, directory)
 
     # Deploying the application to AWS
-    environment = deploy_ctx['environment']
-    sam_deploy(cliparams, directory, environment, resources)
+    sam_deploy(cliparams, directory, deploy_ctx, resources)
 
     if not cliparams.get('no_cleanup'):
         remove_common_dependencies(directory)
@@ -141,10 +140,15 @@ def sam_build(cliparams, directory):
         raise UserWarning('Failed to build SAM template') from e
 
 
-def sam_deploy(cliparams, directory, aws_stack, resources):
-    lg.info(f'Deploying SAM template from {directory} to {aws_stack}')
+def sam_deploy(cliparams, directory, deploy_ctx, resources):
+    lg.info(f'Deploying SAM template from {directory} to {deploy_ctx}')
     sam_tool = cliparams['sam_tool']
     sam_params = sam_tool.split(' ')
+
+    aws_stack = deploy_ctx['environment']
+
+    if not aws_stack:
+        raise UserWarning('No AWS stack found in deploy context')
 
     sam_params.extend([
         'deploy',
@@ -155,6 +159,11 @@ def sam_deploy(cliparams, directory, aws_stack, resources):
         '--resolve-s3',
         '--capabilities', 'CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'
     ])
+
+    region = deploy_ctx.get('target_region')
+
+    if region:
+        sam_params.extend(['--region', region])
 
     aws_tags = list(cliparams.get('tag', []))
 

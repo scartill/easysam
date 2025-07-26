@@ -12,16 +12,8 @@ from easysam.validate_cloud import validate as validate_cloud
 
 @click.group(help='Inspect the application for debugging purposes')
 @click.pass_obj
-@click.option('--environment', type=str, default='dev')
-@click.option('--target-region', type=str)
-def inspect(obj, environment, target_region):
-    deploy_ctx = obj['deploy_ctx']
-
-    if environment:
-        deploy_ctx['environment'] = environment
-
-    if target_region:
-        deploy_ctx['region'] = target_region
+def inspect(obj):
+    pass
 
 
 @inspect.command(name='common-deps', help='Inspect a lambda function')
@@ -84,9 +76,8 @@ def schema(obj, directory, path, select):
 @inspect.command(help='Inspect the resources in-depth')
 @click.pass_obj
 @click.option('--path', multiple=True)
-@click.option('--environment', type=str, default='dev')
 @click.argument('directory', type=click.Path(exists=True))
-def cloud(obj, directory, path, environment):
+def cloud(obj, directory, path):
     directory = Path(directory)
     pypath = [Path(p) for p in path]
     errors = []
@@ -94,6 +85,8 @@ def cloud(obj, directory, path, environment):
 
     if 'environment' not in deploy_ctx:
         raise click.UsageError('Environment is required for cloud inspection')
+
+    environment = deploy_ctx['environment']
 
     try:
         resources_data = load_resources(directory, pypath, deploy_ctx, errors)
@@ -106,7 +99,7 @@ def cloud(obj, directory, path, environment):
 
             return
 
-        lg.info(f"Validating cloud resources for {environment}")
+        lg.info(f"Validating cloud resources for '{environment}'")
         validate_cloud(obj, resources_data, environment, errors)
 
     except FatalError as e:

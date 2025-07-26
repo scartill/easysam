@@ -27,12 +27,24 @@ from easysam.inspect import inspect
     help='A YAML file containing additional context for the resources.yaml file. '
          'For example, overrides for resource properties.'
 )
-@click.option('--verbose', is_flag=True)
-def easysam(ctx, verbose, aws_profile, context_file):
+@click.option(
+    '--target-region', type=str, help='A region to use for generation'
+)
+@click.option(
+    '--environment', type=str, help='An environment (AWS stack) to use in generation',
+    default='dev'
+)
+@click.option(
+    '--verbose', is_flag=True
+)
+def easysam(ctx, verbose, aws_profile, context_file, target_region, environment):
     ctx.obj = {
         'verbose': verbose,
         'aws_profile': aws_profile,
-        'deploy_ctx': {}
+        'deploy_ctx': {
+            'target_region': target_region,
+            'environment': environment
+        }
     }
 
     if context_file:
@@ -48,25 +60,11 @@ def easysam(ctx, verbose, aws_profile, context_file):
 @click.option(
     '--path', multiple=True, help='A additional Python path to use for generation'
 )
-@click.option(
-    '--environment', type=str, help='An environment (AWS stack) to use in generation',
-    default='dev'
-)
-@click.option(
-    '--target-region', type=str, help='A region to use for generation'
-)
 @click.argument('directory', type=click.Path(exists=True))
-def generate_cmd(obj, directory, path, environment, target_region):
+def generate_cmd(obj, directory, path):
     directory = Path(directory)
     pypath = [Path(p) for p in path]
-
     deploy_ctx = obj.get('deploy_ctx')
-
-    deploy_ctx['environment'] = environment
-
-    if target_region:
-        deploy_ctx['region'] = target_region
-
     resources_data, errors = generate(directory, pypath, deploy_ctx)
 
     if errors:
@@ -100,25 +98,11 @@ def generate_cmd(obj, directory, path, environment, target_region):
 @click.option(
     '--no-cleanup', is_flag=True, help='Do not clean the directory before deploying'
 )
-@click.option(
-    '--environment', type=str, help='An environment (AWS stack) to use in deployment',
-    default='dev'
-)
-@click.option(
-    '--target-region', type=str, help='A region to use for deployment'
-)
 @click.argument('directory', type=click.Path(exists=True))
-def deploy_cmd(obj, directory, environment, target_region, **kwargs):
+def deploy_cmd(obj, directory, **kwargs):
     obj.update(kwargs)  # noqa: F821
     directory = Path(directory)
-    deploy_ctx = obj.get('deploy_ctx', {})
-
-    if environment:
-        deploy_ctx['environment'] = environment
-
-    if target_region:
-        deploy_ctx['region'] = target_region
-
+    deploy_ctx = obj.get('deploy_ctx')
     deploy(obj, directory, deploy_ctx)
 
 
