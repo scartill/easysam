@@ -124,11 +124,16 @@ def deploy_cmd(obj, directory, environment, target_region, **kwargs):
 
 @easysam.command(name='delete', help='Delete the environment from AWS')
 @click.pass_obj
-@click.option('--force', is_flag=True, help='Force delete the environment')
+@click.option(
+    '--force', is_flag=True, help='Force delete the environment'
+)
+@click.option(
+    '--await', 'await_deletion', is_flag=True, help='Await the deletion to complete'
+)
 @click.argument('environment', type=str)
-def delete_cmd(obj, environment, force, **kwargs):
+def delete_cmd(obj, environment, **kwargs):
     obj.update(kwargs)  # noqa: F821
-    delete(obj, environment, force)
+    delete(obj, environment)
 
 
 @easysam.command(name='cleanup', help='Remove common dependencies from the directory')

@@ -1,9 +1,12 @@
 import logging as lg
+import time
 import shutil
 from pathlib import Path
 import subprocess
 
 from benedict import benedict
+from rich.live import Live
+from rich.spinner import Spinner
 
 from easysam.generate import generate
 from easysam.commondep import commondep
@@ -50,11 +53,41 @@ def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
         remove_common_dependencies(directory)
 
 
-def delete(cliparams, environment, force):
+def delete(cliparams, environment):
     lg.info(f'Deleting SAM template from {environment}')
+    force = cliparams.get('force')
+    await_deletion = cliparams.get('await_deletion')
     cf = u.get_aws_client('cloudformation', cliparams)
     mode = 'FORCE_DELETE_STACK' if force else 'STANDARD'
     cf.delete_stack(StackName=environment, DeletionMode=mode)  # type: ignore
+
+    if await_deletion:
+        lg.info(f'Awaiting deletion of {environment}')
+        stack_status = 'UNKNOWN'
+
+        with Live(Spinner('aesthetic', 'Checking stack status...'), transient=True):
+            while stack_status != 'DELETE_COMPLETE':
+                lg.debug(f'Stack {environment} is {stack_status}')
+
+                if stack_status != 'UNKNOWN':
+                    time.sleep(10)
+
+                try:
+                    stacks = cf.describe_stacks(StackName=environment).get('Stacks')
+                except Exception as e:
+                    lg.debug(f'Error describing stack {environment}: {e}')
+                    break
+
+                if not stacks:
+                    lg.info(f'Stack {environment} deleted')
+                    break
+
+                stack_status = stacks[0]['StackStatus']
+
+                if stack_status not in ['DELETE_COMPLETE', 'DELETE_IN_PROGRESS']:
+                    raise UserWarning(f'Stack {environment} is {stack_status}')
+
+    lg.info(f'Stack {environment} deleted')
 
 
 def check_pip_version(cliparams):
