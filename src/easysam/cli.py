@@ -5,6 +5,7 @@ from importlib.metadata import version
 import traceback
 from argparse import ArgumentParser
 
+from benedict import benedict
 import click
 
 from easysam.generate import generate
@@ -35,7 +36,8 @@ def easysam(ctx, verbose, aws_profile, context_file):
     }
 
     if context_file:
-        ctx.obj['context_file'] = Path(context_file)
+        ctx.obj['deploy_ctx'] = benedict.from_yaml(Path(context_file))
+        lg.info(f'Loaded context from {context_file}')
 
     lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
     lg.debug(f'Verbose: {verbose}')
@@ -51,23 +53,21 @@ def easysam(ctx, verbose, aws_profile, context_file):
     default='dev'
 )
 @click.option(
-    '--region', type=str, help='A region to use for generation'
+    '--target-region', type=str, help='A region to use for generation'
 )
 @click.argument('directory', type=click.Path(exists=True))
-def generate_cmd(obj, directory, path, environment, region):
+def generate_cmd(obj, directory, path, environment, target_region):
     directory = Path(directory)
     pypath = [Path(p) for p in path]
 
-    deploy_ctx = {}
+    deploy_ctx = obj.get('deploy_ctx')
 
-    if environment:
-        deploy_ctx['environment'] = environment
+    deploy_ctx['environment'] = environment
 
-    if region:
-        deploy_ctx['region'] = region
+    if target_region:
+        deploy_ctx['region'] = target_region
 
-    context_file = obj.get('context_file')
-    resources_data, errors = generate(directory, pypath, deploy_ctx, context_file)
+    resources_data, errors = generate(directory, pypath, deploy_ctx)
 
     if errors:
         for error in errors:
@@ -104,12 +104,22 @@ def generate_cmd(obj, directory, path, environment, region):
     '--environment', type=str, help='An environment (AWS stack) to use in deployment',
     default='dev'
 )
+@click.option(
+    '--target-region', type=str, help='A region to use for deployment'
+)
 @click.argument('directory', type=click.Path(exists=True))
-def deploy_cmd(obj, directory, environment, **kwargs):
+def deploy_cmd(obj, directory, environment, target_region, **kwargs):
     obj.update(kwargs)  # noqa: F821
     directory = Path(directory)
-    context_file = obj.get('context_file')
-    deploy(obj, directory, environment, context_file)
+    deploy_ctx = obj.get('deploy_ctx', {})
+
+    if environment:
+        deploy_ctx['environment'] = environment
+
+    if target_region:
+        deploy_ctx['region'] = target_region
+
+    deploy(obj, directory, deploy_ctx)
 
 
 @easysam.command(name='delete', help='Delete the environment from AWS')

@@ -45,7 +45,6 @@ def generate(
     resources_dir: Path,
     pypath: list[Path],
     deploy_ctx: dict[str, str],
-    context_file: Path
 ) -> ProcessingResult:
     '''
     Generate a SAM template from a directory.
@@ -62,7 +61,7 @@ def generate(
 
     try:
         errors = []
-        resources_data = load_resources(resources_dir, pypath, deploy_ctx, context_file, errors)
+        resources_data = load_resources(resources_dir, pypath, deploy_ctx, errors)
 
         lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
 
@@ -495,7 +494,6 @@ def load_resources(
     resources_dir: Path,
     pypath: list[Path],
     deploy_ctx: dict[str, str],
-    context_file: Path,
     errors: list[str]
 ) -> benedict:
     '''
@@ -511,10 +509,6 @@ def load_resources(
     Returns:
         A dictionary containing the resources.
     '''
-
-    if context_file:
-        deploy_ctx.update(benedict.from_yaml(context_file))
-        lg.info(f'Loaded context from {context_file}')
 
     resources = Path(resources_dir, 'resources.yaml')
 

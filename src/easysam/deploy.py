@@ -3,6 +3,8 @@ import shutil
 from pathlib import Path
 import subprocess
 
+from benedict import benedict
+
 from easysam.generate import generate
 from easysam.commondep import commondep
 import easysam.utils as u
@@ -11,22 +13,17 @@ SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
 
 
-def deploy(cliparams: dict, directory: Path, environment: str, context_file: Path):
+def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
     '''
     Deploy a SAM template to AWS.
 
     Args:
         cliparams: The CLI parameters.
         directory: The directory containing the SAM template.
-        environment: The AWS environment name.
-        context_file: The path to the deployment context file.
+        deploy_ctx: The deployment context.
     '''
 
-    deploy_ctx = {
-        'environment': environment
-    }
-
-    resources, errors = generate(directory, [], deploy_ctx, context_file)
+    resources, errors = generate(directory, [], deploy_ctx)
 
     if errors:
         lg.error(f'There were {len(errors)} errors:')
@@ -41,7 +38,12 @@ def deploy(cliparams: dict, directory: Path, environment: str, context_file: Pat
     check_sam_cli_version(cliparams)
     remove_common_dependencies(directory)
     copy_common_dependencies(directory, resources)
+
+    # Building the application from the SAM template
     sam_build(cliparams, directory)
+
+    # Deploying the application to AWS
+    environment = deploy_ctx['environment']
     sam_deploy(cliparams, directory, environment, resources)
 
     if not cliparams.get('no_cleanup'):
