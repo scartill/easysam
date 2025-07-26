@@ -501,9 +501,8 @@ def load_resources(
 
     Args:
         resources_dir: The directory containing the resources.yaml file.
-        pypath: The Python path to use.
-        deploy_ctx: The deployment context.
-        context_file: The path to the additional deployment context file.
+        pypath: The additional Python path to use.
+        deploy_ctx: The deployment context dictionary.
         errors: The list of errors.
 
     Returns:

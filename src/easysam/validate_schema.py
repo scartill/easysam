@@ -5,15 +5,15 @@ from pathlib import Path
 from jsonschema import Draft7Validator
 
 
-def load_schema() -> dict:
-    '''Load the JSON schema from the schemas.json file.'''
-    schema_path = Path(__file__).parent / 'schemas.json'
-    with open(schema_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-
 def validate(resources_dir: Path, resources_data: dict, errors: list[str]):
-    '''Validate resources data against the schema and perform custom validations.'''
+    '''Validate resources data against the schema and perform custom validations.
+
+    Args:
+        resources_dir: The directory containing the resources.yaml file.
+        resources_data: The pre-loaded resources data dictionary.
+        errors: The list of errors.
+    '''
+
     schema = load_schema()
     validator = Draft7Validator(schema)
     validation_errors = sorted(validator.iter_errors(resources_data), key=str)
@@ -31,6 +31,13 @@ def validate(resources_dir: Path, resources_data: dict, errors: list[str]):
     validate_import(resources_dir, resources_data, errors)
     validate_prismarine(resources_dir, resources_data, errors)
     validate_authorizers(resources_data, errors)
+
+
+def load_schema() -> dict:
+    '''Load the JSON schema from the schemas.json file.'''
+    schema_path = Path(__file__).parent / 'schemas.json'
+    with open(schema_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
 
 def validate_buckets(resources_data: dict, errors: list[str]):
@@ -156,21 +163,21 @@ def validate_lambda_path(resources_data: dict, path: str, details: dict, errors:
 
 
 def validate_dynamo_path(
-        resources_dir: Path,
-        path: str,
-        details: dict,
-        errors: list[str]
+    resources_dir: Path,
+    path: str,
+    details: dict,
+    errors: list[str]
 ):
     '''Validate dynamo path-specific rules.'''
     validate_request_response_templates(resources_dir, path, details, errors)
 
 
 def validate_sqs_path(
-        resources_dir: Path,
-        resources_data: dict,
-        path: str,
-        details: dict,
-        errors: list[str]
+    resources_dir: Path,
+    resources_data: dict,
+    path: str,
+    details: dict,
+    errors: list[str]
 ):
     '''Validate SQS path-specific rules.'''
     if details['queue'] not in resources_data['queues']:
@@ -180,10 +187,10 @@ def validate_sqs_path(
 
 
 def validate_request_response_templates(
-        resources_dir: Path,
-        path: str,
-        details: dict,
-        errors: list[str]
+    resources_dir: Path,
+    path: str,
+    details: dict,
+    errors: list[str]
 ):
     '''Validate request and response templates.'''
     request = False
