@@ -47,7 +47,8 @@ def easysam(ctx, verbose, aws_profile, context_file):
     '--path', multiple=True, help='A additional Python path to use for generation'
 )
 @click.option(
-    '--environment', type=str, help='An environment (AWS stack) to use in generation'
+    '--environment', type=str, help='An environment (AWS stack) to use in generation',
+    default='dev'
 )
 @click.option(
     '--region', type=str, help='A region to use for generation'
@@ -101,7 +102,7 @@ def generate_cmd(obj, directory, path, environment, region):
 )
 @click.option(
     '--environment', type=str, help='An environment (AWS stack) to use in deployment',
-    required=True,
+    default='dev'
 )
 @click.argument('directory', type=click.Path(exists=True))
 def deploy_cmd(obj, directory, environment, **kwargs):

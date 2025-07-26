@@ -299,9 +299,8 @@ def process_default_functions(resources_data: dict, errors: list[str]):
 
     if 'functions' in resources_data:
         for function in resources_data['functions'].values():
-            function['polls'] = [
-                transform_lambda_poll(poll) for poll in function.get('polls', [])
-            ]
+            if polls := function.get('polls'):
+                function['polls'] = [transform_lambda_poll(poll) for poll in polls]
 
 
 def process_default_streams(resources_data: dict, errors: list[str]):
@@ -338,7 +337,8 @@ def process_default_streams(resources_data: dict, errors: list[str]):
 
         new_streams[stream_name] = stream
 
-    resources_data['streams'] = new_streams
+    if new_streams:
+        resources_data['streams'] = new_streams
 
 
 def process_default_paths(resources_data: dict, errors: list[str]):

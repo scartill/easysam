@@ -162,8 +162,14 @@ def remove_common_dependencies(directory):
 
 
 def copy_common_dependencies(directory, resources):
-    lg.info(f'Copying common dependencies to {directory}')
+    lg.info('Looking for common dependencies')
     common = common_dep_dir(directory)
+
+    if not common.exists():
+        lg.info('No common dependencies found')
+        return
+
+    lg.info(f'Copying common dependencies to {directory}')
 
     if 'functions' not in resources:
         lg.warning('No functions found in resources')

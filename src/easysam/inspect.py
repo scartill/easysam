@@ -12,7 +12,7 @@ from easysam.validate_cloud import validate as validate_cloud
 
 @click.group(help='Inspect the application for debugging purposes')
 @click.pass_obj
-@click.option('--environment', type=str)
+@click.option('--environment', type=str, default='dev')
 @click.option('--target-region', type=str)
 def inspect(obj, environment, target_region):
     deploy_ctx = obj['deploy_ctx']
@@ -79,7 +79,7 @@ def schema(obj, directory, path, select):
 @inspect.command(help='Inspect the resources in-depth')
 @click.pass_obj
 @click.option('--path', multiple=True)
-@click.option('--environment', type=str, required=True)
+@click.option('--environment', type=str, default='dev')
 @click.argument('directory', type=click.Path(exists=True))
 def cloud(obj, directory, path, environment):
     directory = Path(directory)
