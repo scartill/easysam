@@ -43,7 +43,7 @@ STREAMS_SCHEMA = {
     'type': 'object',
     'properties': {
         'buckets': {'type': 'object', 'patternProperties': {
-            '^[\\$a-z0-9-]+$': STREAM_BUCKET_SCHEMA
+            '^[a-z0-9-]+$': STREAM_BUCKET_SCHEMA
         }},
     },
 }
@@ -280,42 +280,42 @@ RESOURCES_SCHEMA = {
         'tags': {
             'type': 'object',
             'patternProperties': {
-                '^[\\$a-z0-9-]+$': {'type': 'string'}
+                '^[a-z0-9-]+$': {'type': 'string'}
             },
             'additionalProperties': False
         },
         'buckets': {
             'type': 'object',
             'patternProperties': {
-                '^[\\$a-z0-9-]+$': BUCKETS_SCHEMA
+                '^[a-z0-9-]+$': BUCKETS_SCHEMA
             },
             'additionalProperties': False
         },
         'queues': {
             'type': 'object',
             'patternProperties': {
-                '^[\\$a-z0-9-]+$': {'type': 'null'}
+                '^[a-z0-9-]+$': {'type': 'null'}
             },
             'additionalProperties': False
         },
         'streams': {
             'type': 'object',
             'patternProperties': {
-                '^[\\$a-z0-9-]+$': STREAMS_SCHEMA
+                '^[a-z0-9-]+$': STREAMS_SCHEMA
             },
             'additionalProperties': False
         },
         'functions': {
             'type': 'object',
             'patternProperties': {
-                '^[\\$a-z0-9-]+$': LAMBDA_SCHEMA
+                '^[a-z0-9-]+$': LAMBDA_SCHEMA
             },
             'additionalProperties': False
         },
         'paths': {
             'type': 'object',
             'patternProperties': {
-                '^[\\$a-zA-Z0-9\\{\\}/]+$': PATH_SCHEMA
+                '^[a-zA-Z0-9\\{\\}/]+$': PATH_SCHEMA
             },
             'additionalProperties': False
         },
@@ -324,14 +324,14 @@ RESOURCES_SCHEMA = {
         'tables': {
             'type': 'object',
             'patternProperties': {
-                '^[\\$a-zA-Z0-9-]+$': TABLES_SCHEMA
+                '^[a-zA-Z0-9-]+$': TABLES_SCHEMA
             },
             'additionalProperties': False
         },
         'authorizers': {
             'type': 'object',
             'patternProperties': {
-                '^[\\$a-z0-9-]+$': AUTHORIZER_SCHEMA
+                '^[a-z0-9-]+$': AUTHORIZER_SCHEMA
             },
             'additionalProperties': False
         },
