@@ -65,7 +65,7 @@ def generate_cmd(obj, directory, path):
     directory = Path(directory)
     pypath = [Path(p) for p in path]
     deploy_ctx = obj.get('deploy_ctx')
-    resources_data, errors = generate(directory, pypath, deploy_ctx)
+    resources_data, errors = generate(obj, directory, pypath, deploy_ctx)
 
     if errors:
         for error in errors:
@@ -98,10 +98,14 @@ def generate_cmd(obj, directory, path):
 @click.option(
     '--no-cleanup', is_flag=True, help='Do not clean the directory before deploying'
 )
-@click.argument('directory', type=click.Path(exists=True))
+@click.option(
+    '--override-main-template',
+    type=click.Path(exists=True, path_type=Path),
+    help='Override the main template',
+)
+@click.argument('directory', type=click.Path(exists=True, path_type=Path))
 def deploy_cmd(obj, directory, **kwargs):
     obj.update(kwargs)  # noqa: F821
-    directory = Path(directory)
     deploy_ctx = obj.get('deploy_ctx')
     deploy(obj, directory, deploy_ctx)
 

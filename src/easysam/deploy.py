@@ -26,7 +26,7 @@ def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
         deploy_ctx: The deployment context.
     '''
 
-    resources, errors = generate(directory, [], deploy_ctx)
+    resources, errors = generate(cliparams, directory, [], deploy_ctx)
 
     if errors:
         lg.error(f'There were {len(errors)} errors:')

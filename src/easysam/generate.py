@@ -1,4 +1,5 @@
 from pathlib import Path
+import traceback
 import logging as lg
 from typing import Any
 
@@ -42,6 +43,7 @@ STREAM_INTERVAL_SECONDS = 300
 
 
 def generate(
+    cliparams: dict,
     resources_dir: Path,
     pypath: list[Path],
     deploy_ctx: dict[str, str],
@@ -70,13 +72,23 @@ def generate(
             swagger = Path(build_dir, 'swagger.yaml')
             template = Path(resources_dir, 'template.yml')
 
-            loader = FileSystemLoader(searchpath=[
+            searchpath = [
                 str(Path(__file__).parent.resolve()),
                 str(resources_dir.resolve()),
-            ])
+            ]
 
+            template_path = 'template.j2'
+
+            if omt := cliparams.get('override_main_template'):
+                lg.info(f'Overriding main template with {omt}')
+                template_path = str(omt.name)
+                lg.info(f'Adding {omt.parent} to search path')
+                searchpath.append(str(omt.parent))
+
+            loader = FileSystemLoader(searchpath=searchpath)
             jenv = Environment(loader=loader)
-            sam_template = jenv.get_template('template.j2')
+
+            sam_template = jenv.get_template(template_path)
             sam_output = sam_template.render(resources_data)
             write_result(template, sam_output)
             lg.info(f'SAM template generated: {template}')
@@ -88,6 +100,9 @@ def generate(
                 lg.info(f'Swagger file generated: {swagger}')
 
         except Exception as e:
+            if cliparams.get('verbose'):
+                traceback.print_exc()
+
             errors.append(f'Error generating template: {e}')
             return resources_data, errors
 
