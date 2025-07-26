@@ -284,6 +284,13 @@ RESOURCES_SCHEMA = {
             },
             'additionalProperties': False
         },
+        'envvars': {
+            'type': 'object',
+            'patternProperties': {
+                '^[A-Z][A-Z0-9-_]+$': {'type': 'string'}
+            },
+            'additionalProperties': False
+        },
         'buckets': {
             'type': 'object',
             'patternProperties': {

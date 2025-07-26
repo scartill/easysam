@@ -20,6 +20,11 @@ Globals:
     Environment:
       Variables:
         ENV: !Ref Stage
+        {% if envvars is defined %}
+        {% for name, value in envvars.items() %}
+        {{ name }}: {{ value }}
+        {% endfor %}
+        {% endif %}
   Api:
     Cors:
       AllowOrigin: "'*'"

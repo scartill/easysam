@@ -1,0 +1,10 @@
+prefix: Onelambda
+
+tags:
+  mytag: myvalue
+
+envvars:
+  MY_ENV_VAR: myvalue
+
+import:
+  - backend

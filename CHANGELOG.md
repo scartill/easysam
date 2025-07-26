@@ -1,5 +1,6 @@
 # 1.4.0
 
+- Added `envvars` (global environment variables for functions)
 - Added `tags` support to the resources.yaml file
 
 # 1.3.0
