@@ -1,3 +1,7 @@
+# 1.3.1
+
+- Fixed a bug with empty `streams` resources
+
 # 1.3.0
 
 - Added multibucket stream support

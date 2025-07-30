@@ -338,7 +338,8 @@ def process_default_streams(resources_data: dict, errors: list[str]):
 
         new_streams[stream_name] = stream
 
-    resources_data['streams'] = new_streams
+    if new_streams:
+        resources_data['streams'] = new_streams
 
 
 def process_default_paths(resources_data: dict, errors: list[str]):
