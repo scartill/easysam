@@ -62,6 +62,9 @@ tables:
 ROOT_GITIGNORE = '''\
 build
 template.yml
+template.yaml
+swagger.yaml
+prismarine_client.py
 .aws-sam
 '''
 
