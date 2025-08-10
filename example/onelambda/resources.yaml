@@ -1,0 +1,6 @@
+prefix: Onelambda
+
+# TODD: include tags here, and remove the `common` directory
+
+import:
+  - backend
