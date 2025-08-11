@@ -1,5 +1,6 @@
 # 1.4.0
 
+- Added custom `layers` support for lambda functions
 - Fixed a bug with empty `streams` resources
 - Added `envvars` (global environment variables for functions)
 - Added `tags` support to the resources.yaml file
