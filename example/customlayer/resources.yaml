@@ -1,6 +1,7 @@
 prefix: Customlayer
 
-# TODD: include tags here, and remove the `common` directory
+tags:
+  project: easysamexamles
 
 import:
   - backend
