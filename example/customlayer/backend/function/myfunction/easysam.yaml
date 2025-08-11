@@ -1,2 +1,4 @@
 lambda:
   name: myfunction
+  layers:
+    mycustomlayer: "{{resolve:ssm:/ffmpeg-latest-arn}}"
