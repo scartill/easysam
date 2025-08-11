@@ -5,6 +5,7 @@ from importlib.metadata import version
 import traceback
 from argparse import ArgumentParser
 
+from benedict import benedict
 import click
 
 from easysam.generate import generate
@@ -26,16 +27,29 @@ from easysam.inspect import inspect
     help='A YAML file containing additional context for the resources.yaml file. '
          'For example, overrides for resource properties.'
 )
-@click.option('--verbose', is_flag=True)
-def easysam(ctx, verbose, aws_profile, context_file):
+@click.option(
+    '--target-region', type=str, help='A region to use for generation'
+)
+@click.option(
+    '--environment', type=str, help='An environment (AWS stack) to use in generation',
+    default='dev'
+)
+@click.option(
+    '--verbose', is_flag=True
+)
+def easysam(ctx, verbose, aws_profile, context_file, target_region, environment):
     ctx.obj = {
         'verbose': verbose,
         'aws_profile': aws_profile,
-        'deploy_ctx': {}
+        'deploy_ctx': {
+            'target_region': target_region,
+            'environment': environment
+        }
     }
 
     if context_file:
-        ctx.obj['context_file'] = Path(context_file)
+        ctx.obj['deploy_ctx'] = benedict.from_yaml(Path(context_file))
+        lg.info(f'Loaded context from {context_file}')
 
     lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
     lg.debug(f'Verbose: {verbose}')
@@ -46,27 +60,12 @@ def easysam(ctx, verbose, aws_profile, context_file):
 @click.option(
     '--path', multiple=True, help='A additional Python path to use for generation'
 )
-@click.option(
-    '--environment', type=str, help='An environment (AWS stack) to use in generation'
-)
-@click.option(
-    '--region', type=str, help='A region to use for generation'
-)
 @click.argument('directory', type=click.Path(exists=True))
-def generate_cmd(obj, directory, path, environment, region):
+def generate_cmd(obj, directory, path):
     directory = Path(directory)
     pypath = [Path(p) for p in path]
-
-    deploy_ctx = {}
-
-    if environment:
-        deploy_ctx['environment'] = environment
-
-    if region:
-        deploy_ctx['region'] = region
-
-    context_file = obj.get('context_file')
-    resources_data, errors = generate(directory, pypath, deploy_ctx, context_file)
+    deploy_ctx = obj.get('deploy_ctx')
+    resources_data, errors = generate(obj, directory, pypath, deploy_ctx)
 
     if errors:
         for error in errors:
@@ -88,7 +87,7 @@ def generate_cmd(obj, directory, path, environment, region):
 @easysam.command(name='deploy', help='Deploy the application to an AWS environment')
 @click.pass_obj
 @click.option(
-    '--tag', type=str, multiple=True, help='AWS tags', required=True
+    '--tag', type=str, multiple=True, help='AWS Tags'
 )
 @click.option(
     '--dry-run', is_flag=True, help='Dry run the deployment'
@@ -100,24 +99,29 @@ def generate_cmd(obj, directory, path, environment, region):
     '--no-cleanup', is_flag=True, help='Do not clean the directory before deploying'
 )
 @click.option(
-    '--environment', type=str, help='An environment (AWS stack) to use in deployment',
-    required=True,
+    '--override-main-template',
+    type=click.Path(exists=True, path_type=Path),
+    help='Override the main template',
 )
-@click.argument('directory', type=click.Path(exists=True))
-def deploy_cmd(obj, directory, environment, **kwargs):
+@click.argument('directory', type=click.Path(exists=True, path_type=Path))
+def deploy_cmd(obj, directory, **kwargs):
     obj.update(kwargs)  # noqa: F821
-    directory = Path(directory)
-    context_file = obj.get('context_file')
-    deploy(obj, directory, environment, context_file)
+    deploy_ctx = obj.get('deploy_ctx')
+    deploy(obj, directory, deploy_ctx)
 
 
 @easysam.command(name='delete', help='Delete the environment from AWS')
 @click.pass_obj
-@click.option('--force', is_flag=True, help='Force delete the environment')
+@click.option(
+    '--force', is_flag=True, help='Force delete the environment'
+)
+@click.option(
+    '--await', 'await_deletion', is_flag=True, help='Await the deletion to complete'
+)
 @click.argument('environment', type=str)
-def delete_cmd(obj, environment, force, **kwargs):
+def delete_cmd(obj, environment, **kwargs):
     obj.update(kwargs)  # noqa: F821
-    delete(obj, environment, force)
+    delete(obj, environment)
 
 
 @easysam.command(name='cleanup', help='Remove common dependencies from the directory')

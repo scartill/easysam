@@ -1,6 +1,8 @@
-# 1.3.1
+# 1.4.0
 
 - Fixed a bug with empty `streams` resources
+- Added `envvars` (global environment variables for functions)
+- Added `tags` support to the resources.yaml file
 
 # 1.3.0
 

@@ -1,0 +1,6 @@
+build
+template.yml
+.aws-sam
+
+# Plugin output
+myplugin.yaml

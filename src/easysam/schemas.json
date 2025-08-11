@@ -1,0 +1,323 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "buckets_schema": {
+      "type": "object",
+      "properties": {
+        "public": {"type": "boolean"},
+        "extaccesspolicy": {"type": "string"}
+      },
+      "required": ["public"],
+      "additionalProperties": false
+    },
+    "queues_schema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "stream_bucket_schema": {
+      "type": "object",
+      "properties": {
+        "bucketname": {"type": "string"},
+        "bucketprefix": {"type": "string"},
+        "extbucketarn": {"type": "string"},
+        "intervalinseconds": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 900
+        }
+      },
+      "required": ["bucketprefix"],
+      "additionalProperties": false
+    },
+    "streams_schema": {
+      "type": "object",
+      "properties": {
+        "buckets": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z0-9-]+$": {"$ref": "#/definitions/stream_bucket_schema"}
+          }
+        }
+      }
+    },
+    "lambda_poll_schema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "batchsize": {"type": "integer"},
+          "batchwindow": {"type": "integer"}
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      }
+    },
+    "lambda_schema": {
+      "type": "object",
+      "properties": {
+        "resources": {"type": "object"},
+        "timeout": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 900
+        },
+        "buckets": {"type": "array", "items": {"type": "string"}},
+        "send": {"type": "array", "items": {"type": "string"}},
+        "streams": {"type": "array", "items": {"type": "string"}},
+        "tables": {"type": "array", "items": {"type": "string"}},
+        "queues": {"type": "array", "items": {"type": "string"}},
+        "polls": {"$ref": "#/definitions/lambda_poll_schema"},
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["comprehend"]
+          }
+        },
+        "uri": {"type": "string"},
+        "schedule": {"type": "string"}
+      },
+      "required": ["uri"],
+      "additionalProperties": false
+    },
+    "lambda_path_schema": {
+      "type": "object",
+      "properties": {
+        "integration": {
+          "type": "string",
+          "enum": ["lambda"]
+        },
+        "function": {"type": "string"},
+        "authorizer": {"type": "string"},
+        "greedy": {"type": "boolean"},
+        "open": {"type": "boolean"}
+      },
+      "required": ["integration", "function", "greedy"],
+      "additionalProperties": false
+    },
+    "dynamo_path_schema": {
+      "type": "object",
+      "properties": {
+        "integration": {
+          "type": "string",
+          "enum": ["dynamo"]
+        },
+        "method": {
+          "type": "string",
+          "enum": ["get"]
+        },
+        "parameters": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "action": {
+          "type": "string",
+          "enum": ["GetItem"]
+        },
+        "role": {"type": "string"},
+        "requestTemplate": {"type": "string"},
+        "responseTemplateFile": {"type": "string"}
+      },
+      "required": [
+        "integration",
+        "method",
+        "parameters",
+        "action",
+        "role",
+        "requestTemplate",
+        "responseTemplateFile"
+      ],
+      "additionalProperties": false
+    },
+    "sqs_path_schema": {
+      "type": "object",
+      "properties": {
+        "integration": {
+          "type": "string",
+          "enum": ["sqs"]
+        },
+        "method": {
+          "type": "string",
+          "enum": ["post"]
+        },
+        "role": {"type": "string"},
+        "queue": {"type": "string"},
+        "requestTemplate": {"type": "string"},
+        "requestTemplateFile": {"type": "string"},
+        "responseTemplate": {"type": "string"},
+        "responseTemplateFile": {"type": "string"},
+        "authorizer": {"type": "string"}
+      },
+      "required": [
+        "integration",
+        "method",
+        "role",
+        "queue"
+      ],
+      "additionalProperties": false
+    },
+    "path_schema": {
+      "oneOf": [
+        {"$ref": "#/definitions/lambda_path_schema"},
+        {"$ref": "#/definitions/dynamo_path_schema"},
+        {"$ref": "#/definitions/sqs_path_schema"}
+      ]
+    },
+    "prismarine_schema": {
+      "type": "object",
+      "properties": {
+        "default-base": {"type": "string"},
+        "access-module": {"type": "string"},
+        "extra-imports": {"type": "array", "items": {"type": "string"}},
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "package": {"type": "string"},
+              "base": {"type": "string"}
+            },
+            "required": ["package"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["tables"],
+      "additionalProperties": false
+    },
+    "table_attribute_schema": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string"},
+        "hash": {"type": "boolean"},
+        "range": {"type": "boolean"}
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+    "tables_schema": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/table_attribute_schema"}
+        },
+        "indices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "attributes": {
+                "type": "array",
+                "items": {"$ref": "#/definitions/table_attribute_schema"}
+              }
+            },
+            "required": ["name", "attributes"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["attributes"],
+      "additionalProperties": false
+    },
+    "authorizer_schema": {
+      "type": "object",
+      "properties": {
+        "function": {"type": "string"},
+        "token": {"type": "string"},
+        "query": {"type": "string"},
+        "headers": {"type": "array", "items": {"type": "string"}},
+        "ttl": {"type": "integer", "minimum": 0, "maximum": 3600}
+      },
+      "required": ["function"],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "prefix": {"type": "string"},
+    "tags": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "envvars": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z][A-Z0-9-_]+$": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "buckets": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {"$ref": "#/definitions/buckets_schema"}
+      },
+      "additionalProperties": false
+    },
+    "queues": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {"type": "null"}
+      },
+      "additionalProperties": false
+    },
+    "streams": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {"$ref": "#/definitions/streams_schema"}
+      },
+      "additionalProperties": false
+    },
+    "functions": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {"$ref": "#/definitions/lambda_schema"}
+      },
+      "additionalProperties": false
+    },
+    "paths": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9\\{\\}/]+$": {"$ref": "#/definitions/path_schema"}
+      },
+      "additionalProperties": false
+    },
+    "import": {"type": "array", "items": {"type": "string"}},
+    "prismarine": {"$ref": "#/definitions/prismarine_schema"},
+    "tables": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9-]+$": {"$ref": "#/definitions/tables_schema"}
+      },
+      "additionalProperties": false
+    },
+    "authorizers": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {"$ref": "#/definitions/authorizer_schema"}
+      },
+      "additionalProperties": false
+    },
+    "plugins": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {
+          "type": "object",
+          "properties": {
+            "template": {"type": "string"},
+            "aux": {"type": "object"}
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["prefix"],
+  "additionalProperties": false
+}

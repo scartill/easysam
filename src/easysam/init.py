@@ -12,6 +12,9 @@ def my_common_function():
 RESOURCES_YAML = '''\
 prefix: MyApp
 
+tags:
+  mytag: myvalue
+
 import:
   - backend
 '''

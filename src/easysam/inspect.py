@@ -6,22 +6,14 @@ import rich
 from benedict import benedict
 
 from easysam.commondep import commondep
-from easysam.generate import load_resources
+from easysam.generate import FatalError, load_resources
 from easysam.validate_cloud import validate as validate_cloud
 
 
 @click.group(help='Inspect the application for debugging purposes')
 @click.pass_obj
-@click.option('--environment', type=str)
-@click.option('--target-region', type=str)
-def inspect(obj, environment, target_region):
-    deploy_ctx = obj['deploy_ctx']
-
-    if environment:
-        deploy_ctx['environment'] = environment
-
-    if target_region:
-        deploy_ctx['region'] = target_region
+def inspect(obj):
+    pass
 
 
 @inspect.command(name='common-deps', help='Inspect a lambda function')
@@ -55,12 +47,17 @@ def common_deps(common_dir, lambda_dir):
 )
 @click.argument('directory', type=click.Path(exists=True))
 def schema(obj, directory, path, select):
+    errors = []
     directory = Path(directory)
     pypath = [Path(p) for p in path]
-    errors = []
-    deploy_ctx = obj['deploy_ctx']
-    context_file = obj.get('context_file')
-    resources_data = load_resources(directory, pypath, deploy_ctx, context_file, errors)
+    deploy_ctx = obj.get('deploy_ctx', {})
+
+    try:
+        resources_data = load_resources(directory, pypath, deploy_ctx, errors)
+
+    except FatalError as e:
+        lg.error('There were fatal errors. Interrupting schema validation.')
+        errors = e.errors
 
     if errors:
         rich.print(f'[red]There were {len(errors)} validation errors.[/red]')
@@ -79,33 +76,35 @@ def schema(obj, directory, path, select):
 @inspect.command(help='Inspect the resources in-depth')
 @click.pass_obj
 @click.option('--path', multiple=True)
-@click.option('--environment', type=str, required=True)
 @click.argument('directory', type=click.Path(exists=True))
-def cloud(obj, directory, path, environment):
+def cloud(obj, directory, path):
     directory = Path(directory)
     pypath = [Path(p) for p in path]
     errors = []
+    deploy_ctx = obj.get('deploy_ctx', {})
 
-    if 'environment' not in obj:
+    if 'environment' not in deploy_ctx:
         raise click.UsageError('Environment is required for cloud inspection')
 
-    deploy_ctx = {
-        'environment': environment,
-    }
+    environment = deploy_ctx['environment']
 
-    context_file = obj.get('context_file')
-    resources_data = load_resources(directory, pypath, deploy_ctx, context_file, errors)
+    try:
+        resources_data = load_resources(directory, pypath, deploy_ctx, errors)
 
-    if errors:
-        rich.print(
-            '[red]There were validation errors.[/red] '
-            'Please run `easysam inspect schema` to fix them.'
-        )
+        if errors:
+            rich.print(
+                '[red]There were validation errors.[/red] '
+                'Please run `easysam inspect schema` to fix them.'
+            )
 
-        return
+            return
 
-    lg.info(f"Validating cloud resources for {environment}")
-    validate_cloud(obj, resources_data, environment, errors)
+        lg.info(f"Validating cloud resources for '{environment}'")
+        validate_cloud(obj, resources_data, environment, errors)
+
+    except FatalError as e:
+        lg.error('There were fatal errors. Interrupting inspection.')
+        errors = e.errors
 
     if errors:
         for error in errors:

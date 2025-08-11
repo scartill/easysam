@@ -1,10 +1,12 @@
 from pathlib import Path
+import traceback
 import logging as lg
-from typing import Any
+from typing import Any, cast
 
 from benedict import benedict
 from jinja2 import Environment, FileSystemLoader
 import yaml
+from mergedeep import merge
 
 import prismarine.prisma_common as prisma_common
 import prismarine.prisma_easysam as prisma_easysam
@@ -42,10 +44,10 @@ STREAM_INTERVAL_SECONDS = 300
 
 
 def generate(
+    cliparams: dict,
     resources_dir: Path,
     pypath: list[Path],
     deploy_ctx: dict[str, str],
-    context_file: Path
 ) -> ProcessingResult:
     '''
     Generate a SAM template from a directory.
@@ -62,7 +64,7 @@ def generate(
 
     try:
         errors = []
-        resources_data = load_resources(resources_dir, pypath, deploy_ctx, context_file, errors)
+        resources_data = load_resources(resources_dir, pypath, deploy_ctx, errors)
 
         lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
 
@@ -71,14 +73,31 @@ def generate(
             swagger = Path(build_dir, 'swagger.yaml')
             template = Path(resources_dir, 'template.yml')
 
-            loader = FileSystemLoader(searchpath=[
+            if plugins := resources_data.get('plugins'):
+                lg.info('The template has plugins, executing them')
+
+                for plugin_name, plugin in cast(dict, plugins).items():
+                    invoke_plugin(resources_dir, resources_data, plugin_name, plugin, errors)
+
+            searchpath = [
                 str(Path(__file__).parent.resolve()),
                 str(resources_dir.resolve()),
-            ])
+            ]
 
+            template_path = 'template.j2'
+
+            if omt := cliparams.get('override_main_template'):
+                lg.info(f'Overriding main template with {omt}')
+                template_path = str(omt.name)
+                lg.info(f'Adding {omt.parent} to search path')
+                searchpath.append(str(omt.parent))
+
+            loader = FileSystemLoader(searchpath=searchpath)
             jenv = Environment(loader=loader)
-            sam_template = jenv.get_template('template.j2')
+
+            sam_template = jenv.get_template(template_path)
             sam_output = sam_template.render(resources_data)
+
             write_result(template, sam_output)
             lg.info(f'SAM template generated: {template}')
 
@@ -89,6 +108,9 @@ def generate(
                 lg.info(f'Swagger file generated: {swagger}')
 
         except Exception as e:
+            if cliparams.get('verbose'):
+                traceback.print_exc()
+
             errors.append(f'Error generating template: {e}')
             return resources_data, errors
 
@@ -100,6 +122,81 @@ def generate(
 
     except FatalError as e:
         return benedict(), e.errors
+
+
+def invoke_plugin(
+    resources_dir: Path,
+    resources_data: benedict,
+    plugin_name: str,
+    plugin: benedict,
+    errors: list[str]
+):
+    template_j2_filename = cast(str, plugin['template'])
+    template_j2_path = Path(resources_dir, template_j2_filename)
+
+    if not template_j2_path.exists():
+        errors.append(f'Plugin {plugin} has no template file {template_j2_path}')
+        return
+
+    lg.info(f'Invoking plugin {plugin} with template {template_j2_path}')
+    template_dir = template_j2_path.parent
+    loader = FileSystemLoader(searchpath=[str(template_dir.resolve())])
+    jenv = Environment(loader=loader)
+    template = jenv.get_template(template_j2_filename)
+    aux_data = dict(plugin.get('aux', {}))
+    output = template.render(merge(resources_data, aux_data))
+    output_yaml_path = Path(resources_dir, plugin_name).with_suffix('.yaml')
+    write_result(output_yaml_path, output)
+
+
+def load_resources(
+    resources_dir: Path,
+    pypath: list[Path],
+    deploy_ctx: dict[str, str],
+    errors: list[str]
+) -> benedict:
+    '''
+    Load the resources from the resources.yaml file.
+
+    Args:
+        resources_dir: The directory containing the resources.yaml file.
+        pypath: The additional Python path to use.
+        deploy_ctx: The deployment context dictionary.
+        errors: The list of errors.
+
+    Returns:
+        A dictionary containing the resources.
+    '''
+
+    resources = Path(resources_dir, 'resources.yaml')
+
+    try:
+        yaml.SafeLoader.add_constructor('!Conditional', conditional_constructor)
+        raw_resources_data = benedict(yaml.safe_load(Path(resources).read_text()))
+    except Exception as e:
+        errors.append(f'Error loading resources file {resources}: {e}')
+        return benedict()
+
+    lg.info('Resolving conditional resources')
+    lg.debug(f'Deployment context: {deploy_ctx}')
+    resources_data = resolve_conditionals(raw_resources_data, deploy_ctx, errors)
+    lg.debug('Resources data after resolving conditionals:')
+    lg.debug(resources_data.to_yaml())
+
+    lg.info('Applying overrides')
+    apply_overrides(resources_data, deploy_ctx)
+
+    lg.info('Processing resources')
+    pypath = [resources_dir] + list(pypath)
+    preprocess_resources(resources_data, resources_dir, pypath, errors)
+
+    lg.info('Validating resources')
+    validate_schema(resources_dir, resources_data, errors)
+
+    lg.info('Adding internal values')
+    check_lambda_layer(resources_dir, resources_data)
+
+    return resources_data
 
 
 def write_result(path, text):
@@ -285,11 +382,6 @@ def preprocess_imports(resources_data: dict, resources_dir: Path, errors: list[s
             preprocess_file(resources_data, resources_dir, entry_path, errors)
 
 
-def preprocess_deploy_ctx(resources_data: dict, deploy_ctx: dict[str, str]):
-    if 'deploy' in resources_data:
-        resources_data['deploy'] = deploy_ctx
-
-
 def process_default_functions(resources_data: dict, errors: list[str]):
     def transform_lambda_poll(poll: str | dict):
         if isinstance(poll, str):
@@ -299,9 +391,8 @@ def process_default_functions(resources_data: dict, errors: list[str]):
 
     if 'functions' in resources_data:
         for function in resources_data['functions'].values():
-            function['polls'] = [
-                transform_lambda_poll(poll) for poll in function.get('polls', [])
-            ]
+            if polls := function.get('polls'):
+                function['polls'] = [transform_lambda_poll(poll) for poll in polls]
 
 
 def process_default_streams(resources_data: dict, errors: list[str]):
@@ -367,7 +458,6 @@ def preprocess_resources(
     resources_data: dict,
     resources_dir: Path,
     pypath: list[Path],
-    deploy_ctx: dict[str, str],
     errors: list[str]
 ):
     def sort_dict(d):
@@ -379,7 +469,6 @@ def preprocess_resources(
     if 'import' in resources_data:
         preprocess_imports(resources_data, resources_dir, errors)
 
-    preprocess_deploy_ctx(resources_data, deploy_ctx)
     preprocess_defaults(resources_data, errors)
 
     for section in SUPPORTED_SECTIONS:
@@ -390,6 +479,11 @@ def preprocess_resources(
                 resources_data[section] = sorted(resources_data[section])
 
     resources_data = sort_dict(resources_data)
+
+
+def check_lambda_layer(resources_dir: Path, resources_data: dict):
+    thirdparty_dir = Path(resources_dir, 'thirdparty')
+    resources_data['enable_lambda_layer'] = thirdparty_dir.exists()
 
 
 class Conditional(yaml.YAMLObject):
@@ -473,7 +567,7 @@ def resolve_conditionals(
         if isinstance(key, Conditional):
             include = all([
                 check_condition('environment', key.environment, deploy_ctx, errors),
-                check_condition('region', key.region, deploy_ctx, errors),
+                check_condition('target_region', key.region, deploy_ctx, errors),
             ])
 
             if include:
@@ -490,56 +584,3 @@ def apply_overrides(resources_data: dict, deploy_ctx: dict[str, Any]):
             key = override_path.replace('/', '.')
             lg.info(f'Applying override: {key} = {override_value}')
             resources_data[key] = override_value
-
-
-def load_resources(
-    resources_dir: Path,
-    pypath: list[Path],
-    deploy_ctx: dict[str, str],
-    context_file: Path,
-    errors: list[str]
-) -> benedict:
-    '''
-    Load the resources from the resources.yaml file.
-
-    Args:
-        resources_dir: The directory containing the resources.yaml file.
-        pypath: The Python path to use.
-        deploy_ctx: The deployment context.
-        context_file: The path to the additional deployment context file.
-        errors: The list of errors.
-
-    Returns:
-        A dictionary containing the resources.
-    '''
-
-    if context_file:
-        deploy_ctx.update(benedict.from_yaml(context_file))
-        lg.info(f'Loaded context from {context_file}')
-
-    resources = Path(resources_dir, 'resources.yaml')
-
-    try:
-        yaml.SafeLoader.add_constructor('!Conditional', conditional_constructor)
-        raw_resources_data = benedict(yaml.safe_load(Path(resources).read_text()))
-    except Exception as e:
-        errors.append(f'Error loading resources file {resources}: {e}')
-        return benedict()
-
-    lg.info('Resolving conditional resources')
-    lg.debug(f'Deployment context: {deploy_ctx}')
-    resources_data = resolve_conditionals(raw_resources_data, deploy_ctx, errors)
-    lg.debug('Resources data after resolving conditionals:')
-    lg.debug(resources_data.to_yaml())
-
-    lg.info('Applying overrides')
-    apply_overrides(resources_data, deploy_ctx)
-
-    lg.info('Processing resources')
-    pypath = [resources_dir] + list(pypath)
-    preprocess_resources(resources_data, resources_dir, pypath, deploy_ctx, errors)
-
-    lg.info('Validating resources')
-    validate_schema(resources_dir, resources_data, errors)
-
-    return resources_data

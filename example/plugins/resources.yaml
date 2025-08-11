@@ -1,0 +1,10 @@
+prefix: Onelambda
+
+tags:
+  mytag: myvalue
+
+plugins:
+  myplugin:
+    template: customlambda.j2
+    aux:
+      funname: mycustomfun

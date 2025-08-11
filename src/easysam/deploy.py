@@ -1,7 +1,12 @@
 import logging as lg
+import time
 import shutil
 from pathlib import Path
 import subprocess
+
+from benedict import benedict
+from rich.live import Live
+from rich.spinner import Spinner
 
 from easysam.generate import generate
 from easysam.commondep import commondep
@@ -11,22 +16,17 @@ SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
 
 
-def deploy(cliparams: dict, directory: Path, environment: str, context_file: Path):
+def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
     '''
     Deploy a SAM template to AWS.
 
     Args:
         cliparams: The CLI parameters.
         directory: The directory containing the SAM template.
-        environment: The AWS environment name.
-        context_file: The path to the deployment context file.
+        deploy_ctx: The deployment context.
     '''
 
-    deploy_ctx = {
-        'environment': environment
-    }
-
-    resources, errors = generate(directory, [], deploy_ctx, context_file)
+    resources, errors = generate(cliparams, directory, [], deploy_ctx)
 
     if errors:
         lg.error(f'There were {len(errors)} errors:')
@@ -41,18 +41,52 @@ def deploy(cliparams: dict, directory: Path, environment: str, context_file: Pat
     check_sam_cli_version(cliparams)
     remove_common_dependencies(directory)
     copy_common_dependencies(directory, resources)
+
+    # Building the application from the SAM template
     sam_build(cliparams, directory)
-    sam_deploy(cliparams, directory, environment)
+
+    # Deploying the application to AWS
+    sam_deploy(cliparams, directory, deploy_ctx, resources)
 
     if not cliparams.get('no_cleanup'):
         remove_common_dependencies(directory)
 
 
-def delete(cliparams, environment, force):
+def delete(cliparams, environment):
     lg.info(f'Deleting SAM template from {environment}')
+    force = cliparams.get('force')
+    await_deletion = cliparams.get('await_deletion')
     cf = u.get_aws_client('cloudformation', cliparams)
     mode = 'FORCE_DELETE_STACK' if force else 'STANDARD'
     cf.delete_stack(StackName=environment, DeletionMode=mode)  # type: ignore
+
+    if await_deletion:
+        lg.info(f'Awaiting deletion of {environment}')
+        stack_status = 'UNKNOWN'
+
+        with Live(Spinner('aesthetic', 'Checking stack status...'), transient=True):
+            while stack_status != 'DELETE_COMPLETE':
+                lg.debug(f'Stack {environment} is {stack_status}')
+
+                if stack_status != 'UNKNOWN':
+                    time.sleep(10)
+
+                try:
+                    stacks = cf.describe_stacks(StackName=environment).get('Stacks')
+                except Exception as e:
+                    lg.debug(f'Error describing stack {environment}: {e}')
+                    break
+
+                if not stacks:
+                    lg.info(f'Stack {environment} deleted')
+                    break
+
+                stack_status = stacks[0]['StackStatus']
+
+                if stack_status not in ['DELETE_COMPLETE', 'DELETE_IN_PROGRESS']:
+                    raise UserWarning(f'Stack {environment} is {stack_status}')
+
+    lg.info(f'Stack {environment} deleted')
 
 
 def check_pip_version(cliparams):
@@ -106,10 +140,15 @@ def sam_build(cliparams, directory):
         raise UserWarning('Failed to build SAM template') from e
 
 
-def sam_deploy(cliparams, directory, aws_stack):
-    lg.info(f'Deploying SAM template from {directory} to {aws_stack}')
+def sam_deploy(cliparams, directory, deploy_ctx, resources):
+    lg.info(f'Deploying SAM template from {directory} to {deploy_ctx}')
     sam_tool = cliparams['sam_tool']
     sam_params = sam_tool.split(' ')
+
+    aws_stack = deploy_ctx['environment']
+
+    if not aws_stack:
+        raise UserWarning('No AWS stack found in deploy context')
 
     sam_params.extend([
         'deploy',
@@ -121,10 +160,21 @@ def sam_deploy(cliparams, directory, aws_stack):
         '--capabilities', 'CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'
     ])
 
-    aws_tags = cliparams.get('tag')
-    lg.info(f'Using AWS tags: {aws_tags}')
+    region = deploy_ctx.get('target_region')
+
+    if region:
+        sam_params.extend(['--region', region])
+
+    aws_tags = list(cliparams.get('tag', []))
+
+    if 'tags' in resources:
+        aws_tags.extend(
+            f'{name}={value}'
+            for name, value in resources['tags'].items()
+        )
+
     aws_tag_string = ' '.join(aws_tags)
-    lg.debug(f'AWS tag string: {aws_tag_string}')
+    lg.info(f'AWS tag string: {aws_tag_string}')
     sam_params.extend(['--tags', aws_tag_string])
 
     if cliparams.get('verbose'):
@@ -162,8 +212,14 @@ def remove_common_dependencies(directory):
 
 
 def copy_common_dependencies(directory, resources):
-    lg.info(f'Copying common dependencies to {directory}')
+    lg.info('Looking for common dependencies')
     common = common_dep_dir(directory)
+
+    if not common.exists():
+        lg.info('No common dependencies found')
+        return
+
+    lg.info(f'Copying common dependencies to {directory}')
 
     if 'functions' not in resources:
         lg.warning('No functions found in resources')

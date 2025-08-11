@@ -1,359 +1,26 @@
+import json
 import logging as lg
 from pathlib import Path
 
 from jsonschema import Draft7Validator
 
 
-BUCKETS_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'public': {'type': 'boolean'},
-        'extaccesspolicy': {'type': 'string'}
-    },
-    'required': ['public'],
-    'optional': ['extaccesspolicy'],
-    'additionalProperties': False
-}
-
-QUEUES_SCHEMA = {
-    'type': 'object',
-    'properties': {
-    },
-    'additionalProperties': False
-}
-
-STREAM_BUCKET_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'bucketname': {'type': 'string'},
-        'bucketprefix': {'type': 'string'},
-        'extbucketarn': {'type': 'string'},
-        'intervalinseconds': {
-            'type': 'integer',
-            'minimum': 60,
-            'maximum': 900
-        },
-    },
-    'required': ['bucketprefix'],
-    'optional': ['bucketname', 'intervalinseconds', 'extbucketarn'],
-    'additionalProperties': False
-}
-
-STREAMS_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'buckets': {'type': 'object', 'patternProperties': {
-            '^[\\$a-z0-9-]+$': STREAM_BUCKET_SCHEMA
-        }},
-    },
-}
-
-LAMBDA_POLL_SCHEMA = {
-    'type': 'array',
-    'items': {
-        'type': 'object',
-        'properties': {
-            'name': {'type': 'string'},
-            'batchsize': {'type': 'integer'},
-            'batchwindow': {'type': 'integer'},
-        },
-        'required': ['name'],
-        'optional': ['batchsize', 'batchwindow'],
-        'additionalProperties': False
-    }
-}
-
-LAMBDA_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'resources': {'type': 'object'},
-        'timeout': {
-            'type': 'integer',
-            'minimum': 1,
-            'maximum': 900
-        },
-        'buckets': {'type': 'array', 'items': {'type': 'string'}},
-        'send': {'type': 'array', 'items': {'type': 'string'}},
-        'streams': {'type': 'array', 'items': {'type': 'string'}},
-        'tables': {'type': 'array', 'items': {'type': 'string'}},
-        'queues': {'type': 'array', 'items': {'type': 'string'}},
-        'polls': LAMBDA_POLL_SCHEMA,
-        'services': {
-            'type': 'array',
-            'items': {
-                'type': 'string',
-                'enum': ['comprehend']
-            }
-        },
-        'uri': {'type': 'string'},
-        'schedule': {'type': 'string'},
-    },
-    'required': ['uri'],
-    'optional': [
-        'timeout',
-        'send',
-        'streams',
-        'tables',
-        'queues',
-        'polls',
-        'services',
-        'schedule',
-    ],
-    'additionalProperties': False
-}
-
-LAMBDA_PATH_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'integration': {
-            'type': 'string',
-            'enum': ['lambda']
-        },
-        'function': {'type': 'string'},
-        'authorizer': {'type': 'string'},
-        'greedy': {'type': 'boolean'},
-        'open': {'type': 'boolean'}
-    },
-    'required': ['integration', 'function', 'greedy'],
-    'optional': ['authorizer', 'open'],
-    'additionalProperties': False
-}
-
-DYNAMO_PATH_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'integration': {
-            'type': 'string',
-            'enum': ['dynamo']
-        },
-        'method': {
-            'type': 'string',
-            'enum': ['get']
-        },
-        'parameters': {
-            'type': 'array',
-            'items': {'type': 'string'}
-        },
-        'action': {
-            'type': 'string',
-            'enum': ['GetItem']
-        },
-        'role': {'type': 'string'},
-        'requestTemplate': {'type': 'string'},
-        'responseTemplateFile': {'type': 'string'},
-    },
-    'required': [
-        'integration',
-        'method',
-        'parameters',
-        'action',
-        'role',
-        'requestTemplate',
-        'responseTemplateFile'
-    ],
-    'additionalProperties': False
-}
-
-SQS_PATH_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'integration': {
-            'type': 'string',
-            'enum': ['sqs']
-        },
-        'method': {
-            'type': 'string',
-            'enum': ['post']
-        },
-        'role': {'type': 'string'},
-        'queue': {'type': 'string'},
-        'requestTemplate': {'type': 'string'},
-        'requestTemplateFile': {'type': 'string'},
-        'responseTemplate': {'type': 'string'},
-        'responseTemplateFile': {'type': 'string'},
-        'authorizer': {'type': 'string'},
-    },
-    'required': [
-        'integration',
-        'method',
-        'role',
-        'queue',
-    ],
-    'optional': [
-        'authorizer',
-        'requestTemplate',
-        'requestTemplateFile',
-        'responseTemplate',
-        'responseTemplateFile',
-    ],
-    'additionalProperties': False
-}
-
-PATH_SCHEMA = {
-    'oneOf': [LAMBDA_PATH_SCHEMA, DYNAMO_PATH_SCHEMA, SQS_PATH_SCHEMA]
-}
-
-PRISMARINE_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'default-base': {'type': 'string'},
-        'access-module': {'type': 'string'},
-        'extra-imports': {'type': 'array', 'items': {'type': 'string'}},
-        'tables': {
-            'type': 'array',
-            'items': {
-                'type': 'object',
-                'properties': {
-                    'package': {'type': 'string'},
-                    'base': {'type': 'string'},
-                },
-                'required': ['package'],
-                'optional': ['base'],
-                'additionalProperties': False
-            }
-        }
-    },
-    'required': ['tables'],
-    'optional': ['default-base', 'access-module', 'extra-imports'],
-    'additionalProperties': False
-}
-
-TABLE_ATTRIBUTE_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'name': {'type': 'string'},
-        'hash': {'type': 'boolean'},
-        'range': {'type': 'boolean'},
-    },
-    'required': ['name'],
-    'optional': ['hash', 'range'],
-    'additionalProperties': False
-}
-
-TABLES_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'attributes': {
-            'type': 'array',
-            'items': TABLE_ATTRIBUTE_SCHEMA
-        },
-        'indices': {
-            'type': 'array',
-            'items': {
-                'type': 'object',
-                'properties': {
-                    'name': {'type': 'string'},
-                    'attributes': {
-                        'type': 'array',
-                        'items': TABLE_ATTRIBUTE_SCHEMA,
-                        'additionalProperties': False
-                    },
-                },
-                'required': ['name', 'attributes'],
-                'additionalProperties': False
-            }
-        }
-    },
-    'required': ['attributes'],
-    'optional': ['indices'],
-    'additionalProperties': False
-}
-
-AUTHORIZER_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'function': {'type': 'string'},
-        'token': {'type': 'string'},
-        'query': {'type': 'string'},
-        'headers': {'type': 'array', 'items': {'type': 'string'}},
-        'ttl': {'type': 'integer', 'minimum': 0, 'maximum': 3600},
-    },
-    'required': ['function'],
-    'optional': ['token', 'query', 'headers', 'ttl'],
-    'additionalProperties': False
-}
-
-RESOURCES_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'prefix': {'type': 'string'},
-        'buckets': {
-            'type': 'object',
-            'patternProperties': {
-                '^[\\$a-z0-9-]+$': BUCKETS_SCHEMA
-            },
-            'additionalProperties': False
-        },
-        'queues': {
-            'type': 'object',
-            'patternProperties': {
-                '^[\\$a-z0-9-]+$': {'type': 'null'}
-            },
-            'additionalProperties': False
-        },
-        'streams': {
-            'type': 'object',
-            'patternProperties': {
-                '^[\\$a-z0-9-]+$': STREAMS_SCHEMA
-            },
-            'additionalProperties': False
-        },
-        'functions': {
-            'type': 'object',
-            'patternProperties': {
-                '^[\\$a-z0-9-]+$': LAMBDA_SCHEMA
-            },
-            'additionalProperties': False
-        },
-        'paths': {
-            'type': 'object',
-            'patternProperties': {
-                '^[\\$a-zA-Z0-9\\{\\}/]+$': PATH_SCHEMA
-            },
-            'additionalProperties': False
-        },
-        'import': {'type': 'array', 'items': {'type': 'string'}},
-        'prismarine': PRISMARINE_SCHEMA,
-        'tables': {
-            'type': 'object',
-            'patternProperties': {
-                '^[\\$a-zA-Z0-9-]+$': TABLES_SCHEMA
-            },
-            'additionalProperties': False
-        },
-        'authorizers': {
-            'type': 'object',
-            'patternProperties': {
-                '^[\\$a-z0-9-]+$': AUTHORIZER_SCHEMA
-            },
-            'additionalProperties': False
-        },
-    },
-    'required': ['prefix'],
-    'optional': [
-        'buckets',
-        'queues',
-        'streams',
-        'lambda',
-        'paths',
-        'import',
-        'prismarine',
-        'functions',
-        'tables',
-        'authorizers',
-    ],
-    'additionalProperties': False,
-}
-
-
 def validate(resources_dir: Path, resources_data: dict, errors: list[str]):
-    # General schema validation
-    validator = Draft7Validator(RESOURCES_SCHEMA)
+    '''Validate resources data against the schema and perform custom validations.
+
+    Args:
+        resources_dir: The directory containing the resources.yaml file.
+        resources_data: The pre-loaded resources data dictionary.
+        errors: The list of errors.
+    '''
+
+    schema = load_schema()
+    validator = Draft7Validator(schema)
     validation_errors = sorted(validator.iter_errors(resources_data), key=str)
 
     for error in validation_errors:
         lg.error(f'Validation error: {error}')
-        errors.append(f"Invalid resources data: {error.message} in {list(error.path)}")
+        errors.append(f'Invalid resources data: {error.message} in {list(error.path)}')
 
     # More specific validations
     validate_buckets(resources_data, errors)
@@ -366,27 +33,37 @@ def validate(resources_dir: Path, resources_data: dict, errors: list[str]):
     validate_authorizers(resources_data, errors)
 
 
+def load_schema() -> dict:
+    '''Load the JSON schema from the schemas.json file.'''
+    schema_path = Path(__file__).parent / 'schemas.json'
+    with open(schema_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+
 def validate_buckets(resources_data: dict, errors: list[str]):
+    '''Validate bucket-specific rules.'''
     for bucket, details in resources_data.get('buckets', {}).items():
         if bucket == 'private' and details['public']:
-            errors.append(f"Bucket '{bucket}' cannot be public")
+            errors.append(f'Bucket \'{bucket}\' cannot be public')
 
 
 def validate_queues(resources_data: dict, errors: list[str]):
+    '''Validate queue-specific rules.'''
     pass
 
 
 def validate_streams(resources_data: dict, errors: list[str]):
+    '''Validate stream-specific rules.'''
     for stream, details in resources_data.get('streams', {}).items():
         for bucket in details.get('buckets', {}).values():
             if 'bucketname' not in bucket and 'extbucketarn' not in bucket:
-                errors.append(f"Stream '{stream}': 'bucketname' or 'extbucketarn' is required")
+                errors.append(f'Stream \'{stream}\': \'bucketname\' or \'extbucketarn\' is required')
                 continue
 
             if 'bucketname' in bucket and 'extbucketarn' in bucket:
                 errors.append(
-                    f"Stream '{stream}': "
-                    "'bucketname' and 'extbucketarn' cannot be used together"
+                    f'Stream \'{stream}\': '
+                    '\'bucketname\' and \'extbucketarn\' cannot be used together'
                 )
                 continue
 
@@ -395,7 +72,7 @@ def validate_streams(resources_data: dict, errors: list[str]):
 
                 if resources_data['buckets'].get(bucketname) is None:
                     errors.append(
-                        f"Stream '{stream}': '{bucketname}' must be a valid bucket"
+                        f'Stream \'{stream}\': \'{bucketname}\' must be a valid bucket'
                     )
 
                 continue
@@ -405,10 +82,11 @@ def validate_streams(resources_data: dict, errors: list[str]):
                     not bucket['extbucketarn'].startswith('arn:aws:s3:::') and
                     bucket['extbucketarn'] != '<overriden>'
                 ):
-                    errors.append(f"Stream '{stream}': 'extbucketarn' must be a valid ARN")
+                    errors.append(f'Stream \'{stream}\': \'extbucketarn\' must be a valid ARN')
 
 
 def validate_lambda(resources_data: dict, errors: list[str]):
+    '''Validate lambda function-specific rules.'''
     for lambda_name, details in resources_data.get('functions', {}).items():
         for bucket in details.get('buckets', []):
             if bucket not in resources_data['buckets']:
@@ -457,6 +135,7 @@ def validate_lambda(resources_data: dict, errors: list[str]):
 
 
 def validate_paths(resources_dir: Path, resources_data: dict, errors: list[str]):
+    '''Validate path-specific rules.'''
     for path, details in resources_data.get('paths', {}).items():
         match details.get('integration', 'lambda'):
             case 'lambda':
@@ -468,6 +147,7 @@ def validate_paths(resources_dir: Path, resources_data: dict, errors: list[str])
 
 
 def validate_lambda_path(resources_data: dict, path: str, details: dict, errors: list[str]):
+    '''Validate lambda path-specific rules.'''
     authorizer = details.get('authorizer')
     open_path = details.get('open')
 
@@ -479,37 +159,40 @@ def validate_lambda_path(resources_data: dict, path: str, details: dict, errors:
 
     if authorizer:
         if authorizer not in resources_data.get('authorizers', {}):
-            errors.append(f"Lambda path '{path}' authorizer must be a valid authorizer")
+            errors.append(f'Lambda path \'{path}\' authorizer must be a valid authorizer')
 
 
 def validate_dynamo_path(
-        resources_dir: Path,
-        path: str,
-        details: dict,
-        errors: list[str]
+    resources_dir: Path,
+    path: str,
+    details: dict,
+    errors: list[str]
 ):
+    '''Validate dynamo path-specific rules.'''
     validate_request_response_templates(resources_dir, path, details, errors)
 
 
 def validate_sqs_path(
-        resources_dir: Path,
-        resources_data: dict,
-        path: str,
-        details: dict,
-        errors: list[str]
+    resources_dir: Path,
+    resources_data: dict,
+    path: str,
+    details: dict,
+    errors: list[str]
 ):
+    '''Validate SQS path-specific rules.'''
     if details['queue'] not in resources_data['queues']:
-        errors.append(f"SQS path '{path}' queue must be a valid queue")
+        errors.append(f'SQS path \'{path}\' queue must be a valid queue')
 
     validate_request_response_templates(resources_dir, path, details, errors)
 
 
 def validate_request_response_templates(
-        resources_dir: Path,
-        path: str,
-        details: dict,
-        errors: list[str]
+    resources_dir: Path,
+    path: str,
+    details: dict,
+    errors: list[str]
 ):
+    '''Validate request and response templates.'''
     request = False
     response = False
 
@@ -517,11 +200,11 @@ def validate_request_response_templates(
         request_template_path = Path(resources_dir, request_template_file).resolve()
 
         if not request_template_path.exists():
-            errors.append(f"SQS path '{path}' request template must be a valid file")
+            errors.append(f'SQS path \'{path}\' request template must be a valid file')
 
         if 'requestTemplate' in details:
             errors.append(
-                f"Path '{path}' cannot have both requestTemplate and requestTemplateFile"
+                f'Path \'{path}\' cannot have both requestTemplate and requestTemplateFile'
             )
 
         request = True
@@ -533,11 +216,11 @@ def validate_request_response_templates(
         response_template_path = Path(resources_dir, response_template_file).resolve()
 
         if not response_template_path.exists():
-            errors.append(f"SQS path '{path}' response template must be a valid file")
+            errors.append(f'SQS path \'{path}\' response template must be a valid file')
 
         if 'responseTemplate' in details:
             errors.append(
-                f"Path '{path}' cannot have both responseTemplate and responseTemplateFile"
+                f'Path \'{path}\' cannot have both responseTemplate and responseTemplateFile'
             )
 
         response = True
@@ -546,22 +229,24 @@ def validate_request_response_templates(
         response = True
 
     if not request:
-        errors.append(f"Path '{path}' must have a request template")
+        errors.append(f'Path \'{path}\' must have a request template')
 
     if not response:
-        errors.append(f"Path '{path}' must have a response template")
+        errors.append(f'Path \'{path}\' must have a response template')
 
 
 def validate_import(resources_dir: Path, resources_data: dict, errors: list[str]):
+    '''Validate import-specific rules.'''
     if import_list := resources_data.get('import'):
         for import_item in import_list:
             import_path = Path(resources_dir, import_item).resolve()
 
             if not import_path.exists():
-                errors.append(f"Import '{import_item}' must be a valid directory")
+                errors.append(f'Import \'{import_item}\' must be a valid directory')
 
 
 def validate_prismarine(resources_dir: Path, resources_data: dict, errors: list[str]):
+    '''Validate prismarine-specific rules.'''
     prismarine = resources_data.get('prismarine', {})
 
     if not prismarine:
@@ -571,7 +256,7 @@ def validate_prismarine(resources_dir: Path, resources_data: dict, errors: list[
     default_base_dir = Path(resources_dir, default_base).resolve()
 
     if not default_base_dir.exists():
-        errors.append(f"Prismarine default-base '{default_base}' must be a valid directory")
+        errors.append(f'Prismarine default-base \'{default_base}\' must be a valid directory')
         return
 
     for table in prismarine.get('tables', []):
@@ -580,16 +265,17 @@ def validate_prismarine(resources_dir: Path, resources_data: dict, errors: list[
 
         if not table_base_dir.exists():
             errors.append(
-                f"Prismarine table package '{table_base}' must have a valid bsee directory"
+                f'Prismarine table package \'{table_base}\' must have a valid bsee directory'
             )
 
 
 def validate_authorizers(resources_data: dict, errors: list[str]):
+    '''Validate authorizer-specific rules.'''
     for authorizer, details in resources_data.get('authorizers', {}).items():
         present_types = ['token' in details, 'query' in details, 'headers' in details]
 
         if present_types.count(True) != 1:
-            errors.append(f"Authorizer '{authorizer}' cannot have multiple types")
+            errors.append(f'Authorizer \'{authorizer}\' cannot have multiple types')
 
         if details['function'] not in resources_data.get('functions', {}):
-            errors.append(f"Authorizer '{authorizer}' function must be a valid function")
+            errors.append(f'Authorizer \'{authorizer}\' function must be a valid function')
