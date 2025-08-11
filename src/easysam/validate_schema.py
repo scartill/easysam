@@ -57,13 +57,13 @@ def validate_streams(resources_data: dict, errors: list[str]):
     for stream, details in resources_data.get('streams', {}).items():
         for bucket in details.get('buckets', {}).values():
             if 'bucketname' not in bucket and 'extbucketarn' not in bucket:
-                errors.append(f'Stream \'{stream}\': \'bucketname\' or \'extbucketarn\' is required')
+                errors.append(f"Stream '{stream}': 'bucketname' or 'extbucketarn' is required")
                 continue
 
             if 'bucketname' in bucket and 'extbucketarn' in bucket:
                 errors.append(
-                    f'Stream \'{stream}\': '
-                    '\'bucketname\' and \'extbucketarn\' cannot be used together'
+                    f"Stream '{stream}': "
+                    "'bucketname' and 'extbucketarn' cannot be used together"
                 )
                 continue
 
@@ -72,7 +72,7 @@ def validate_streams(resources_data: dict, errors: list[str]):
 
                 if resources_data['buckets'].get(bucketname) is None:
                     errors.append(
-                        f'Stream \'{stream}\': \'{bucketname}\' must be a valid bucket'
+                        f"Stream '{stream}': '{bucketname}' must be a valid bucket"
                     )
 
                 continue
@@ -82,7 +82,7 @@ def validate_streams(resources_data: dict, errors: list[str]):
                     not bucket['extbucketarn'].startswith('arn:aws:s3:::') and
                     bucket['extbucketarn'] != '<overriden>'
                 ):
-                    errors.append(f'Stream \'{stream}\': \'extbucketarn\' must be a valid ARN')
+                    errors.append(f"Stream '{stream}': 'extbucketarn' must be a valid ARN")
 
 
 def validate_lambda(resources_data: dict, errors: list[str]):
@@ -159,7 +159,7 @@ def validate_lambda_path(resources_data: dict, path: str, details: dict, errors:
 
     if authorizer:
         if authorizer not in resources_data.get('authorizers', {}):
-            errors.append(f'Lambda path \'{path}\' authorizer must be a valid authorizer')
+            errors.append(f"Lambda path '{path}' authorizer must be a valid authorizer")
 
 
 def validate_dynamo_path(
@@ -181,7 +181,7 @@ def validate_sqs_path(
 ):
     '''Validate SQS path-specific rules.'''
     if details['queue'] not in resources_data['queues']:
-        errors.append(f'SQS path \'{path}\' queue must be a valid queue')
+        errors.append(f"SQS path '{path}' queue must be a valid queue")
 
     validate_request_response_templates(resources_dir, path, details, errors)
 
@@ -200,11 +200,11 @@ def validate_request_response_templates(
         request_template_path = Path(resources_dir, request_template_file).resolve()
 
         if not request_template_path.exists():
-            errors.append(f'SQS path \'{path}\' request template must be a valid file')
+            errors.append(f"SQS path '{path}' request template must be a valid file")
 
         if 'requestTemplate' in details:
             errors.append(
-                f'Path \'{path}\' cannot have both requestTemplate and requestTemplateFile'
+                f"Path '{path}' cannot have both requestTemplate and requestTemplateFile"
             )
 
         request = True
@@ -216,11 +216,11 @@ def validate_request_response_templates(
         response_template_path = Path(resources_dir, response_template_file).resolve()
 
         if not response_template_path.exists():
-            errors.append(f'SQS path \'{path}\' response template must be a valid file')
+            errors.append(f"SQS path '{path}' response template must be a valid file")
 
         if 'responseTemplate' in details:
             errors.append(
-                f'Path \'{path}\' cannot have both responseTemplate and responseTemplateFile'
+                f"Path '{path}' cannot have both responseTemplate and responseTemplateFile"
             )
 
         response = True
@@ -229,10 +229,10 @@ def validate_request_response_templates(
         response = True
 
     if not request:
-        errors.append(f'Path \'{path}\' must have a request template')
+        errors.append(f"Path '{path}' must have a request template")
 
     if not response:
-        errors.append(f'Path \'{path}\' must have a response template')
+        errors.append(f"Path '{path}' must have a response template")
 
 
 def validate_import(resources_dir: Path, resources_data: dict, errors: list[str]):
@@ -242,7 +242,7 @@ def validate_import(resources_dir: Path, resources_data: dict, errors: list[str]
             import_path = Path(resources_dir, import_item).resolve()
 
             if not import_path.exists():
-                errors.append(f'Import \'{import_item}\' must be a valid directory')
+                errors.append(f"Import '{import_item}' must be a valid directory")
 
 
 def validate_prismarine(resources_dir: Path, resources_data: dict, errors: list[str]):
@@ -256,7 +256,7 @@ def validate_prismarine(resources_dir: Path, resources_data: dict, errors: list[
     default_base_dir = Path(resources_dir, default_base).resolve()
 
     if not default_base_dir.exists():
-        errors.append(f'Prismarine default-base \'{default_base}\' must be a valid directory')
+        errors.append(f"Prismarine default-base '{default_base}' must be a valid directory")
         return
 
     for table in prismarine.get('tables', []):
@@ -265,7 +265,7 @@ def validate_prismarine(resources_dir: Path, resources_data: dict, errors: list[
 
         if not table_base_dir.exists():
             errors.append(
-                f'Prismarine table package \'{table_base}\' must have a valid bsee directory'
+                f"Prismarine table package '{table_base}' must have a valid base directory"
             )
 
 
@@ -275,7 +275,7 @@ def validate_authorizers(resources_data: dict, errors: list[str]):
         present_types = ['token' in details, 'query' in details, 'headers' in details]
 
         if present_types.count(True) != 1:
-            errors.append(f'Authorizer \'{authorizer}\' cannot have multiple types')
+            errors.append(f"Authorizer '{authorizer}' cannot have multiple types")
 
         if details['function'] not in resources_data.get('functions', {}):
-            errors.append(f'Authorizer \'{authorizer}\' function must be a valid function')
+            errors.append(f"Authorizer '{authorizer}' function must be a valid function")
