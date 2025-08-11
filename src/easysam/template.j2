@@ -461,9 +461,18 @@ Resources:
         - ComprehendBasicAccessPolicy: {}
           {% endif %}
         {% endfor %}        
-      {% if enable_lambda_layer %}
+      {% if enable_lambda_layer or function.layers %}
       Layers:
+      {% endif %}
+      {% if enable_lambda_layer %}
+        # Common layer
         - !Ref PythonLambdaLayer
+      {% endif %}
+      {% if function.layers %}
+        {% for layer_name, layer_arn in function.layers.items() %}
+        # {{ layer_name }}
+        - "{{ layer_arn }}"
+        {% endfor %}
       {% endif %}
       Events:
         {% if function.schedule%}
