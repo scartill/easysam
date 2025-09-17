@@ -1,4 +1,5 @@
 import logging as lg
+import json
 import time
 import shutil
 from pathlib import Path
@@ -141,7 +142,7 @@ def sam_build(cliparams, directory):
 
 
 def sam_deploy(cliparams, directory, deploy_ctx, resources):
-    lg.info(f'Deploying SAM template from {directory} to {deploy_ctx}')
+    lg.info(f'Deploying SAM template from {directory} to\n{json.dumps(deploy_ctx, indent=4)}')
     sam_tool = cliparams['sam_tool']
     sam_params = sam_tool.split(' ')
 
