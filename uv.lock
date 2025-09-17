@@ -490,7 +490,7 @@ wheels = [
 
 [[package]]
 name = "easysam"
-version = "1.4.0"
+version = "1.4.1"
 source = { editable = "." }
 dependencies = [
     { name = "aws-sam-cli" },
@@ -518,7 +518,7 @@ requires-dist = [
     { name = "jinja2-cli", extras = ["yaml"], specifier = ">=0.8.2" },
     { name = "jsonschema", specifier = ">=4.23.0" },
     { name = "mergedeep", specifier = ">=1.3.4" },
-    { name = "prismarine", specifier = ">=1.3.0" },
+    { name = "prismarine", specifier = ">=1.3.1" },
     { name = "python-benedict", extras = ["yaml"], specifier = ">=0.34.1" },
     { name = "rich", specifier = ">=13.9.4" },
 ]
@@ -1049,7 +1049,7 @@ wheels = [
 
 [[package]]
 name = "prismarine"
-version = "1.3.0"
+version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
@@ -1059,9 +1059,9 @@ dependencies = [
     { name = "mako" },
     { name = "types-boto3", extra = ["dynamodb"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2c/63/5c2282174a7ec489f198a86abefd42dc5b23a3fde88c88f182701cf2888a/prismarine-1.3.0.tar.gz", hash = "sha256:ccef7667b347f7fc9c9ed3b20a0ca11edf1193259a18810c45c0ffb13e167bf4", size = 35649, upload-time = "2025-07-13T22:36:52.006Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e1/b3/4326579e4c514df133f782d2add649e93c46948150a24a011a04510890a2/prismarine-1.3.1.tar.gz", hash = "sha256:31dcbf2bbcc8b52e91aecfb1432987a88b0f9b3aa86cb954dde934c26a59964a", size = 35717, upload-time = "2025-09-16T21:34:04.999Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/06/88/a59f9b176ede25b23f9eb0805c25bf5da9de588ed73f062084df21d16100/prismarine-1.3.0-py3-none-any.whl", hash = "sha256:cd4ae1ea0b451676bc65edfdc7ffa7e7e567f9ae2367451a0791937f1e6a4d87", size = 12653, upload-time = "2025-07-13T22:36:50.627Z" },
+    { url = "https://files.pythonhosted.org/packages/8d/eb/baf664b415136ef6ade93c9fd7162dd6fde22a136ee5e5707d68de8d1212/prismarine-1.3.1-py3-none-any.whl", hash = "sha256:178f104e26a533ea3470d00f69371f7eeffc27c9928d0af521380b0e5d51c0ca", size = 12666, upload-time = "2025-09-16T21:34:03.8Z" },
 ]
 
 [[package]]

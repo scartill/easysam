@@ -172,7 +172,7 @@ def load_resources(
 
     try:
         yaml.SafeLoader.add_constructor('!Conditional', conditional_constructor)
-        raw_resources_data = benedict(yaml.safe_load(Path(resources).read_text()))
+        raw_resources_data = benedict(yaml.safe_load(Path(resources).read_text(encoding='utf-8')))
     except Exception as e:
         errors.append(f'Error loading resources file {resources}: {e}')
         return benedict()
@@ -346,7 +346,7 @@ def preprocess_file(
     lg.info(f'Processing import file {entry_path}')
     try:
         entry_dir = entry_path.parent
-        entry_data = yaml.safe_load(entry_path.read_text())
+        entry_data = yaml.safe_load(entry_path.read_text(encoding='utf-8'))
     except Exception as e:
         errors.append(f'Error loading import file {entry_path}: {e}')
         return

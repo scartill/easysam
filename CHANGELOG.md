@@ -1,3 +1,7 @@
+# 1.4.1
+
+- Fixed a bug with json load encoding issue
+
 # 1.4.0
 
 - Added custom `layers` support for lambda functions

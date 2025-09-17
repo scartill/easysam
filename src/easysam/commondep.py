@@ -44,7 +44,7 @@ def is_common_package(name: str, commons: list[str]) -> str | None:
 def find_common_deps_in_file(target_file, common_base, commons, common_imports):
     lg.debug(f'Processing {target_file}')
     file_imports = set()
-    target_code = target_file.read_text()
+    target_code = target_file.read_text(encoding='utf-8')
     target_ast = ast.parse(target_code)
 
     for stmt in target_ast.body:
