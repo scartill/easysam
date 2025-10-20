@@ -523,7 +523,7 @@ Resources:
 
   # Search
   {% if search is defined %}
-  {{ lprefix }}VpcEndpointSecurityGroup:
+  {{ lprefix }}VpcEndpointSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Allow Lambda access to OpenSearch Serverless
@@ -536,4 +536,13 @@ Resources:
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
+
+  {{ lprefix }}VpcEndpoint:
+    Type: AWS::OpenSearchServerless::VpcEndpoint
+    Properties:
+      Name: !Sub "{{ lprefix }}-vpce-${Stage}"
+      VpcId: {{ cloud.vpc_id }}
+      SubnetIds: {{ cloud.subnet_ids }}
+      SecurityGroupIds:
+        - !GetAtt {{ lprefix }}VpcEndpointSG.GroupId
   {% endif %}  # end search
