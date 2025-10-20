@@ -76,6 +76,7 @@
             "enum": ["comprehend"]
           }
         },
+        "search": {"type": "array", "items": {"type": "string"}},
         "uri": {"type": "string"},
         "schedule": {"type": "string"},
         "layers": {
@@ -320,6 +321,18 @@
             "template": {"type": "string"},
             "aux": {"type": "object"}
           }
+        }
+      },
+      "additionalProperties": false
+    },
+    "search": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {
+          "oneOf": [
+            { "type": "object" },
+            { "type": "null"}
+          ]
         }
       },
       "additionalProperties": false

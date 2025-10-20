@@ -109,8 +109,9 @@ Resources:
     Properties:
         LogGroupName: !Sub "apigw-${AWS::StackName}-${Stage}"
         RetentionInDays: 7
-  {% endif %}  # paths
+  {% endif %}  # end paths
 
+  # Streams
   {% if streams is defined %}
   {{ lprefix }}DeliveryStreamPolicy:
     Type: AWS::IAM::Policy
@@ -166,8 +167,9 @@ Resources:
             Condition:
               StringEquals:
                 'sts:ExternalId': !Ref 'AWS::AccountId'
-  {% endif %}  # streams
+  {% endif %}  # end streams 
 
+  # Tables
   {% if tables is defined %}
   GatewayDynamoRole:
     Type: 'AWS::IAM::Role'
@@ -193,8 +195,9 @@ Resources:
                   - 'dynamodb:GetItem'
 ## Todo: provide only required resources list
                 Resource: '*'
-  {% endif %}  # tables
+  {% endif %}  # end tables
   
+  # Queues
   {% if queues is defined %}
   GatewaySQSRole:
     Type: 'AWS::IAM::Role'
@@ -218,7 +221,6 @@ Resources:
                 - 'sqs:SendMessage'
                 - 'sqs:GetQueueUrl'
                 - 'sqs:SendMessageBatch'
-## Todo: provide only required resources list
               Resource: '*'
       - PolicyName: AuthorizerPolicy
         PolicyDocument:
@@ -231,8 +233,9 @@ Resources:
                 {% for auth_name, auth_params in authorizers.items() %}
                 - !GetAtt {{ auth_name }}Function.Arn
                 {% endfor %}
-  {% endif %}  # queues
+  {% endif %}  # end queues
 
+  # Streams
   {% if streams is defined %}
   {% for stream_name, stream in streams.items() %}
   {{ lprefix }}{{ stream_name.replace('-', '') }}Stream:
@@ -269,8 +272,9 @@ Resources:
         RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
   {% endfor %}
   {% endfor %}
-  {% endif %}  # streams
+  {% endif %}  # end streams
 
+  # Buckets
   {% if buckets is defined %}
   {% for bucket_name, bucket in buckets.items() %}
   {{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket:
@@ -321,7 +325,7 @@ Resources:
             Principal: '*'
             Action: 's3:GetObjectAttributes'
             Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*            
-  {% endif %}
+  {% endif %}  # if bucket.public
 
   {% if bucket.extaccesspolicy is defined %}
   {{ lprefix }}{{ bucket_name.replace('-', '') }}ReadPolicy:
@@ -340,8 +344,9 @@ Resources:
 
   {% endif %}
   {% endfor %}
-  {% endif %}  # buckets
+  {% endif %}  # end buckets
   
+  # Queues
   {% if queues is defined %}
   {% for queue_name, queue in queues.items() %}
   {{ lprefix }}{{ queue_name.replace('-', '') }}Queue:
@@ -349,8 +354,9 @@ Resources:
     Properties:
       QueueName: !Sub "{{ lprefix }}-{{ queue_name }}-${Stage}"
   {% endfor %}
-  {% endif %}  # queues
+  {% endif %}  # end queues
 
+  # Tables
   {% if tables is defined %}
   {% for table_name, table in tables.items() %}
   {{ prefix }}{{ table_name }}:
@@ -405,13 +411,14 @@ Resources:
         PointInTimeRecoveryEnabled: true
         RecoveryPeriodInDays: 14
     {% endfor %}
-  {% endif %}  # tables
+  {% endif %}  # end tables
 
+  # Lambda Layer
   {% if enable_lambda_layer %}
   PythonLambdaLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: !Sub pythonthirdparty-${Stage}
+      LayerName: !Sub {{ lprefix }}-pythonthirdparty-${Stage}
       Description: Dependencies for all python lambdas
       ContentUri: thirdparty/.
       CompatibleRuntimes:
@@ -419,8 +426,9 @@ Resources:
     Metadata:
       BuildMethod: python3.13
       BuildArchitecture: x86_64
-  {% endif %}  # enable_lambda_layer
+  {% endif %}  # end lambda layer
 
+  # Functions
   {% if functions is defined %}
   {% for function_name, function in functions.items() %}
   {{ function_name.replace('-', '' )}}Function:
@@ -511,4 +519,21 @@ Resources:
         {% endfor %}
         {% endif %}
   {% endfor %}
-  {% endif %}  # functions
+  {% endif %}  # end functions
+
+  # Search
+  {% if search is defined %}
+  VpcEndpointSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow Lambda access to OpenSearch Serverless
+      {# VpcId: "[TBD]" #}
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "[VPC CIDR]"
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+  {% endif %}  # end search

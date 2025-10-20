@@ -6,7 +6,8 @@ import rich
 from benedict import benedict
 
 from easysam.commondep import commondep
-from easysam.generate import FatalError, load_resources
+from easysam.definitions import FatalError
+from easysam.load import resources as load_resources
 from easysam.validate_cloud import validate as validate_cloud
 
 
@@ -53,7 +54,9 @@ def schema(obj, directory, path, select):
     deploy_ctx = obj.get('deploy_ctx', {})
 
     try:
-        resources_data = load_resources(directory, pypath, deploy_ctx, errors)
+        resources_data = load_resources(
+            directory, pypath, deploy_ctx, errors
+        )
 
     except FatalError as e:
         lg.error('There were fatal errors. Interrupting schema validation.')
@@ -89,7 +92,9 @@ def cloud(obj, directory, path):
     environment = deploy_ctx['environment']
 
     try:
-        resources_data = load_resources(directory, pypath, deploy_ctx, errors)
+        resources_data = load_resources(
+            directory, pypath, deploy_ctx, errors
+        )
 
         if errors:
             rich.print(

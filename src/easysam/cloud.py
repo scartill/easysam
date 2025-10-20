@@ -1,0 +1,31 @@
+import boto3
+import logging as lg
+from benedict import benedict
+
+
+def scan(resources_data: benedict, errors: list[str]):
+    if 'search' not in resources_data:
+        return
+
+    lg.info('Scanning cloud for resources')
+
+    ec2 = boto3.client('ec2')
+
+    vpcs = ec2.describe_vpcs()['Vpcs']
+
+    if not vpcs:
+        errors.append('Error: No VPCs found')
+        return
+
+    if len(vpcs) > 1:
+        errors.append('Error: Not implemented for multiple VPCs')
+        return
+
+    vpc_id = vpcs[0]['VpcId']
+    subnets = ec2.describe_subnets(Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}])['Subnets']
+    subnet_ids = [subnet['SubnetId'] for subnet in subnets]
+
+    lg.info(f'Found {len(subnet_ids)} subnets in VPC {vpc_id}')
+    lg.debug(f'Subnet IDs: {subnet_ids}')
+
+    resources_data['subnet_ids'] = subnet_ids
