@@ -118,9 +118,9 @@ def deploy_cmd(obj, directory, **kwargs):
 @click.option(
     '--await', 'await_deletion', is_flag=True, help='Await the deletion to complete'
 )
-@click.argument('environment', type=str)
-def delete_cmd(obj, environment, **kwargs):
+def delete_cmd(obj, **kwargs):
     obj.update(kwargs)  # noqa: F821
+    environment = obj.get('deploy_ctx').get('environment')
     delete(obj, environment)
 
 

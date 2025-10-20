@@ -523,16 +523,16 @@ Resources:
 
   # Search
   {% if search is defined %}
-  VpcEndpointSecurityGroup:
+  {{ lprefix }}VpcEndpointSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Allow Lambda access to OpenSearch Serverless
-      {# VpcId: "[TBD]" #}
+      VpcId: {{ cloud.vpc_id }}
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
-          CidrIp: "[VPC CIDR]"
+          CidrIp: {{ cloud.vpc_cidr }}
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0

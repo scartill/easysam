@@ -7,6 +7,8 @@ def scan(resources_data: benedict, errors: list[str]):
     if 'search' not in resources_data:
         return
 
+    cloud = resources_data.get_dict('cloud', {})
+
     lg.info('Scanning cloud for resources')
 
     ec2 = boto3.client('ec2')
@@ -21,11 +23,22 @@ def scan(resources_data: benedict, errors: list[str]):
         errors.append('Error: Not implemented for multiple VPCs')
         return
 
-    vpc_id = vpcs[0]['VpcId']
-    subnets = ec2.describe_subnets(Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}])['Subnets']
+    vpc = vpcs[0]
+    vpc_id = vpc['VpcId']
+    cloud['vpc_id'] = vpc_id
+    cloud['vpc_cidr'] = vpc['CidrBlock']
+
+    lg.info(f'Found VPC {vpc_id} with CIDR {cloud["vpc_cidr"]}')
+
+    subnets = ec2.describe_subnets(
+        Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}]
+    )[
+        'Subnets'
+    ]
     subnet_ids = [subnet['SubnetId'] for subnet in subnets]
 
     lg.info(f'Found {len(subnet_ids)} subnets in VPC {vpc_id}')
     lg.debug(f'Subnet IDs: {subnet_ids}')
 
-    resources_data['subnet_ids'] = subnet_ids
+    cloud['subnet_ids'] = subnet_ids
+    resources_data['cloud'] = cloud
