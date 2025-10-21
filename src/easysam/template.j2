@@ -627,5 +627,12 @@ Resources:
           }
         ]
 
+  {{ collection_name.replace('-', '') }}Collection:
+    Type: AWS::OpenSearchServerless::Collection
+    Properties:
+      Name: !Sub {{ lprefix }}-{{ collection_name }}-${Stage}
+      Type: SEARCH
+      Description: "Serverless collection {{ collection_name}}"
+
   {% endfor %}
   {% endif %}  # end search
