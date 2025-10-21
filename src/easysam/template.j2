@@ -549,7 +549,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
-          CidrIp: {{ cloud.vpc_cidr }}
+          CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
@@ -601,10 +601,7 @@ Resources:
                 ]
               }
             ],
-            "AllowFromPublic": false,
-            "SourceVPCEs": [
-              "${{ "{" }}VpcEndpoint.Id{{ "}" }}"
-            ]
+            "AllowFromPublic": true
           }
         ]
 

@@ -43,12 +43,29 @@ def create_aoss_client():
 
 
 def index_aoss():
+    service = 'aoss'
+    region = os.getenv('REGION')
+    collection = os.getenv('SEARCH_SEARCHABLE_COLLECTION_ID')
+    host = f'https://{collection}.{region}.{service}.amazonaws.com'
+    index = INDEX_NAME
+
+    url = host + "/" + index + "/_doc"
+    headers = {"Content-Type": "application/json"}
+
+    awsauth = AWS4Auth(
+        refreshable_credentials=boto3.Session().get_credentials(),
+        region=region,
+        service='aoss'
+    )
+
     document = {
         'title': 'The Great Gatsby',
         'content': 'The Great Gatsby is a novel by F. Scott Fitzgerald. It is a story about the American Dream and the corruption of the American Dream.'
     }
-    client = create_aoss_client()
-    return client.index(index=INDEX_NAME, body=document)
+
+    r = requests.post(url, auth=awsauth, headers=headers, json=document)
+    r.raise_for_status()
+    return r.json()
 
 
 def search_aoss():
