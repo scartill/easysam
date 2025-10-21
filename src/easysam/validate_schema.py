@@ -57,12 +57,13 @@ def validate_queues(resources_data: dict, errors: list[str]):
 def validate_tables(resources_data: dict, errors: list[str]):
     '''Validate table-specific rules.'''
     for table_name, table in resources_data.get('tables', {}).items():
-        if stream_config := table.get('stream'):
-            trigger_function = stream_config.get('trigger')
+        if trigger_config := table.get('trigger'):
+            # trigger_config is always an object at this point (processed by load.py)
+            trigger_function = trigger_config.get('function')
             if trigger_function not in resources_data.get('functions', {}):
                 errors.append(
                     f'Table {table_name}: '
-                    f'Stream trigger function {trigger_function} must be a valid function'
+                    f'Trigger function {trigger_function} must be a valid function'
                 )
 
 

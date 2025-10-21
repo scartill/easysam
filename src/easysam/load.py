@@ -325,14 +325,19 @@ def process_default_paths(resources_data: dict, errors: list[str]):
 
 def process_default_tables(resources_data: dict, errors: list[str]):
     for table_name, table in resources_data.get('tables', {}).items():
-        if stream_config := table.get('stream'):
+        if trigger_config := table.get('trigger'):
+            # If trigger is a string, convert to object
+            if isinstance(trigger_config, str):
+                trigger_config = {'function': trigger_config}
+                table['trigger'] = trigger_config
+
             # Set default viewtype to 'new-and-old'
-            if 'viewtype' not in stream_config:
-                stream_config['viewtype'] = 'new-and-old'
+            if 'viewtype' not in trigger_config:
+                trigger_config['viewtype'] = 'new-and-old'
 
             # Set default startingposition to 'latest'
-            if 'startingposition' not in stream_config:
-                stream_config['startingposition'] = 'latest'
+            if 'startingposition' not in trigger_config:
+                trigger_config['startingposition'] = 'latest'
 
 
 def preprocess_defaults(resources_data: dict, errors: list[str]):

@@ -420,9 +420,9 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
         RecoveryPeriodInDays: 14
-      {% if table.stream %}
+      {% if table.trigger %}
       StreamSpecification:
-        StreamViewType: {{ stream_view_type_map[table.stream.viewtype] }}
+        StreamViewType: {{ stream_view_type_map[table.trigger.viewtype] }}
       {% endif %}
     {% endfor %}
   {% endif %}  # end tables
@@ -476,7 +476,7 @@ Resources:
         {% endfor %}
         {% if tables is defined %}
         {% for table_name, table in tables.items() %}
-        {% if table.stream and table.stream.trigger == function_name %}
+        {% if table.trigger and table.trigger.function == function_name %}
         - Version: "2012-10-17"
           Statement:
             - Effect: Allow
@@ -570,21 +570,21 @@ Resources:
   # DynamoDB Stream Event Source Mappings (from table definitions)
   {% if tables is defined %}
   {% for table_name, table in tables.items() %}
-  {% if table.stream and table.stream.trigger %}
+  {% if table.trigger %}
   {{ table_name.replace('-', '') }}StreamEventSourceMapping:
     Type: AWS::Lambda::EventSourceMapping
     DependsOn:
-      - {{ table.stream.trigger.replace('-', '') }}Function
+      - {{ table.trigger.function.replace('-', '') }}Function
       - {{ prefix }}{{ table_name }}
     Properties:
       EventSourceArn: !GetAtt {{ prefix }}{{ table_name }}.StreamArn
-      FunctionName: !GetAtt {{ table.stream.trigger.replace('-', '') }}Function.Arn
-      StartingPosition: {{ stream_starting_position_map[table.stream.startingposition] }}
-      {% if table.stream.batchsize is defined %}
-      BatchSize: {{ table.stream.batchsize }}
+      FunctionName: !GetAtt {{ table.trigger.function.replace('-', '') }}Function.Arn
+      StartingPosition: {{ stream_starting_position_map[table.trigger.startingposition] }}
+      {% if table.trigger.batchsize is defined %}
+      BatchSize: {{ table.trigger.batchsize }}
       {% endif %}
-      {% if table.stream.batchwindow is defined %}
-      MaximumBatchingWindowInSeconds: {{ table.stream.batchwindow }}
+      {% if table.trigger.batchwindow is defined %}
+      MaximumBatchingWindowInSeconds: {{ table.trigger.batchwindow }}
       {% endif %}
   {% endif %}
   {% endfor %}

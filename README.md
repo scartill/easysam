@@ -95,14 +95,16 @@ tables:
             type: String
             hash: Boolean Optional
             range: Boolean Optional
-    stream:
-      trigger: String (e.g., my-lambda) - lambda function to trigger on changes
-      viewtype: String Optional (e.g., new-and-old) - defaults to new-and-old
-        # Options: keys-only, new, old, new-and-old
-      batchsize: Integer Optional (e.g., 10)
-      batchwindow: Integer Optional (e.g., 5) - seconds
-      startingposition: String Optional (e.g., latest) - defaults to latest
-        # Options: trim-horizon, latest
+    trigger: String or Object - lambda function to trigger on table changes
+      # Simple form (just function name, uses defaults):
+      # trigger: my-lambda
+      # Advanced form (with options):
+      # trigger:
+      #   function: my-lambda
+      #   viewtype: new-and-old  # Optional: keys-only, new, old, new-and-old (default: new-and-old)
+      #   batchsize: 10          # Optional: number of records per batch
+      #   batchwindow: 5         # Optional: seconds to wait for batch
+      #   startingposition: latest  # Optional: trim-horizon, latest (default: latest)
 ```
 
 ### Bucket Definitions

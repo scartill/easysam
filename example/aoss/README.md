@@ -46,14 +46,22 @@ tables:
     attributes:
     - hash: true
       name: ItemID
-    stream:
-      trigger: indexfunc  # Lambda function to trigger on table changes
-      # Optional: viewtype defaults to 'new-and-old'
-      # Optional: batchsize defaults to Lambda defaults
-      # Optional: startingposition defaults to 'latest'
+    trigger: indexfunc  # Lambda function to trigger on table changes
 ```
 
-The stream configuration is defined at the table level, making it clear which lambda function responds to changes in which table. The `indexfunc` Lambda will automatically be triggered when items in the `SearchableItem` table are created, modified, or deleted.
+That's it! The simple `trigger: indexfunc` configuration:
+- Enables DynamoDB Streams on the table automatically
+- Triggers the `indexfunc` Lambda when items are created, modified, or deleted
+- Uses sensible defaults (view type: `new-and-old`, starting position: `latest`)
+
+For advanced configuration, you can use the expanded form:
+```yaml
+trigger:
+  function: indexfunc
+  viewtype: new-and-old  # Optional, default
+  batchsize: 10          # Optional
+  startingposition: latest  # Optional, default
+```
 
 ## Stream View Types
 
