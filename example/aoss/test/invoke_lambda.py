@@ -4,9 +4,6 @@ import json
 import click
 
 
-@click.command()
-@click.option('--env', default='dev')
-@click.argument('message', default='{"message": "Hello, World!"}')
 def send_message(message, env):
     lambda_client = boto3.client('lambda')
 
@@ -16,9 +13,15 @@ def send_message(message, env):
     )
 
     answer = json.loads(response['Payload'].read())
-    body = json.loads(answer['body'])
-    click.echo(json.dumps(body, indent=2))
+    click.echo(answer)
+
+
+@click.command()
+@click.option('--env', default='easysamdev')
+def main(env):
+    send_message('index', env)   
+    send_message('search', env)
 
 
 if __name__ == '__main__':
-    send_message()
+    main()
