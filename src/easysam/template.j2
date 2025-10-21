@@ -684,10 +684,9 @@ Resources:
               }
             ],
             "Principal": [
-              {% for function_name, function in functions.items() %}
-              {% if function.searches is defined %}
-              "${{ "{" }}{{ function_name.replace('-', '') }}FunctionRole.Arn{{ "}" }}"{% if not loop.last %},{% endif %}
-              {% endif %}
+              {% set valid_functions = functions | dictsort | selectattr('1.searches', 'defined') | list %}
+              {% for function_name, function in valid_functions %}
+                "${{ '{' }}{{ function_name.replace('-', '') }}FunctionRole.Arn{{ '}' }}"{% if not loop.last %},{% endif %}
               {% endfor %}
             ]
           }
@@ -699,6 +698,9 @@ Resources:
       Name: !Sub {{ lprefix }}-{{ collection_name }}-${Stage}
       Type: SEARCH
       Description: "Serverless collection {{ collection_name}}"
+    DependsOn: 
+      - {{ collection_name.replace('-', '') }}EP
+      - {{ collection_name.replace('-', '') }}NP
 
   {% endfor %}
   {% endif %}  # end search
