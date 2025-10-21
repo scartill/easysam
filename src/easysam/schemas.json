@@ -76,7 +76,7 @@
             "enum": ["comprehend"]
           }
         },
-        "search": {"type": "array", "items": {"type": "string"}},
+        "searches": {"type": "array", "items": {"type": "string"}},
         "uri": {"type": "string"},
         "schedule": {"type": "string"},
         "layers": {

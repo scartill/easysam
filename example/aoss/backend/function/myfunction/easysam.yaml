@@ -1,5 +1,5 @@
 lambda:
   name: myfunction
   resources:
-    search:
+    searches:
       - searchable

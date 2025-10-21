@@ -134,7 +134,7 @@ def validate_lambda(resources_data: dict, errors: list[str]):
 
                 continue
 
-        for collection in details.get('search', []):
+        for collection in details.get('searches', []):
             if collection not in resources_data.get('search', {}):
                 errors.append(
                     f'Lambda {lambda_name}: '

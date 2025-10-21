@@ -468,7 +468,16 @@ Resources:
           {% if service == 'comprehend' %}
         - ComprehendBasicAccessPolicy: {}
           {% endif %}
-        {% endfor %}        
+        {% endfor %}
+        {% for search_collection in function.searches %}
+        - Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+              - aoss:*
+            Resource:
+              - !GetAtt {{ search_collection.replace('-', '') }}Collection.Arn
+        {% endfor %}
       {% if enable_lambda_layer or function.layers %}
       Layers:
       {% endif %}
@@ -619,7 +628,7 @@ Resources:
             ],
             "Principal": [
               {% for function_name, function in functions.items() %}
-              {% if function.search is defined %}
+              {% if function.searches is defined %}
               "${{ "{" }}{{ function_name.replace('-', '') }}FunctionRole.Arn{{ "}" }}"{% if not loop.last %},{% endif %}
               {% endif %}
               {% endfor %}
