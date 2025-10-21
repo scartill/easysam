@@ -591,5 +591,41 @@ Resources:
           }
         ]
 
+  # Allow all IAM roles in the account (covers any Lambda execution role).
+  {{ collection_name.replace('-', '') }}AP:
+    Type: AWS::OpenSearchServerless::AccessPolicy
+    Properties:
+      Name: !Sub {{ lprefix }}-{{ collection_name }}-ap-${Stage}
+      Type: data
+      Policy: !Sub |
+        [
+          {
+            "Description": "Data access for all roles in account",
+            "Rules": [
+              {
+                "ResourceType": "collection",
+                "Resource": [
+                  "collection/{{ lprefix }}-{{ collection_name }}-${Stage}"
+                ],
+                "Permission": ["aoss:*"]
+              },
+              {
+                "ResourceType": "index",
+                "Resource": [
+                  "index/{{ lprefix }}-{{ collection_name }}-${Stage}/*"
+                ],
+                "Permission": ["aoss:*"]
+              }
+            ],
+            "Principal": [
+              {% for function_name, function in functions.items() %}
+              {% if function.search is defined %}
+              "${{ "{" }}{{ function_name.replace('-', '') }}FunctionRole.Arn{{ "}" }}"{% if not loop.last %},{% endif %}
+              {% endif %}
+              {% endfor %}
+            ]
+          }
+        ]
+
   {% endfor %}
   {% endif %}  # end search
