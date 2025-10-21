@@ -491,6 +491,14 @@ Resources:
         - "{{ layer_arn }}"
         {% endfor %}
       {% endif %}
+      Environment:
+        Variables:
+          REGION: !Ref AWS::Region
+          {% if function.searches %}
+          {% for search_collection in function.searches %}
+          SEARCH_{{ search_collection.replace('-', '_').upper() }}_COLLECTION_ID: !GetAtt {{ search_collection.replace('-', '') }}Collection.Id
+          {% endfor %}
+          {% endif %}
       Events:
         {% if function.schedule%}
         InvocationLevel:

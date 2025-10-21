@@ -33,6 +33,7 @@ packages = ["src/easysam"]
 
 [dependency-groups]
 dev = [
+    "opensearch-py>=3.0.0",
     "pip>=25.1.1",
     "ruff>=0.14.1",
     "twine>=6.1.0",
