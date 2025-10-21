@@ -1,5 +1,7 @@
 lambda:
   name: myfunction
   resources:
+    tables:
+      - SearchableItem
     searches:
       - searchable
