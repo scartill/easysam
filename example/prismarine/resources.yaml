@@ -1,5 +1,8 @@
 prefix: MyAppWithPrismarine
 
+import:
+  - backend
+
 prismarine:
   default-base: common
   access-module: common.dynamo_access
