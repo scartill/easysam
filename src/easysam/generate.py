@@ -36,7 +36,8 @@ def generate(
     try:
         errors = []
         resources_data = load_resources(resources_dir, pypath, deploy_ctx, errors)
-        scan_cloud(resources_data, errors)
+        aws_profile = cliparams.get('aws_profile')
+        scan_cloud(resources_data, errors, aws_profile)
 
         lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
 

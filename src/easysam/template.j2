@@ -1,4 +1,14 @@
 {% set lprefix = prefix.lower() %}
+{% set stream_view_type_map = {
+  'keys-only': 'KEYS_ONLY',
+  'new': 'NEW_IMAGE',
+  'old': 'OLD_IMAGE',
+  'new-and-old': 'NEW_AND_OLD_IMAGES'
+} %}
+{% set stream_starting_position_map = {
+  'trim-horizon': 'TRIM_HORIZON',
+  'latest': 'LATEST'
+} %}
 
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
@@ -410,6 +420,10 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
         RecoveryPeriodInDays: 14
+      {% if table.stream %}
+      StreamSpecification:
+        StreamViewType: {{ stream_view_type_map[table.stream.viewtype] }}
+      {% endif %}
     {% endfor %}
   {% endif %}  # end tables
 
@@ -460,6 +474,21 @@ Resources:
         - KinesisCrudPolicy:
             StreamName: !Ref {{ lprefix }}{{ stream.replace('-', '') }}Stream
         {% endfor %}
+        {% if tables is defined %}
+        {% for table_name, table in tables.items() %}
+        {% if table.stream and table.stream.trigger == function_name %}
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:DescribeStream
+                - dynamodb:GetRecords
+                - dynamodb:GetShardIterator
+                - dynamodb:ListStreams
+              Resource: !GetAtt {{ prefix }}{{ table_name }}.StreamArn
+        {% endif %}
+        {% endfor %}
+        {% endif %}
         {% for queue in function.send %}
         - SQSSendMessagePolicy:
             QueueName: !GetAtt {{ lprefix }}{{ queue.replace('-','') }}Queue.QueueName
@@ -537,6 +566,29 @@ Resources:
         {% endif %}
   {% endfor %}
   {% endif %}  # end functions
+
+  # DynamoDB Stream Event Source Mappings (from table definitions)
+  {% if tables is defined %}
+  {% for table_name, table in tables.items() %}
+  {% if table.stream and table.stream.trigger %}
+  {{ table_name.replace('-', '') }}StreamEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    DependsOn:
+      - {{ table.stream.trigger.replace('-', '') }}Function
+      - {{ prefix }}{{ table_name }}
+    Properties:
+      EventSourceArn: !GetAtt {{ prefix }}{{ table_name }}.StreamArn
+      FunctionName: !GetAtt {{ table.stream.trigger.replace('-', '') }}Function.Arn
+      StartingPosition: {{ stream_starting_position_map[table.stream.startingposition] }}
+      {% if table.stream.batchsize is defined %}
+      BatchSize: {{ table.stream.batchsize }}
+      {% endif %}
+      {% if table.stream.batchwindow is defined %}
+      MaximumBatchingWindowInSeconds: {{ table.stream.batchwindow }}
+      {% endif %}
+  {% endif %}
+  {% endfor %}
+  {% endif %}  # end stream event source mappings
 
   # Search
   {% if search is defined %}

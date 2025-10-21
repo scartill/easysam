@@ -3,3 +3,5 @@ tables:
     attributes:
     - hash: true
       name: ItemID
+    stream:
+      trigger: indexfunc

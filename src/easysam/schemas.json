@@ -226,6 +226,24 @@
             "required": ["name", "attributes"],
             "additionalProperties": false
           }
+        },
+        "stream": {
+          "type": "object",
+          "properties": {
+            "viewtype": {
+              "type": "string",
+              "enum": ["keys-only", "new", "old", "new-and-old"]
+            },
+            "trigger": {"type": "string"},
+            "batchsize": {"type": "integer"},
+            "batchwindow": {"type": "integer"},
+            "startingposition": {
+              "type": "string",
+              "enum": ["trim-horizon", "latest"]
+            }
+          },
+          "required": ["trigger"],
+          "additionalProperties": false
         }
       },
       "required": ["attributes"],

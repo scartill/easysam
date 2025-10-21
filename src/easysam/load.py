@@ -323,9 +323,22 @@ def process_default_paths(resources_data: dict, errors: list[str]):
                     path['greedy'] = True
 
 
+def process_default_tables(resources_data: dict, errors: list[str]):
+    for table_name, table in resources_data.get('tables', {}).items():
+        if stream_config := table.get('stream'):
+            # Set default viewtype to 'new-and-old'
+            if 'viewtype' not in stream_config:
+                stream_config['viewtype'] = 'new-and-old'
+
+            # Set default startingposition to 'latest'
+            if 'startingposition' not in stream_config:
+                stream_config['startingposition'] = 'latest'
+
+
 def preprocess_defaults(resources_data: dict, errors: list[str]):
     process_default_functions(resources_data, errors)
     process_default_streams(resources_data, errors)
+    process_default_tables(resources_data, errors)
     process_default_paths(resources_data, errors)
 
 

@@ -26,6 +26,7 @@ def validate(resources_dir: Path, resources_data: dict, errors: list[str]):
     validate_buckets(resources_data, errors)
     validate_queues(resources_data, errors)
     validate_streams(resources_data, errors)
+    validate_tables(resources_data, errors)
     validate_lambda(resources_data, errors)
     validate_paths(resources_dir, resources_data, errors)
     validate_import(resources_dir, resources_data, errors)
@@ -51,6 +52,18 @@ def validate_buckets(resources_data: dict, errors: list[str]):
 def validate_queues(resources_data: dict, errors: list[str]):
     '''Validate queue-specific rules.'''
     pass
+
+
+def validate_tables(resources_data: dict, errors: list[str]):
+    '''Validate table-specific rules.'''
+    for table_name, table in resources_data.get('tables', {}).items():
+        if stream_config := table.get('stream'):
+            trigger_function = stream_config.get('trigger')
+            if trigger_function not in resources_data.get('functions', {}):
+                errors.append(
+                    f'Table {table_name}: '
+                    f'Stream trigger function {trigger_function} must be a valid function'
+                )
 
 
 def validate_streams(resources_data: dict, errors: list[str]):

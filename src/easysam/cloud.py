@@ -3,7 +3,7 @@ import logging as lg
 from benedict import benedict
 
 
-def scan(resources_data: benedict, errors: list[str]):
+def scan(resources_data: benedict, errors: list[str], aws_profile: str = None):
     if 'search' not in resources_data:
         return
 
@@ -11,7 +11,12 @@ def scan(resources_data: benedict, errors: list[str]):
 
     lg.info('Scanning cloud for resources')
 
-    ec2 = boto3.client('ec2')
+    session_kwargs = {}
+    if aws_profile:
+        session_kwargs['profile_name'] = aws_profile
+
+    session = boto3.Session(**session_kwargs)
+    ec2 = session.client('ec2')
 
     vpcs = ec2.describe_vpcs()['Vpcs']
 
@@ -30,9 +35,7 @@ def scan(resources_data: benedict, errors: list[str]):
 
     lg.info(f'Found VPC {vpc_id} with CIDR {cloud["vpc_cidr"]}')
 
-    subnets = ec2.describe_subnets(
-        Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}]
-    )[
+    subnets = ec2.describe_subnets(Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}])[
         'Subnets'
     ]
     subnet_ids = [subnet['SubnetId'] for subnet in subnets]
