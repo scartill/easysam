@@ -4,11 +4,11 @@ import json
 import click
 
 
-def send_message(message, env):
+def send_message(function_name, message, env):
     lambda_client = boto3.client('lambda')
 
     response = lambda_client.invoke(
-        FunctionName=f'myfunction-{env}',
+        FunctionName=f'{function_name}-{env}',
         Payload=json.dumps(message),
     )
 
@@ -19,8 +19,8 @@ def send_message(message, env):
 @click.command()
 @click.option('--env', default='easysamdev')
 def main(env):
-    send_message('index', env)
-    send_message('search', env)
+    send_message('indexfunc', 'index', env)
+    send_message('searchfunc', 'search', env)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,7 @@
+lambda:
+  name: indexfunc
+  resources:
+    tables:
+      - SearchableItem
+    searches:
+      - searchable
