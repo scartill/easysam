@@ -4,6 +4,9 @@ import boto3
 from opensearchpy import (
     OpenSearch, RequestsHttpConnection, AWSV4SignerAuth
 )
+import requests
+from requests_aws4auth import AWS4Auth
+
 
 INDEX_NAME = 'searchable-documents'
 
@@ -39,16 +42,6 @@ def create_aoss_client():
     )
 
 
-def search_aoss():
-    client = create_aoss_client()
-    query = {
-        'query': {
-            'match_all': {}
-        }
-    }
-    return client.search(index=INDEX_NAME, body=query)
-
-
 def index_aoss():
     document = {
         'title': 'The Great Gatsby',
@@ -56,3 +49,30 @@ def index_aoss():
     }
     client = create_aoss_client()
     return client.index(index=INDEX_NAME, body=document)
+
+
+def search_aoss():
+    service = 'aoss'
+    region = os.getenv('REGION')
+    collection = os.getenv('SEARCH_SEARCHABLE_COLLECTION_ID')
+    host = f'https://{collection}.{region}.{service}.amazonaws.com'
+    index = INDEX_NAME
+
+    url = host + "/" + index
+    headers = {"Content-Type": "application/json"}
+
+    awsauth = AWS4Auth(
+        refreshable_credentials=boto3.Session().get_credentials(),
+        region=region,
+        service='aoss'  # NOTE: The service name is 'aoss' not 'es
+    )
+
+    query = {
+        'query': {
+            'match_all': {}
+        }
+    }
+
+    r = requests.get(url + "/_search", auth=awsauth, headers=headers, json=query)
+    r.raise_for_status()
+    return r.text

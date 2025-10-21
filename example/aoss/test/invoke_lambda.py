@@ -19,7 +19,7 @@ def send_message(message, env):
 @click.command()
 @click.option('--env', default='easysamdev')
 def main(env):
-    send_message('index', env)   
+    send_message('index', env)
     send_message('search', env)
 
 
