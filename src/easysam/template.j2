@@ -567,5 +567,29 @@ Resources:
           "AWSOwnedKey": true
         }
 
+  # No public access. Restrict to specific VPC endpoints only.
+  {{ collection_name.replace('-', '') }}NP:
+    Type: AWS::OpenSearchServerless::SecurityPolicy
+    Properties:
+      Name: !Sub {{ lprefix }}-{{ collection_name }}-np-${Stage}
+      Type: network
+      Policy: !Sub |
+        [
+          {
+            "Rules": [
+              {
+                "ResourceType": "collection",
+                "Resource": [
+                  "collection/{{ lprefix }}-{{ collection_name }}-${Stage}"
+                ]
+              }
+            ],
+            "AllowFromPublic": false,
+            "SourceVPCEs": [
+              "${{ "{" }}VpcEndpoint.Id{{ "}" }}"
+            ]
+          }
+        ]
+
   {% endfor %}
   {% endif %}  # end search
