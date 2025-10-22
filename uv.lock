@@ -521,7 +521,7 @@ requires-dist = [
     { name = "jinja2-cli", extras = ["yaml"], specifier = ">=0.8.2" },
     { name = "jsonschema", specifier = ">=4.23.0" },
     { name = "mergedeep", specifier = ">=1.3.4" },
-    { name = "prismarine", editable = "../prismarine" },
+    { name = "prismarine", specifier = ">=1.4.1" },
     { name = "python-benedict", extras = ["yaml"], specifier = ">=0.34.1" },
     { name = "rich", specifier = ">=13.9.4" },
 ]
@@ -1078,8 +1078,8 @@ wheels = [
 
 [[package]]
 name = "prismarine"
-version = "1.3.1"
-source = { editable = "../prismarine" }
+version = "1.4.1"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
     { name = "case-converter" },
@@ -1088,21 +1088,9 @@ dependencies = [
     { name = "mako" },
     { name = "types-boto3", extra = ["dynamodb"] },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "boto3", specifier = ">=1.38.19" },
-    { name = "case-converter", specifier = ">=1.2.0" },
-    { name = "click", specifier = ">=8.2.0" },
-    { name = "gray-formatter", specifier = ">=3.0.10" },
-    { name = "mako", specifier = ">=1.3.10" },
-    { name = "types-boto3", extras = ["dynamodb"], specifier = ">=1.38.19" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pip", specifier = ">=25.1.1" },
-    { name = "twine", specifier = ">=6.1.0" },
+sdist = { url = "https://files.pythonhosted.org/packages/4b/42/ff065b10615dbcb18eae1b136334e6e98ec088c194f3a9b75b7cd81d3afe/prismarine-1.4.1.tar.gz", hash = "sha256:59ca0e4e153f17098a12d1168e497eb77224bab7584ab87fec813b5487e20379", size = 36752, upload-time = "2025-10-22T18:58:37.354Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a6/31/2d7c677c7395e392c1f15733e21fc1d53163f22923aa23f39bf81a4c3c5a/prismarine-1.4.1-py3-none-any.whl", hash = "sha256:6a40fcb47de04ad77ca6cba1688d6204a1519e5ce9bffb9938739ed446993768", size = 13777, upload-time = "2025-10-22T18:58:35.951Z" },
 ]
 
 [[package]]
@@ -1698,15 +1686,15 @@ wheels = [
 
 [[package]]
 name = "types-boto3"
-version = "1.40.55"
+version = "1.40.56"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore-stubs" },
     { name = "types-s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/70/17/d341a03017ea1fa228e1756438034240275eb470b8454a4384163dda25d1/types_boto3-1.40.55.tar.gz", hash = "sha256:42a4b669201325f71e60f3bc4bc492dfcb999dc5be77962759082e1ad68cc03e", size = 101279, upload-time = "2025-10-17T19:49:04.997Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7b/c6/754cf69672b25a29e1cd3eaa51538e91a881f10c1aa36af45cac4d5eec05/types_boto3-1.40.56.tar.gz", hash = "sha256:bf2ea05e87393da5901465cb6dd23ebcf4cb851f233a62f4be492328ad9cb198", size = 101245, upload-time = "2025-10-21T20:35:12.593Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/76/55/c92c2ca287ab34fb3aff05e72b18401d73bea5a67ef66ab3b9c2457ecb54/types_boto3-1.40.55-py3-none-any.whl", hash = "sha256:e5624fe17ff1ef834bd962bce816063fa11c36ca5ec3564160644de8f8078791", size = 69608, upload-time = "2025-10-17T19:49:02.211Z" },
+    { url = "https://files.pythonhosted.org/packages/27/e7/f193c2671fa50ef4acca20b51a7cc907a5f4a7f769cda14aa279f6f29887/types_boto3-1.40.56-py3-none-any.whl", hash = "sha256:0f7331e5f11e6db44a69f7eff8618089704af72893815759c188634bb539dd8b", size = 69609, upload-time = "2025-10-21T20:35:04.622Z" },
 ]
 
 [package.optional-dependencies]
@@ -1716,11 +1704,11 @@ dynamodb = [
 
 [[package]]
 name = "types-boto3-dynamodb"
-version = "1.40.44"
+version = "1.40.56"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/90/b1/e30933a34699186a73dbec4c762444e011b99e1e4897b4b6051cc794ea49/types_boto3_dynamodb-1.40.44.tar.gz", hash = "sha256:ddf0b0a29b600d0ef4abe437a70c23387a4008f3b791dd0ad1bcfc9538a1ef0d", size = 47536, upload-time = "2025-10-02T20:31:43.549Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/48/583e0c4a80ee6a618107aba63d5c85983d88576e5014247d9f7dd2484073/types_boto3_dynamodb-1.40.56.tar.gz", hash = "sha256:319cb1032df0c220d33f95cb473eea0c9da1c1bdc5799d5ebaa03066c1761df8", size = 47530, upload-time = "2025-10-21T20:34:55.202Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e8/79/d11ff3218954a46192328b44f7ae1e147300f56aa2d4f6e9040b1da6cda4/types_boto3_dynamodb-1.40.44-py3-none-any.whl", hash = "sha256:0c9b9ee4aeaac1ffb81a4a2e11350517d86201b3b5dc8768bb6ae41eb441af0e", size = 56774, upload-time = "2025-10-02T20:31:42.165Z" },
+    { url = "https://files.pythonhosted.org/packages/82/08/a1686a7efe6f6879923af11138ed476091232f28ca571376fc52639a806e/types_boto3_dynamodb-1.40.56-py3-none-any.whl", hash = "sha256:ca3e5fc47c2948537bcd65885a4ebb72f3be0a80f7d6a752930f36c0d9e54950", size = 56777, upload-time = "2025-10-21T20:34:51.944Z" },
 ]
 
 [[package]]
