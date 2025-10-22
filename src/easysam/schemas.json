@@ -76,6 +76,7 @@
             "enum": ["comprehend"]
           }
         },
+        "searches": {"type": "array", "items": {"type": "string"}},
         "uri": {"type": "string"},
         "schedule": {"type": "string"},
         "layers": {
@@ -204,6 +205,29 @@
       "required": ["name"],
       "additionalProperties": false
     },
+    "table_trigger_schema": {
+      "oneOf": [
+        {"type": "string"},
+        {
+          "type": "object",
+          "properties": {
+            "function": {"type": "string"},
+            "viewtype": {
+              "type": "string",
+              "enum": ["keys-only", "new", "old", "new-and-old"]
+            },
+            "batchsize": {"type": "integer"},
+            "batchwindow": {"type": "integer"},
+            "startingposition": {
+              "type": "string",
+              "enum": ["trim-horizon", "latest"]
+            }
+          },
+          "required": ["function"],
+          "additionalProperties": false
+        }
+      ]
+    },
     "tables_schema": {
       "type": "object",
       "properties": {
@@ -225,7 +249,8 @@
             "required": ["name", "attributes"],
             "additionalProperties": false
           }
-        }
+        },
+        "trigger": {"$ref": "#/definitions/table_trigger_schema"}
       },
       "required": ["attributes"],
       "additionalProperties": false
@@ -320,6 +345,18 @@
             "template": {"type": "string"},
             "aux": {"type": "object"}
           }
+        }
+      },
+      "additionalProperties": false
+    },
+    "search": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {
+          "oneOf": [
+            { "type": "object" },
+            { "type": "null"}
+          ]
         }
       },
       "additionalProperties": false

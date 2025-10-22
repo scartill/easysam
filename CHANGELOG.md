@@ -1,3 +1,15 @@
+# 1.5.0
+
+- Added DynamoDB Streams support for lambda functions
+- Simple table-level `trigger` configuration - just specify the function name to enable automatic stream processing
+- Supports both simple (`trigger: my-function`) and advanced forms with options
+- User-friendly view type constants: `keys-only`, `new`, `old`, `new-and-old` (default: `new-and-old`)
+- User-friendly starting position: `trim-horizon`, `latest` (default: `latest`)
+- Optional batch size and batch window configuration for stream event processing
+- Automatic validation ensures trigger functions exist before deployment
+- Updated `aoss` example to demonstrate automatic OpenSearch indexing via DynamoDB Streams
+- Breaking change: Removed `tablestreams` from lambda function configuration in favor of table-based `trigger` configuration
+
 # 1.4.1
 
 - Fixed a bug with json load encoding issue

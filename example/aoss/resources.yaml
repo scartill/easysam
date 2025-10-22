@@ -1,0 +1,10 @@
+prefix: Aoss
+
+tags:
+  mytag: myvalue
+
+import:
+  - backend
+
+search:
+  searchable:

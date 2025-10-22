@@ -8,11 +8,15 @@ EasySAM is a simple, opinionated tool for deploying cloud resources with a focus
 - Modular architecture with import support
 - Comprehensive AWS resource support:
   - Lambda functions
-  - DynamoDB tables
+  - DynamoDB tables with stream support
   - S3 buckets
   - SQS queues
   - Kinesis streams
   - API Gateway integrations
+- Event-driven architecture:
+  - DynamoDB Streams for table change notifications
+  - SQS polling
+  - Kinesis stream processing
 - Easy initialization of new projects
 
 ## Installation
@@ -91,6 +95,16 @@ tables:
             type: String
             hash: Boolean Optional
             range: Boolean Optional
+    trigger: String or Object - lambda function to trigger on table changes
+      # Simple form (just function name, uses defaults):
+      # trigger: my-lambda
+      # Advanced form (with options):
+      # trigger:
+      #   function: my-lambda
+      #   viewtype: new-and-old  # Optional: keys-only, new, old, new-and-old (default: new-and-old)
+      #   batchsize: 10          # Optional: number of records per batch
+      #   batchwindow: 5         # Optional: seconds to wait for batch
+      #   startingposition: latest  # Optional: trim-horizon, latest (default: latest)
 ```
 
 ### Bucket Definitions
@@ -290,6 +304,7 @@ See `example` folder for examples:
 * `prismarine`- a simple [application](example/prismarine) with a lambda function and a table, using Prismarine.
 * `appwitherrors`- an [application](example/appwitherrors) with some errors in the resources.yaml file, to test the error handling.
 * `conditionals`- an [application](example/conditionals) with conditional resources.
+* `aoss`- an [application](example/aoss) with Amazon OpenSearch Serverless and DynamoDB Streams integration.
 
 ## License
 

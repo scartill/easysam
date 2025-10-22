@@ -1,0 +1,7 @@
+lambda:
+  name: searchfunc
+  resources:
+    tables:
+      - SearchableItem
+    searches:
+      - searchable

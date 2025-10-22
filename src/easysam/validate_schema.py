@@ -26,11 +26,13 @@ def validate(resources_dir: Path, resources_data: dict, errors: list[str]):
     validate_buckets(resources_data, errors)
     validate_queues(resources_data, errors)
     validate_streams(resources_data, errors)
+    validate_tables(resources_data, errors)
     validate_lambda(resources_data, errors)
     validate_paths(resources_dir, resources_data, errors)
     validate_import(resources_dir, resources_data, errors)
     validate_prismarine(resources_dir, resources_data, errors)
     validate_authorizers(resources_data, errors)
+    validate_search(resources_data, errors)
 
 
 def load_schema() -> dict:
@@ -50,6 +52,19 @@ def validate_buckets(resources_data: dict, errors: list[str]):
 def validate_queues(resources_data: dict, errors: list[str]):
     '''Validate queue-specific rules.'''
     pass
+
+
+def validate_tables(resources_data: dict, errors: list[str]):
+    '''Validate table-specific rules.'''
+    for table_name, table in resources_data.get('tables', {}).items():
+        if trigger_config := table.get('trigger'):
+            # trigger_config is always an object at this point (processed by load.py)
+            trigger_function = trigger_config.get('function')
+            if trigger_function not in resources_data.get('functions', {}):
+                errors.append(
+                    f'Table {table_name}: '
+                    f'Trigger function {trigger_function} must be a valid function'
+                )
 
 
 def validate_streams(resources_data: dict, errors: list[str]):
@@ -89,7 +104,7 @@ def validate_lambda(resources_data: dict, errors: list[str]):
     '''Validate lambda function-specific rules.'''
     for lambda_name, details in resources_data.get('functions', {}).items():
         for bucket in details.get('buckets', []):
-            if bucket not in resources_data['buckets']:
+            if bucket not in resources_data.get('buckets', {}):
                 errors.append(
                     f'Lambda {lambda_name}: '
                     f'Bucket {bucket} must be a valid bucket'
@@ -98,7 +113,7 @@ def validate_lambda(resources_data: dict, errors: list[str]):
                 continue
 
         for table in details.get('tables', []):
-            if table not in resources_data['tables']:
+            if table not in resources_data.get('tables', {}):
                 errors.append(
                     f'Lambda {lambda_name}: '
                     f'Table {table} must be a valid table'
@@ -107,7 +122,7 @@ def validate_lambda(resources_data: dict, errors: list[str]):
                 continue
 
         for poll in details.get('polls', []):
-            if poll['name'] not in resources_data['queues']:
+            if poll['name'] not in resources_data.get('queues', {}):
                 errors.append(
                     f'Lambda {lambda_name}: '
                     f'Queue {poll["name"]} must be a valid queue'
@@ -116,7 +131,7 @@ def validate_lambda(resources_data: dict, errors: list[str]):
                 continue
 
         for send in details.get('send', []):
-            if send not in resources_data['queues']:
+            if send not in resources_data.get('queues', {}):
                 errors.append(
                     f'Lambda {lambda_name}: '
                     f'Send {send} must be a valid queue'
@@ -125,10 +140,19 @@ def validate_lambda(resources_data: dict, errors: list[str]):
                 continue
 
         for stream in details.get('streams', []):
-            if stream not in resources_data['streams']:
+            if stream not in resources_data.get('streams', {}):
                 errors.append(
                     f'Lambda {lambda_name}: '
                     f'Stream {stream} must be a valid stream'
+                )
+
+                continue
+
+        for collection in details.get('searches', []):
+            if collection not in resources_data.get('search', {}):
+                errors.append(
+                    f'Lambda {lambda_name}: '
+                    f'Search {collection} must be a valid search'
                 )
 
                 continue
@@ -279,3 +303,11 @@ def validate_authorizers(resources_data: dict, errors: list[str]):
 
         if details['function'] not in resources_data.get('functions', {}):
             errors.append(f"Authorizer '{authorizer}' function must be a valid function")
+
+
+def validate_search(resources_data: dict, errors: list[str]):
+    '''Validate search-specific rules - no rules yet.'''
+    search = resources_data.get('search', {})
+
+    if not search:
+        return

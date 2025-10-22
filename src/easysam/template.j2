@@ -1,4 +1,14 @@
 {% set lprefix = prefix.lower() %}
+{% set stream_view_type_map = {
+  'keys-only': 'KEYS_ONLY',
+  'new': 'NEW_IMAGE',
+  'old': 'OLD_IMAGE',
+  'new-and-old': 'NEW_AND_OLD_IMAGES'
+} %}
+{% set stream_starting_position_map = {
+  'trim-horizon': 'TRIM_HORIZON',
+  'latest': 'LATEST'
+} %}
 
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
@@ -109,8 +119,9 @@ Resources:
     Properties:
         LogGroupName: !Sub "apigw-${AWS::StackName}-${Stage}"
         RetentionInDays: 7
-  {% endif %}  # paths
+  {% endif %}  # end paths
 
+  # Streams
   {% if streams is defined %}
   {{ lprefix }}DeliveryStreamPolicy:
     Type: AWS::IAM::Policy
@@ -166,8 +177,9 @@ Resources:
             Condition:
               StringEquals:
                 'sts:ExternalId': !Ref 'AWS::AccountId'
-  {% endif %}  # streams
+  {% endif %}  # end streams 
 
+  # Tables
   {% if tables is defined %}
   GatewayDynamoRole:
     Type: 'AWS::IAM::Role'
@@ -193,8 +205,9 @@ Resources:
                   - 'dynamodb:GetItem'
 ## Todo: provide only required resources list
                 Resource: '*'
-  {% endif %}  # tables
+  {% endif %}  # end tables
   
+  # Queues
   {% if queues is defined %}
   GatewaySQSRole:
     Type: 'AWS::IAM::Role'
@@ -218,7 +231,6 @@ Resources:
                 - 'sqs:SendMessage'
                 - 'sqs:GetQueueUrl'
                 - 'sqs:SendMessageBatch'
-## Todo: provide only required resources list
               Resource: '*'
       - PolicyName: AuthorizerPolicy
         PolicyDocument:
@@ -231,8 +243,9 @@ Resources:
                 {% for auth_name, auth_params in authorizers.items() %}
                 - !GetAtt {{ auth_name }}Function.Arn
                 {% endfor %}
-  {% endif %}  # queues
+  {% endif %}  # end queues
 
+  # Streams
   {% if streams is defined %}
   {% for stream_name, stream in streams.items() %}
   {{ lprefix }}{{ stream_name.replace('-', '') }}Stream:
@@ -269,8 +282,9 @@ Resources:
         RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
   {% endfor %}
   {% endfor %}
-  {% endif %}  # streams
+  {% endif %}  # end streams
 
+  # Buckets
   {% if buckets is defined %}
   {% for bucket_name, bucket in buckets.items() %}
   {{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket:
@@ -321,7 +335,7 @@ Resources:
             Principal: '*'
             Action: 's3:GetObjectAttributes'
             Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*            
-  {% endif %}
+  {% endif %}  # if bucket.public
 
   {% if bucket.extaccesspolicy is defined %}
   {{ lprefix }}{{ bucket_name.replace('-', '') }}ReadPolicy:
@@ -340,8 +354,9 @@ Resources:
 
   {% endif %}
   {% endfor %}
-  {% endif %}  # buckets
+  {% endif %}  # end buckets
   
+  # Queues
   {% if queues is defined %}
   {% for queue_name, queue in queues.items() %}
   {{ lprefix }}{{ queue_name.replace('-', '') }}Queue:
@@ -349,8 +364,9 @@ Resources:
     Properties:
       QueueName: !Sub "{{ lprefix }}-{{ queue_name }}-${Stage}"
   {% endfor %}
-  {% endif %}  # queues
+  {% endif %}  # end queues
 
+  # Tables
   {% if tables is defined %}
   {% for table_name, table in tables.items() %}
   {{ prefix }}{{ table_name }}:
@@ -404,14 +420,19 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
         RecoveryPeriodInDays: 14
+      {% if table.trigger %}
+      StreamSpecification:
+        StreamViewType: {{ stream_view_type_map[table.trigger.viewtype] }}
+      {% endif %}
     {% endfor %}
-  {% endif %}  # tables
+  {% endif %}  # end tables
 
+  # Lambda Layer
   {% if enable_lambda_layer %}
   PythonLambdaLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: !Sub pythonthirdparty-${Stage}
+      LayerName: !Sub {{ lprefix }}-pythonthirdparty-${Stage}
       Description: Dependencies for all python lambdas
       ContentUri: thirdparty/.
       CompatibleRuntimes:
@@ -419,8 +440,9 @@ Resources:
     Metadata:
       BuildMethod: python3.13
       BuildArchitecture: x86_64
-  {% endif %}  # enable_lambda_layer
+  {% endif %}  # end lambda layer
 
+  # Functions
   {% if functions is defined %}
   {% for function_name, function in functions.items() %}
   {{ function_name.replace('-', '' )}}Function:
@@ -452,6 +474,21 @@ Resources:
         - KinesisCrudPolicy:
             StreamName: !Ref {{ lprefix }}{{ stream.replace('-', '') }}Stream
         {% endfor %}
+        {% if tables is defined %}
+        {% for table_name, table in tables.items() %}
+        {% if table.trigger and table.trigger.function == function_name %}
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:DescribeStream
+                - dynamodb:GetRecords
+                - dynamodb:GetShardIterator
+                - dynamodb:ListStreams
+              Resource: !GetAtt {{ prefix }}{{ table_name }}.StreamArn
+        {% endif %}
+        {% endfor %}
+        {% endif %}
         {% for queue in function.send %}
         - SQSSendMessagePolicy:
             QueueName: !GetAtt {{ lprefix }}{{ queue.replace('-','') }}Queue.QueueName
@@ -460,7 +497,16 @@ Resources:
           {% if service == 'comprehend' %}
         - ComprehendBasicAccessPolicy: {}
           {% endif %}
-        {% endfor %}        
+        {% endfor %}
+        {% for search_collection in function.searches %}
+        - Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+              - aoss:*
+            Resource:
+              - !GetAtt {{ search_collection.replace('-', '') }}Collection.Arn
+        {% endfor %}
       {% if enable_lambda_layer or function.layers %}
       Layers:
       {% endif %}
@@ -474,6 +520,14 @@ Resources:
         - "{{ layer_arn }}"
         {% endfor %}
       {% endif %}
+      Environment:
+        Variables:
+          REGION: !Ref AWS::Region
+          {% if function.searches %}
+          {% for search_collection in function.searches %}
+          SEARCH_{{ search_collection.replace('-', '_').upper() }}_COLLECTION_ID: !GetAtt {{ search_collection.replace('-', '') }}Collection.Id
+          {% endfor %}
+          {% endif %}
       Events:
         {% if function.schedule%}
         InvocationLevel:
@@ -511,4 +565,142 @@ Resources:
         {% endfor %}
         {% endif %}
   {% endfor %}
-  {% endif %}  # functions
+  {% endif %}  # end functions
+
+  # DynamoDB Stream Event Source Mappings (from table definitions)
+  {% if tables is defined %}
+  {% for table_name, table in tables.items() %}
+  {% if table.trigger %}
+  {{ table_name.replace('-', '') }}StreamEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    DependsOn:
+      - {{ table.trigger.function.replace('-', '') }}Function
+      - {{ prefix }}{{ table_name }}
+    Properties:
+      EventSourceArn: !GetAtt {{ prefix }}{{ table_name }}.StreamArn
+      FunctionName: !GetAtt {{ table.trigger.function.replace('-', '') }}Function.Arn
+      StartingPosition: {{ stream_starting_position_map[table.trigger.startingposition] }}
+      {% if table.trigger.batchsize is defined %}
+      BatchSize: {{ table.trigger.batchsize }}
+      {% endif %}
+      {% if table.trigger.batchwindow is defined %}
+      MaximumBatchingWindowInSeconds: {{ table.trigger.batchwindow }}
+      {% endif %}
+  {% endif %}
+  {% endfor %}
+  {% endif %}  # end stream event source mappings
+
+  # Search
+  {% if search is defined %}
+  VpcEndpointSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow Lambda access to OpenSearch Serverless
+      VpcId: {{ cloud.vpc_id }}
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+  VpcEndpoint:
+    Type: AWS::OpenSearchServerless::VpcEndpoint
+    Properties:
+      Name: !Sub "{{ lprefix }}-vpce-${Stage}"
+      VpcId: {{ cloud.vpc_id }}
+      SubnetIds: {{ cloud.subnet_ids }}
+      SecurityGroupIds:
+        - !GetAtt VpcEndpointSG.GroupId
+
+  {% for collection_name, collection in search.items() %}
+
+  # Encryption is required by the service. Using AWS-owned key.
+  {{ collection_name.replace('-', '') }}EP:
+    Type: AWS::OpenSearchServerless::SecurityPolicy
+    Properties:
+      Name: !Sub {{ lprefix }}-{{ collection_name }}-ep-${Stage}
+      Type: encryption
+      Policy: !Sub |
+        {
+          "Rules": [
+            {
+              "ResourceType": "collection",
+              "Resource": [
+                "collection/{{ lprefix }}-{{ collection_name }}-${Stage}"
+              ]
+            }
+          ],
+          "AWSOwnedKey": true
+        }
+
+  # No public access. Restrict to specific VPC endpoints only.
+  {{ collection_name.replace('-', '') }}NP:
+    Type: AWS::OpenSearchServerless::SecurityPolicy
+    Properties:
+      Name: !Sub {{ lprefix }}-{{ collection_name }}-np-${Stage}
+      Type: network
+      Policy: !Sub |
+        [
+          {
+            "Rules": [
+              {
+                "ResourceType": "collection",
+                "Resource": [
+                  "collection/{{ lprefix }}-{{ collection_name }}-${Stage}"
+                ]
+              }
+            ],
+            "AllowFromPublic": true
+          }
+        ]
+
+  # Allow all IAM roles in the account (covers any Lambda execution role).
+  {{ collection_name.replace('-', '') }}AP:
+    Type: AWS::OpenSearchServerless::AccessPolicy
+    Properties:
+      Name: !Sub {{ lprefix }}-{{ collection_name }}-ap-${Stage}
+      Type: data
+      Policy: !Sub |
+        [
+          {
+            "Description": "Data access for all roles in account",
+            "Rules": [
+              {
+                "ResourceType": "collection",
+                "Resource": [
+                  "collection/{{ lprefix }}-{{ collection_name }}-${Stage}"
+                ],
+                "Permission": ["aoss:*"]
+              },
+              {
+                "ResourceType": "index",
+                "Resource": [
+                  "index/{{ lprefix }}-{{ collection_name }}-${Stage}/*"
+                ],
+                "Permission": ["aoss:*"]
+              }
+            ],
+            "Principal": [
+              {% set valid_functions = functions | dictsort | selectattr('1.searches', 'defined') | list %}
+              {% for function_name, function in valid_functions %}
+                "${{ '{' }}{{ function_name.replace('-', '') }}FunctionRole.Arn{{ '}' }}"{% if not loop.last %},{% endif %}
+              {% endfor %}
+            ]
+          }
+        ]
+
+  {{ collection_name.replace('-', '') }}Collection:
+    Type: AWS::OpenSearchServerless::Collection
+    Properties:
+      Name: !Sub {{ lprefix }}-{{ collection_name }}-${Stage}
+      Type: SEARCH
+      Description: "Serverless collection {{ collection_name}}"
+    DependsOn: 
+      - {{ collection_name.replace('-', '') }}EP
+      - {{ collection_name.replace('-', '') }}NP
+
+  {% endfor %}
+  {% endif %}  # end search

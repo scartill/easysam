@@ -1,0 +1,6 @@
+tables:
+  SearchableItem:
+    attributes:
+    - hash: true
+      name: ItemID
+    trigger: indexfunc
