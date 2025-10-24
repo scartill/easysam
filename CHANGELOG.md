@@ -1,3 +1,8 @@
+# 1.5.1
+
+- Fixed multicollection AOSS deployment
+- Added default search index support
+
 # 1.5.0
 
 - Added DynamoDB Streams support for lambda functions
