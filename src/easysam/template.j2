@@ -592,29 +592,6 @@ Resources:
 
   # Search
   {% if search is defined %}
-  VpcEndpointSG:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Allow Lambda access to OpenSearch Serverless
-      VpcId: {{ cloud.vpc_id }}
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
-      SecurityGroupEgress:
-        - IpProtocol: -1
-          CidrIp: 0.0.0.0/0
-
-  VpcEndpoint:
-    Type: AWS::OpenSearchServerless::VpcEndpoint
-    Properties:
-      Name: !Sub "{{ lprefix }}-vpce-${Stage}"
-      VpcId: {{ cloud.vpc_id }}
-      SubnetIds: {{ cloud.subnet_ids }}
-      SecurityGroupIds:
-        - !GetAtt VpcEndpointSG.GroupId
-
   {% for collection_name, collection in search.items() %}
 
   # Encryption is required by the service. Using AWS-owned key.

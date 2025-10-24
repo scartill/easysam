@@ -7,4 +7,5 @@ import:
   - backend
 
 search:
+  # This is the default search index and can be omitted
   searchable:

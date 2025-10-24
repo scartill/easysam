@@ -102,7 +102,11 @@ def validate_streams(resources_data: dict, errors: list[str]):
 
 def validate_lambda(resources_data: dict, errors: list[str]):
     '''Validate lambda function-specific rules.'''
+    lg.debug('Validating lambda functions')
+
     for lambda_name, details in resources_data.get('functions', {}).items():
+        lg.debug(f'Validating lambda {lambda_name}')
+
         for bucket in details.get('buckets', []):
             if bucket not in resources_data.get('buckets', {}):
                 errors.append(

@@ -265,9 +265,15 @@ def process_default_functions(resources_data: dict, errors: list[str]):
             return poll
 
     if 'functions' in resources_data:
-        for function in resources_data['functions'].values():
+        for name, function in resources_data['functions'].items():
+            lg.debug(f'Processing function {name}')
+
             if polls := function.get('polls'):
                 function['polls'] = [transform_lambda_poll(poll) for poll in polls]
+
+            if 'searches' in function:
+                if not function['searches']:
+                    function['searches'] = ['searchable']
 
 
 def process_default_streams(resources_data: dict, errors: list[str]):
@@ -341,6 +347,7 @@ def process_default_tables(resources_data: dict, errors: list[str]):
 
 
 def preprocess_defaults(resources_data: dict, errors: list[str]):
+    process_default_searches(resources_data, errors)
     process_default_functions(resources_data, errors)
     process_default_streams(resources_data, errors)
     process_default_tables(resources_data, errors)
@@ -477,3 +484,16 @@ def apply_overrides(resources_data: dict, deploy_ctx: dict[str, Any]):
             key = override_path.replace('/', '.')
             lg.info(f'Applying override: {key} = {override_value}')
             resources_data[key] = override_value
+
+
+def process_default_searches(resources_data: dict, errors: list[str]):
+    lg.debug('Processing default searches')
+
+    if 'search' in resources_data:
+        lg.debug('Search is defined')
+
+        if not resources_data['search']:
+            lg.debug('Search is empty, adding searchable')
+            resources_data['search'] = {
+                'searchable': {}
+            }

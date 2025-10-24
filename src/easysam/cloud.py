@@ -4,7 +4,8 @@ from benedict import benedict
 
 
 def scan(resources_data: benedict, errors: list[str], aws_profile: str = None):
-    if 'search' not in resources_data:
+    # Forward compatibility with future resources
+    if '__future__' not in resources_data:
         return
 
     cloud = resources_data.get_dict('cloud', {})
