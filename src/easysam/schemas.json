@@ -73,7 +73,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["comprehend"]
+            "enum": ["comprehend", "bedrock"]
           }
         },
         "searches": {"type": "array", "items": {"type": "string"}},

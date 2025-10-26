@@ -143,7 +143,8 @@ streams:
     send:
       - String (e.g., my-queue) - outgoing queue's name
     services:
-      - comprehend
+      - comprehend  # Grants ComprehendBasicAccessPolicy
+      - bedrock     # Grants bedrock:InvokeModel permission
 ```
 
 ### API Gateway Definition

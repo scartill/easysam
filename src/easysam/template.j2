@@ -497,6 +497,15 @@ Resources:
           {% if service == 'comprehend' %}
         - ComprehendBasicAccessPolicy: {}
           {% endif %}
+          {% if service == 'bedrock' %}
+        - Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+              - bedrock:InvokeModel
+              - bedrock:InvokeModelWithResponseStream
+            Resource: '*'
+          {% endif %}
         {% endfor %}
         {% for search_collection in function.searches %}
         - Version: "2012-10-17"

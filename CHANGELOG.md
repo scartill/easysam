@@ -1,3 +1,7 @@
+# 1.6.0
+
+- Added support for the AWS Bedrock permissions
+
 # 1.5.1
 
 - Fixed multicollection AOSS deployment
