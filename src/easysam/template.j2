@@ -365,6 +365,7 @@ Resources:
   {% endif %}  # if not bucket.public and bucket.custompolicies is defined
 
   {% if bucket.extaccesspolicy is defined %}
+  # External access bucket policy
   {{ lprefix }}{{ bucket_name.replace('-', '') }}ReadPolicy:
     Type: "AWS::IAM::ManagedPolicy"
     Properties:
@@ -391,6 +392,7 @@ Resources:
     Properties:
       QueueName: !Sub "{{ lprefix }}-{{ queue_name }}-${Stage}"
   {% if queue is not none and queue.custompolicies is defined %}
+
   {{ lprefix }}{{ queue_name.replace('-', '') }}QueuePolicy:
     Type: AWS::SQS::QueuePolicy
     Properties:
@@ -403,7 +405,8 @@ Resources:
           - Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
             Action: {{ custom_policy.action | tojson }}
             Resource: !GetAtt {{ lprefix }}{{ queue_name.replace('-', '') }}Queue.Arn
-            Principal: {{ custom_policy.principal | default('*') | tojson }}
+            Principal:
+              AWS: {{ custom_policy.principal | tojson }}
           {% endfor %}
   {% endif %}
   {% endfor %}
