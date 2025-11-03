@@ -2,9 +2,9 @@ lambda:
   name: myfunction
   resources:
     buckets:
-      - documents
+      - docs
     send:
-      - notifications
+      - notify
     custompolicies:
       - action: logs:CreateLogGroup
         effect: allow
