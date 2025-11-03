@@ -18,10 +18,6 @@
         "resource": {
           "type": "string",
           "default": "any"
-        },
-        "principal": {
-          "oneOf": [{ "type": "string" }, { "type": "null" }],
-          "default": null
         }
       },
       "required": ["action"],
@@ -42,8 +38,8 @@
           "default": "allow"
         },
         "principal": {
-          "oneOf": [{ "type": "string" }, { "type": "null" }],
-          "default": null
+          "type": "string",
+          "default": "*"
         }
       },
       "required": ["action"],
@@ -64,8 +60,8 @@
           "default": "allow"
         },
         "principal": {
-          "oneOf": [{ "type": "string" }, { "type": "null" }],
-          "default": null
+          "type": "string",
+          "default": "*"
         }
       },
       "required": ["action"],
