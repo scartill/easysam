@@ -58,14 +58,13 @@ Use as:
 buckets:
   my-bucket:
     public: Boolean Optional (e.g., true), means Public read policy
-    custompolicies: Optional Array of custom IAM policies
+    custompolicies: Optional Array of custom S3 bucket policies
       - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
         effect: String Optional (e.g., "allow" or "deny", default: "allow")
-        resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for default, default: "any")
         principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
 ```
 
-Custom policies are added to the bucket's S3 BucketPolicy. For public buckets, custom policies are merged with the existing public access policies. For non-public buckets, a new BucketPolicy is created if custompolicies are defined. The `resource` value of "any" translates to the bucket ARN (`arn:aws:s3:::bucket-name/*`). If `principal` is null, it is omitted from the policy statement.
+Custom policies are added to the bucket's S3 BucketPolicy. For public buckets, custom policies are merged with the existing public access policies. For non-public buckets, a new BucketPolicy is created if custompolicies are defined. The resource is always set to the bucket's object ARN (`arn:aws:s3:::bucket-name/*`). If `principal` is null, it is omitted from the policy statement.
 
 ### Queue Definitions
 
@@ -77,11 +76,10 @@ queues:
     custompolicies: Optional Array of custom SQS queue policies
       - action: String or Array (e.g., "sqs:SendMessage" or ["sqs:SendMessage", "sqs:ReceiveMessage"])
         effect: String Optional (e.g., "allow" or "deny", default: "allow")
-        resource: String Optional (e.g., "arn:aws:sqs:*:*:my-queue" or "any" for queue ARN, default: "any")
         principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
 ```
 
-Custom policies create an SQS QueuePolicy resource. The `resource` value of "any" translates to the queue's ARN. If `principal` is null, it is omitted from the policy statement.
+Custom policies create an SQS QueuePolicy resource. The resource is always set to the queue's ARN. If `principal` is null, it is omitted from the policy statement.
 
 ### Stream Definitions
 
