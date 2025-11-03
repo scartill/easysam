@@ -97,16 +97,32 @@ tables:
 
 ```yaml
 buckets:
-  - name: String (e.g., my-bucket)
-    public Boolean Optional (e.g., true), means Public read policy
+  my-bucket:
+    public: Boolean Optional (e.g., true), means Public read policy
+    custompolicies: Optional Array of custom IAM policies
+      - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
+        effect: String Optional (e.g., "allow" or "deny", default: "allow")
+        resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for default, default: "any")
+        principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
 ```
+
+Custom policies are added to the bucket's S3 BucketPolicy. For public buckets, custom policies are merged with the existing public access policies. For non-public buckets, a new BucketPolicy is created if custompolicies are defined. The `resource` value of "any" translates to the bucket ARN (`arn:aws:s3:::bucket-name/*`). If `principal` is null, it is omitted from the policy statement.
 
 ### Queue Definitions
 
 ```yaml
 queues:
-  - name: String (e.g., my-queue)
+  my-queue: null  # Simple queue (no custom policies)
+  # OR
+  my-queue:
+    custompolicies: Optional Array of custom SQS queue policies
+      - action: String or Array (e.g., "sqs:SendMessage" or ["sqs:SendMessage", "sqs:ReceiveMessage"])
+        effect: String Optional (e.g., "allow" or "deny", default: "allow")
+        resource: String Optional (e.g., "arn:aws:sqs:*:*:my-queue" or "any" for queue ARN, default: "any")
+        principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
 ```
+
+Custom policies create an SQS QueuePolicy resource. The `resource` value of "any" translates to the queue's ARN. If `principal` is null, it is omitted from the policy statement.
 
 ### Stream Definitions
 
@@ -118,7 +134,8 @@ streams:
 ## Lambda Definition
 
 ```yaml
-  - name: String (e.g., my-lambda)
+functions:
+  my-lambda:
     uri: String (i.e., local path to the source)
     tables:
       - String (e.g., Items)
@@ -131,7 +148,14 @@ streams:
     services:
       - comprehend  # Grants ComprehendBasicAccessPolicy
       - bedrock     # Grants bedrock:InvokeModel permission
+    custompolicies: Optional Array of custom IAM policies
+      - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
+        effect: String Optional (e.g., "allow" or "deny", default: "allow")
+        resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for "*", default: "any")
+        principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
 ```
+
+Custom policies are added to the Lambda function's IAM execution role as inline policy statements. The `resource` value of "any" translates to "*" (any resource). If `principal` is null, it is omitted from the policy statement (which is appropriate for IAM role policies that don't need a principal field).
 
 ### API Gateway Definition
 
@@ -193,6 +217,11 @@ lambda:
       - <queue>
     polls:
       - <stream>
+    custompolicies: Optional Array of custom IAM policies
+      - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
+        effect: String Optional (e.g., "allow" or "deny", default: "allow")
+        resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for "*", default: "any")
+        principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
   integration:
     path: <path>
     open: <boolean>
@@ -200,7 +229,7 @@ lambda:
     authorizer: <authorizer-lambda-name>
 ```
 
-Locally-defined lambda URI is set to the path of the `easysam.yaml` file.
+Locally-defined lambda URI is set to the path of the `easysam.yaml` file. Custom policies work the same way as in the main `resources.yaml` file.
 
 #### Local Import
 
