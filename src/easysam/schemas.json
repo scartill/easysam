@@ -30,6 +30,56 @@
       "required": ["action"],
       "additionalProperties": false
     },
+    "bucket_custom_policy_schema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ]
+        },
+        "effect": {
+          "type": "string",
+          "enum": ["allow", "deny"],
+          "default": "allow"
+        },
+        "principal": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "null"}
+          ],
+          "default": null
+        }
+      },
+      "required": ["action"],
+      "additionalProperties": false
+    },
+    "queue_custom_policy_schema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ]
+        },
+        "effect": {
+          "type": "string",
+          "enum": ["allow", "deny"],
+          "default": "allow"
+        },
+        "principal": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "null"}
+          ],
+          "default": null
+        }
+      },
+      "required": ["action"],
+      "additionalProperties": false
+    },
     "buckets_schema": {
       "type": "object",
       "properties": {
@@ -37,7 +87,7 @@
         "extaccesspolicy": {"type": "string"},
         "custompolicies": {
           "type": "array",
-          "items": {"$ref": "#/definitions/custom_policy_schema"}
+          "items": {"$ref": "#/definitions/bucket_custom_policy_schema"}
         }
       },
       "required": ["public"],
@@ -48,7 +98,7 @@
       "properties": {
         "custompolicies": {
           "type": "array",
-          "items": {"$ref": "#/definitions/custom_policy_schema"}
+          "items": {"$ref": "#/definitions/queue_custom_policy_schema"}
         }
       },
       "additionalProperties": false
