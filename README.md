@@ -54,17 +54,36 @@ pipx install easysam
 
 Use as:
 
-```bash
-easysam --help
+```yaml
+buckets:
+  my-bucket:
+    public: Boolean Optional (e.g., true), means Public read policy
+    custompolicies: Optional Array of custom IAM policies
+      - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
+        effect: String Optional (e.g., "allow" or "deny", default: "allow")
+        resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for default, default: "any")
+        principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
 ```
 
-### Option C: global/local with pip
+Custom policies are added to the bucket's S3 BucketPolicy. For public buckets, custom policies are merged with the existing public access policies. For non-public buckets, a new BucketPolicy is created if custompolicies are defined. The `resource` value of "any" translates to the bucket ARN (`arn:aws:s3:::bucket-name/*`). If `principal` is null, it is omitted from the policy statement.
 
-```bash
-pip install easysam
+### Queue Definitions
+
+```yaml
+queues:
+  my-queue: null  # Simple queue (no custom policies)
+  # OR
+  my-queue:
+    custompolicies: Optional Array of custom SQS queue policies
+      - action: String or Array (e.g., "sqs:SendMessage" or ["sqs:SendMessage", "sqs:ReceiveMessage"])
+        effect: String Optional (e.g., "allow" or "deny", default: "allow")
+        resource: String Optional (e.g., "arn:aws:sqs:*:*:my-queue" or "any" for queue ARN, default: "any")
+        principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
 ```
 
-## Quick start (5 minutes)
+Custom policies create an SQS QueuePolicy resource. The `resource` value of "any" translates to the queue's ARN. If `principal` is null, it is omitted from the policy statement.
+
+### Stream Definitions
 
 1. Create a Python project and initialize EasySAM:
 
@@ -78,11 +97,31 @@ uv run easysam init
 
 For a Prismarine scaffold:
 
-```bash
-uv run easysam init --prismarine
+```yaml
+functions:
+  my-lambda:
+    uri: String (i.e., local path to the source)
+    tables:
+      - String (e.g., Items)
+    polls:
+      - String (e.g., my-stream) - incoming stream's name
+    buckets:
+      - String (e.g., my-bucket)
+    send:
+      - String (e.g., my-queue) - outgoing queue's name
+    services:
+      - comprehend  # Grants ComprehendBasicAccessPolicy
+      - bedrock     # Grants bedrock:InvokeModel permission
+    custompolicies: Optional Array of custom IAM policies
+      - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
+        effect: String Optional (e.g., "allow" or "deny", default: "allow")
+        resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for "*", default: "any")
+        principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
 ```
 
-2. Validate your resources:
+Custom policies are added to the Lambda function's IAM execution role as inline policy statements. The `resource` value of "any" translates to "*" (any resource). If `principal` is null, it is omitted from the policy statement (which is appropriate for IAM role policies that don't need a principal field).
+
+### API Gateway Definition
 
 ```bash
 uv run easysam --environment dev inspect schema .
@@ -130,14 +169,27 @@ lambda:
   name: myfunction
   resources:
     tables:
-      - MyItem
+      - <table>
+    buckets:
+      - <bucket>
+    send:
+      - <queue>
+    polls:
+      - <stream>
+    custompolicies: Optional Array of custom IAM policies
+      - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
+        effect: String Optional (e.g., "allow" or "deny", default: "allow")
+        resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for "*", default: "any")
+        principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
   integration:
     path: /items
     open: true
     greedy: false
 ```
 
-You can also define tables locally:
+Locally-defined lambda URI is set to the path of the `easysam.yaml` file. Custom policies work the same way as in the main `resources.yaml` file.
+
+#### Local Import
 
 ```yaml
 tables:
