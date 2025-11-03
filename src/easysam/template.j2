@@ -232,6 +232,7 @@ Resources:
                 - 'sqs:GetQueueUrl'
                 - 'sqs:SendMessageBatch'
               Resource: '*'
+      {% if authorizers is defined %} # check if authorizers are defined
       - PolicyName: AuthorizerPolicy
         PolicyDocument:
           Version: '2012-10-17'
@@ -243,6 +244,7 @@ Resources:
                 {% for auth_name, auth_params in authorizers.items() %}
                 - !GetAtt {{ auth_name }}Function.Arn
                 {% endfor %}
+      {% endif %}  # end authorizers
   {% endif %}  # end queues
 
   # Streams
