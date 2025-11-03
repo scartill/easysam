@@ -320,5 +320,6 @@ def validate_mqtt(resources_data: dict, errors: list[str]):
         return
 
     auth_function = mqtt.get('authorizer', {}).get('function')
+
     if auth_function and auth_function not in resources_data.get('functions', {}):
         errors.append(f"MQTT authorizer function '{auth_function}' must be a valid function")
