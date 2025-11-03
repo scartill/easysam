@@ -1,0 +1,29 @@
+prefix: CustomPoliciesApp
+
+import:
+  - backend
+
+buckets:
+  documents:
+    public: false
+    custompolicies:
+      - action: s3:GetObject
+        effect: allow
+        principal: 'arn:aws:iam::123456789012:root'
+      - action:
+          - s3:PutObject
+          - s3:DeleteObject
+        effect: allow
+        principal: 'arn:aws:iam::987654321098:root'
+
+queues:
+  notifications:
+    custompolicies:
+      - action: sqs:SendMessage
+        effect: allow
+        principal: 'arn:aws:iam::123456789012:root'
+      - action:
+          - sqs:ReceiveMessage
+          - sqs:DeleteMessage
+        effect: allow
+        principal: '*'
