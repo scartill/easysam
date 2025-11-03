@@ -1,10 +1,10 @@
-prefix: CustomPoliciesApp
+prefix: cpol
 
 import:
   - backend
 
 buckets:
-  documents:
+  docs:
     public: false
     custompolicies:
       - action: s3:GetObject
@@ -17,7 +17,7 @@ buckets:
         principal: 'arn:aws:iam::987654321098:root'
 
 queues:
-  notifications:
+  notify:
     custompolicies:
       - action: sqs:SendMessage
         effect: allow
@@ -26,4 +26,4 @@ queues:
           - sqs:ReceiveMessage
           - sqs:DeleteMessage
         effect: allow
-        principal: '*'
+        principal: 'arn:aws:iam::123456789012:root'
