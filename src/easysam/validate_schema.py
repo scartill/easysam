@@ -47,11 +47,15 @@ def validate_buckets(resources_data: dict, errors: list[str]):
     for bucket, details in resources_data.get('buckets', {}).items():
         if bucket == 'private' and details['public']:
             errors.append(f'Bucket \'{bucket}\' cannot be public')
+        if 'custompolicies' in details:
+            validate_custom_policies(details['custompolicies'], f'Bucket {bucket}', errors)
 
 
 def validate_queues(resources_data: dict, errors: list[str]):
     '''Validate queue-specific rules.'''
-    pass
+    for queue_name, queue in resources_data.get('queues', {}).items():
+        if queue is not None and 'custompolicies' in queue:
+            validate_custom_policies(queue['custompolicies'], f'Queue {queue_name}', errors)
 
 
 def validate_tables(resources_data: dict, errors: list[str]):
@@ -98,6 +102,21 @@ def validate_streams(resources_data: dict, errors: list[str]):
                     bucket['extbucketarn'] != '<overriden>'
                 ):
                     errors.append(f"Stream '{stream}': 'extbucketarn' must be a valid ARN")
+
+
+def validate_custom_policies(custompolicies: list, resource_name: str, errors: list[str]):
+    '''Validate custom policies structure.'''
+    if not isinstance(custompolicies, list):
+        errors.append(f'{resource_name}: custompolicies must be an array')
+        return
+    for idx, policy in enumerate(custompolicies):
+        if not isinstance(policy, dict):
+            errors.append(f'{resource_name}: custompolicies[{idx}] must be an object')
+            continue
+        if 'action' not in policy:
+            errors.append(f'{resource_name}: custompolicies[{idx}] must have an action field')
+        if 'effect' in policy and policy['effect'] not in ['allow', 'deny']:
+            errors.append(f'{resource_name}: custompolicies[{idx}].effect must be "allow" or "deny"')
 
 
 def validate_lambda(resources_data: dict, errors: list[str]):
@@ -160,6 +179,8 @@ def validate_lambda(resources_data: dict, errors: list[str]):
                 )
 
                 continue
+        if 'custompolicies' in details:
+            validate_custom_policies(details['custompolicies'], f'Lambda {lambda_name}', errors)
 
 
 def validate_paths(resources_dir: Path, resources_data: dict, errors: list[str]):

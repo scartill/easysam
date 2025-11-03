@@ -334,8 +334,36 @@ Resources:
             Effect: Allow
             Principal: '*'
             Action: 's3:GetObjectAttributes'
-            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*            
+            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
+          {% if bucket.custompolicies is defined %}
+          {% for custom_policy in bucket.custompolicies %}
+          - Sid: CustomPolicy{{ loop.index }}
+            Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
+            Action: {{ custom_policy.action | tojson }}
+            Resource: {% if custom_policy.resource | default('any') == 'any' %}!Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*{% else %}{{ custom_policy.resource | tojson }}{% endif %}
+            {% if custom_policy.principal is defined and custom_policy.principal is not none %}
+            Principal: {{ custom_policy.principal | tojson }}
+            {% endif %}
+          {% endfor %}
+          {% endif %}
   {% endif %}  # if bucket.public
+  {% if not bucket.public and bucket.custompolicies is defined %}
+  {{ lprefix }}{{ bucket_name.replace('-', '') }}BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref {{ lprefix }}{{ bucket_name }}Bucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          {% for custom_policy in bucket.custompolicies %}
+          - Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
+            Action: {{ custom_policy.action | tojson }}
+            Resource: {% if custom_policy.resource | default('any') == 'any' %}!Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*{% else %}{{ custom_policy.resource | tojson }}{% endif %}
+            {% if custom_policy.principal is defined and custom_policy.principal is not none %}
+            Principal: {{ custom_policy.principal | tojson }}
+            {% endif %}
+          {% endfor %}
+  {% endif %}  # if not bucket.public and bucket.custompolicies is defined
 
   {% if bucket.extaccesspolicy is defined %}
   {{ lprefix }}{{ bucket_name.replace('-', '') }}ReadPolicy:
@@ -363,6 +391,24 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub "{{ lprefix }}-{{ queue_name }}-${Stage}"
+  {% if queue is not none and queue.custompolicies is defined %}
+  {{ lprefix }}{{ queue_name.replace('-', '') }}QueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref {{ lprefix }}{{ queue_name.replace('-', '') }}Queue
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          {% for custom_policy in queue.custompolicies %}
+          - Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
+            Action: {{ custom_policy.action | tojson }}
+            Resource: {% if custom_policy.resource is defined and custom_policy.resource != 'any' %}{{ custom_policy.resource | tojson }}{% else %}!GetAtt {{ lprefix }}{{ queue_name.replace('-', '') }}Queue.Arn{% endif %}
+            {% if custom_policy.principal is defined and custom_policy.principal is not none %}
+            Principal: {{ custom_policy.principal | tojson }}
+            {% endif %}
+          {% endfor %}
+  {% endif %}
   {% endfor %}
   {% endif %}  # end queues
 
@@ -516,6 +562,18 @@ Resources:
             Resource:
               - !GetAtt {{ search_collection.replace('-', '') }}Collection.Arn
         {% endfor %}
+        {% if function.custompolicies is defined %}
+        {% for custom_policy in function.custompolicies %}
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
+              Action: {{ custom_policy.action | tojson }}
+              Resource: {% if custom_policy.resource | default('any') == 'any' %}'*'{% else %}{{ custom_policy.resource | tojson }}{% endif %}
+              {% if custom_policy.principal is defined and custom_policy.principal is not none %}
+              Principal: {{ custom_policy.principal | tojson }}
+              {% endif %}
+        {% endfor %}
+        {% endif %}
       {% if enable_lambda_layer or function.layers %}
       Layers:
       {% endif %}
