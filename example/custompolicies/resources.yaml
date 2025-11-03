@@ -3,18 +3,18 @@ prefix: cpol
 import:
   - backend
 
-buckets:
-  docs:
-    public: false
-    custompolicies:
-      - action: s3:GetObject
-        effect: allow
-        principal: 'arn:aws:iam::123456789012:root'
-      - action:
-          - s3:PutObject
-          - s3:DeleteObject
-        effect: allow
-        principal: 'arn:aws:iam::987654321098:root'
+# buckets:
+#   docs:
+#     public: false
+#     custompolicies:
+#       - action: s3:GetObject
+#         effect: allow
+#         principal: 'arn:aws:iam::123456789012:root'
+#       - action:
+#           - s3:PutObject
+#           - s3:DeleteObject
+#         effect: allow
+#         principal: 'arn:aws:iam::987654321098:root'
 
 queues:
   notify:
