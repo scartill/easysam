@@ -342,9 +342,7 @@ Resources:
             Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
             Action: {{ custom_policy.action | tojson }}
             Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
-            {% if custom_policy.principal is defined and custom_policy.principal is not none %}
-            Principal: {{ custom_policy.principal | tojson }}
-            {% endif %}
+            Principal: {{ custom_policy.principal | default('*') | tojson }}
           {% endfor %}
           {% endif %}
   {% endif %}  # if bucket.public
@@ -360,9 +358,7 @@ Resources:
           - Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
             Action: {{ custom_policy.action | tojson }}
             Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
-            {% if custom_policy.principal is defined and custom_policy.principal is not none %}
-            Principal: {{ custom_policy.principal | tojson }}
-            {% endif %}
+            Principal: {{ custom_policy.principal | default('*') | tojson }}
           {% endfor %}
   {% endif %}  # if not bucket.public and bucket.custompolicies is defined
 
@@ -405,9 +401,7 @@ Resources:
           - Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
             Action: {{ custom_policy.action | tojson }}
             Resource: !GetAtt {{ lprefix }}{{ queue_name.replace('-', '') }}Queue.Arn
-            {% if custom_policy.principal is defined and custom_policy.principal is not none %}
-            Principal: {{ custom_policy.principal | tojson }}
-            {% endif %}
+            Principal: {{ custom_policy.principal | default('*') | tojson }}
           {% endfor %}
   {% endif %}
   {% endfor %}
@@ -648,9 +642,6 @@ Resources:
             - Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
               Action: {{ custom_policy.action | tojson }}
               Resource: {% if custom_policy.resource | default('any') == 'any' %}'*'{% else %}{{ custom_policy.resource | tojson }}{% endif %}
-              {% if custom_policy.principal is defined and custom_policy.principal is not none %}
-              Principal: {{ custom_policy.principal | tojson }}
-              {% endif %}
         {% endfor %}
         {% endif %}
       {% if enable_lambda_layer or function.layers %}

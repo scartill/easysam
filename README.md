@@ -61,10 +61,10 @@ buckets:
     custompolicies: Optional Array of custom S3 bucket policies
       - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
         effect: String Optional (e.g., "allow" or "deny", default: "allow")
-        principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
+        principal: String Optional (e.g., "arn:aws:iam::123456789012:root", default: "*")
 ```
 
-Custom policies are added to the bucket's S3 BucketPolicy. For public buckets, custom policies are merged with the existing public access policies. For non-public buckets, a new BucketPolicy is created if custompolicies are defined. The resource is always set to the bucket's object ARN (`arn:aws:s3:::bucket-name/*`). If `principal` is null, it is omitted from the policy statement.
+Custom policies are added to the bucket's S3 BucketPolicy. For public buckets, custom policies are merged with the existing public access policies. For non-public buckets, a new BucketPolicy is created if custompolicies are defined. The resource is always set to the bucket's object ARN (`arn:aws:s3:::bucket-name/*`). The `principal` field defaults to `"*"` (all principals) if not specified.
 
 ### Queue Definitions
 
@@ -76,10 +76,10 @@ queues:
     custompolicies: Optional Array of custom SQS queue policies
       - action: String or Array (e.g., "sqs:SendMessage" or ["sqs:SendMessage", "sqs:ReceiveMessage"])
         effect: String Optional (e.g., "allow" or "deny", default: "allow")
-        principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
+        principal: String Optional (e.g., "arn:aws:iam::123456789012:root", default: "*")
 ```
 
-Custom policies create an SQS QueuePolicy resource. The resource is always set to the queue's ARN. If `principal` is null, it is omitted from the policy statement.
+Custom policies create an SQS QueuePolicy resource. The resource is always set to the queue's ARN. The `principal` field defaults to `"*"` (all principals) if not specified.
 
 ### Stream Definitions
 
@@ -114,10 +114,9 @@ functions:
       - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
         effect: String Optional (e.g., "allow" or "deny", default: "allow")
         resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for "*", default: "any")
-        principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
 ```
 
-Custom policies are added to the Lambda function's IAM execution role as inline policy statements. The `resource` value of "any" translates to "*" (any resource). If `principal` is null, it is omitted from the policy statement (which is appropriate for IAM role policies that don't need a principal field).
+Custom policies are added to the Lambda function's IAM execution role as inline policy statements. The `resource` value of "any" translates to "*" (any resource). Note that IAM role policies do not include a `Principal` field (they are identity-based policies attached to the role).
 
 ### API Gateway Definition
 
@@ -178,7 +177,6 @@ lambda:
       - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
         effect: String Optional (e.g., "allow" or "deny", default: "allow")
         resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for "*", default: "any")
-        principal: String or null Optional (e.g., "arn:aws:iam::123456789012:root" or null, default: null)
   integration:
     path: /items
     open: true
