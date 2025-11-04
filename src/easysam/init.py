@@ -69,10 +69,10 @@ template.yaml
 swagger.yaml
 prismarine_client.py
 .aws-sam
+__pycache__/
 '''
 
 FUNCTION_GITIGNORE = '''\
-__pycache__/
 *.py[oc]
 **/common/
 prismarine_client.py
