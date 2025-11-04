@@ -201,11 +201,12 @@ def handler(event, context):
 '''
 
 
-def init(cliparams, app_name, prismarine=False):
-    lg.info(f'Initializing app {app_name} {"with Prismarine support" if prismarine else ""}')
-    app_dir = Path(app_name)
-    lg.debug(f'Creating app directory {app_dir}')
-    app_dir.mkdir(parents=True, exist_ok=True)
+def init(cliparams, prismarine=False):
+    app_dir = Path('.')
+    pyproject_path = app_dir / 'pyproject.toml'
+    if not pyproject_path.exists():
+        raise UserWarning('pyproject.toml not found. Please run "uv init" first to initialize the project.')
+    lg.info(f'Initializing app in current directory {"with Prismarine support" if prismarine else ""}')
     lg.debug(f'Creating resources EasySAM file {app_dir / "resources.yaml"}')
     resources_content = RESOURCES_YAML_PRISMARINE if prismarine else RESOURCES_YAML
     app_dir.joinpath('resources.yaml').write_text(resources_content)
