@@ -27,14 +27,24 @@ pip install easysam
 
 ## Quick Start
 
-1. Initialize a new application:
+1. Initialize a new project with uv:
 ```pwsh
-easysam init my-app
+uv init
 ```
 
-2. Deploy your application:
+2. Initialize EasySAM in the current directory:
 ```pwsh
-easysam deploy --tag my-tag=my-value --environment my-environment-name my-app
+easysam init
+```
+
+Or with Prismarine support:
+```pwsh
+easysam init --prismarine
+```
+
+3. Deploy your application:
+```pwsh
+easysam deploy --tag my-tag=my-value --environment my-environment-name .
 ```
 
 Please note that at least one tag is required.
@@ -56,10 +66,18 @@ On Windows, it may be necessary to run the `deploy` command with the `-sam-tool 
 
 ## Usage
 
-First, initialize a new application. This command creates a new directory with the given name and generates the necessary files for a single lambda function and table. This version only supports AWS as a backend, and Python as a language. 
+First, initialize a new project with uv, then initialize EasySAM in the current directory. The `init` command requires `uv init` to be run first (it checks for `pyproject.toml`). This version only supports AWS as a backend, and Python as a language.
 
 ```pwsh
-easysam init <app-name>
+uv init
+easysam init
+```
+
+To scaffold a minimal application with Prismarine support:
+
+```pwsh
+uv init
+easysam init --prismarine
 ```
 
 Deploy the application:
