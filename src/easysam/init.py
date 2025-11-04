@@ -171,10 +171,10 @@ logger = lg.getLogger()
 
 
 def handler(event, context):
-    '''
+    """
     DynamoDB Stream trigger handler that logs Item changes.
     This is a simple example demonstrating trigger functionality with Prismarine models.
-    '''
+    """
     logger.info(f'Received event: {json.dumps(event)}')
 
     for record in event.get('Records', []):

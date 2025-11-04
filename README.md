@@ -21,76 +21,44 @@ EasySAM is a simple, opinionated tool for deploying cloud resources with a focus
 
 ## Installation
 
-```pwsh
-pip install easysam
-```
-
-## Quick Start
+## Quick Start (using uv)
 
 1. Initialize a new project with uv:
 ```pwsh
 uv init
+uv add --dev pip
+uv add --dev easysam
 ```
 
 2. Initialize EasySAM in the current directory:
+
 ```pwsh
-easysam init
+uv run easysam init
 ```
 
 Or with Prismarine support:
+
 ```pwsh
-easysam init --prismarine
+uv run easysam init --prismarine
 ```
 
-3. Deploy your application:
-```pwsh
-easysam deploy --tag my-tag=my-value --environment my-environment-name .
-```
+3. Make sure that AWS credentials are configured. The recommended way is to use a named profile and use the `--aws-profile` option.
 
-Please note that at least one tag is required.
+4. Deploy your application:
+
+```pwsh
+uv run easysam deploy --tag my-tag=my-value --environment my-environment-name .
+```
 
 For more options, use the `--help` flag:
 ```pwsh
-easysam --help
+uv run easysam --help
 ```
-
-### Windows
-
-On Windows, it may be necessary to run the `deploy` command with the `-sam-tool sam.cmd` option.
 
 ## Prerequisites  
-* Python 3.12 or higher with `pip` on PATH
+
 * uv 0.5 or higher
-* AWS SAM CLI 1.138 or higher on PATH
 * AWS Credentials Configured
-
-## Usage
-
-First, initialize a new project with uv, then initialize EasySAM in the current directory. The `init` command requires `uv init` to be run first (it checks for `pyproject.toml`). This version only supports AWS as a backend, and Python as a language.
-
-```pwsh
-uv init
-easysam init
-```
-
-To scaffold a minimal application with Prismarine support:
-
-```pwsh
-uv init
-easysam init --prismarine
-```
-
-Deploy the application:
-
-```pwsh
-easysam deploy <app-directory> <aws-environment-name>
-```
-
-For more options, use the `--help` flag:
-
-```pwsh
-easysam --help
-```
 
 ## Resource Definitions
 
