@@ -131,11 +131,11 @@ def cleanup_cmd(obj, directory):
     remove_common_dependencies(directory)
 
 
-@easysam.command(name='init', help='Initialize a new application in a given directory')
+@easysam.command(name='init', help='Initialize a new application in the current directory (requires uv init to be run first)')
 @click.pass_obj
-@click.argument('app-name', type=click.Path(exists=False))
-def init_cmd(obj, app_name):
-    init(obj, app_name)
+@click.option('--prismarine', is_flag=True, help='Scaffold a minimal application with Prismarine support')
+def init_cmd(obj, prismarine):
+    init(obj, prismarine=prismarine)
 
 
 def main():

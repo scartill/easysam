@@ -21,58 +21,44 @@ EasySAM is a simple, opinionated tool for deploying cloud resources with a focus
 
 ## Installation
 
+## Quick Start (using uv)
+
+1. Initialize a new project with uv:
 ```pwsh
-pip install easysam
+uv init
+uv add --dev pip
+uv add --dev easysam
 ```
 
-## Quick Start
+2. Initialize EasySAM in the current directory:
 
-1. Initialize a new application:
 ```pwsh
-easysam init my-app
+uv run easysam init
 ```
 
-2. Deploy your application:
+Or with Prismarine support:
+
 ```pwsh
-easysam deploy --tag my-tag=my-value --environment my-environment-name my-app
+uv run easysam init --prismarine
 ```
 
-Please note that at least one tag is required.
+3. Make sure that AWS credentials are configured. The recommended way is to use a named profile and use the `--aws-profile` option.
+
+4. Deploy your application:
+
+```pwsh
+uv run easysam deploy --tag my-tag=my-value --environment my-environment-name .
+```
 
 For more options, use the `--help` flag:
 ```pwsh
-easysam --help
+uv run easysam --help
 ```
-
-### Windows
-
-On Windows, it may be necessary to run the `deploy` command with the `-sam-tool sam.cmd` option.
 
 ## Prerequisites  
-* Python 3.12 or higher with `pip` on PATH
+
 * uv 0.5 or higher
-* AWS SAM CLI 1.138 or higher on PATH
 * AWS Credentials Configured
-
-## Usage
-
-First, initialize a new application. This command creates a new directory with the given name and generates the necessary files for a single lambda function and table. This version only supports AWS as a backend, and Python as a language. 
-
-```pwsh
-easysam init <app-name>
-```
-
-Deploy the application:
-
-```pwsh
-easysam deploy <app-directory> <aws-environment-name>
-```
-
-For more options, use the `--help` flag:
-
-```pwsh
-easysam --help
-```
 
 ## Resource Definitions
 
