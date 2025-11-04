@@ -133,9 +133,10 @@ def cleanup_cmd(obj, directory):
 
 @easysam.command(name='init', help='Initialize a new application in a given directory')
 @click.pass_obj
+@click.option('--prismarine', is_flag=True, help='Scaffold a minimal application with Prismarine support')
 @click.argument('app-name', type=click.Path(exists=False))
-def init_cmd(obj, app_name):
-    init(obj, app_name)
+def init_cmd(obj, app_name, prismarine):
+    init(obj, app_name, prismarine=prismarine)
 
 
 def main():
