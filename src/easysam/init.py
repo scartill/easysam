@@ -211,7 +211,14 @@ def init(cliparams, prismarine=False):
     resources_content = RESOURCES_YAML_PRISMARINE if prismarine else RESOURCES_YAML
     app_dir.joinpath('resources.yaml').write_text(resources_content)
     lg.debug(f'Creating root .gitignore file {app_dir / ".gitignore"}')
-    app_dir.joinpath('.gitignore').write_text(ROOT_GITIGNORE)
+    gitignore_path = app_dir / '.gitignore'
+    easysam_entries = set(ROOT_GITIGNORE.strip().split('\n'))
+    if gitignore_path.exists():
+        existing_entries = set(gitignore_path.read_text().strip().split('\n'))
+        merged_entries = existing_entries | easysam_entries
+        gitignore_path.write_text('\n'.join(sorted(merged_entries, key=str.lower)) + '\n')
+    else:
+        gitignore_path.write_text(ROOT_GITIGNORE)
 
     common_dir = app_dir / 'common'
     common_dir.mkdir(parents=True, exist_ok=True)
