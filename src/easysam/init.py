@@ -75,6 +75,7 @@ FUNCTION_GITIGNORE = '''\
 __pycache__/
 *.py[oc]
 **/common/
+prismarine_client.py
 '''
 
 REQUIREMENTS_TXT = '''\
