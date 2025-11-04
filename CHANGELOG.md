@@ -1,4 +1,4 @@
-# Unreleased
+# 1.6.0
 
 - Added support for the AWS Bedrock permissions
 - Changed `init` command to work in the current directory (requires `uv init` to be run first)
