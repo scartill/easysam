@@ -1,20 +1,10 @@
 lambda:
   name: myfunction
-  # resources:
-  #   buckets:
-  #     - docs
-  #   send:
-  #     - notify
-  #   custompolicies:
-  #     - action: logs:CreateLogGroup
-  #       effect: allow
-  #       resource: 'arn:aws:logs:*:*:*'
-  #     - action:
-  #         - logs:CreateLogStream
-  #         - logs:PutLogEvents
-  #       effect: allow
-  #       resource: 'any'
-  # integration:
-  #   path: /process
-  #   open: true
-  #   greedy: false
+  custompolicies:
+    - action: ec2:CreateSecurityGroup
+      effect: allow
+      resource: 'arn:aws:ec2:*:*:security-group/*'
+  integration:
+    path: /process
+    open: true
+    greedy: false

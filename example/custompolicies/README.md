@@ -1,35 +1,23 @@
 # Custom Policies Example
 
-This example demonstrates the use of `custompolicies` for lambdas, queues, and buckets.
+This example demonstrates the use of `custompolicies` for lambdas.
 
 ## Features Demonstrated
 
-### 1. Lambda Custom Policies
+### Lambda Custom Policies
 The `myfunction` lambda has custom IAM policies that grant:
 - `logs:CreateLogGroup` on any log group ARN
 - `logs:CreateLogStream` and `logs:PutLogEvents` on any resource (`*`)
 
 These are identity-based policies attached to the Lambda execution role, so they don't include a `Principal` field.
 
-### 2. Queue Custom Policies
-The `notifications` queue has custom SQS queue policies that:
-- Allow account `123456789012` to send messages
-- Allow any principal (`*`) to receive and delete messages
-
-Queue policies are resource-based and always include a `Principal` field (defaults to `*` if not specified).
-
-### 3. Bucket Custom Policies
-The `documents` bucket has custom S3 bucket policies that:
-- Allow account `123456789012` to get objects
-- Allow account `987654321098` to put and delete objects
-
-Bucket policies are resource-based and always include a `Principal` field (defaults to `*` if not specified).
+> Bucket and queue custom policies have been removed from `easysam`. Use separate CloudFormation resources or IAM roles if you need resource-based policies for those services.
 
 ## File Structure
 
 ```
 custompolicies/
-??? resources.yaml              # Main resources file with bucket and queue custom policies
+??? resources.yaml              # Main resources file importing the lambda example
 ??? backend/
 ?   ??? function/
 ?       ??? myfunction/
@@ -42,8 +30,7 @@ custompolicies/
 ## Key Points
 
 - **Lambda policies**: Identity-based, no `Principal` field, `resource` can be `"any"` (translates to `"*"`)
-- **Queue policies**: Resource-based, always require `Principal` (defaults to `"*"`), `resource` is always the queue ARN
-- **Bucket policies**: Resource-based, always require `Principal` (defaults to `"*"`), `resource` is always the bucket ARN
+- **Buckets/queues**: Resource-based custom policies are no longer managed by `easysam`
 
 ## Deployment
 
