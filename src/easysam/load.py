@@ -175,6 +175,9 @@ def preprocess_lambda(
     if custompolicies := lambda_def.get('custompolicies', []):
         lambda_resources['custompolicies'] = custompolicies
 
+    if allow_invoke := lambda_def.get('allowinvoke'):
+        lambda_resources['allowinvoke'] = allow_invoke
+
     integration = lambda_def.get('integration', {})
 
     if integration:

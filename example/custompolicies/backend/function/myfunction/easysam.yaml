@@ -3,7 +3,7 @@ lambda:
   custompolicies:
     - action: ec2:CreateSecurityGroup
       effect: allow
-      resource: 'arn:aws:ec2:*:*:security-group/*'
+  allowinvoke: arn:aws:iam::123456789012:root
   integration:
     path: /process
     open: true

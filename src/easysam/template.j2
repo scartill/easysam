@@ -588,6 +588,19 @@ Resources:
   {% endfor %}
   {% endif %}  # end functions
 
+  {% if functions is defined %} # Permissions for lambda functions
+  {% for function_name, function in functions.items() %}
+  {% if function.allowinvoke is defined %}
+  {{ function_name.replace('-', '') }}FunctionAllowInvoke:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt {{ function_name.replace('-', '') }}Function.Arn
+      Principal: {{ function.allowinvoke | tojson }}
+  {% endif %}
+  {% endfor %}
+  {% endif %}  # end permissions for lambda functions
+
   # DynamoDB Stream Event Source Mappings (from table definitions)
   {% if tables is defined %}
   {% for table_name, table in tables.items() %}

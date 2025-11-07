@@ -1,7 +1,8 @@
 # Unreleased
 
 - Added support for the AWS Bedrock permissions
-- Added support for custom policies on lambdas
+- Custom policy support for lambda functions
+- Invoke permission support for lambda functions
 - Changed `init` command to work in the current directory
 - Added `--prismarine` option to `init` command for scaffolding minimal Prismarine applications
 

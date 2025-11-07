@@ -110,7 +110,8 @@
         "custompolicies": {
           "type": "array",
           "items": {"$ref": "#/definitions/custom_policy_schema"}
-        }
+        },
+        "allowinvoke": {"type": "string"}
       },
       "required": ["uri"],
       "additionalProperties": false
