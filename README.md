@@ -99,28 +99,21 @@ tables:
 buckets:
   my-bucket:
     public: Boolean Optional (e.g., true), means Public read policy
-    custompolicies: Optional Array of custom S3 bucket policies
-      - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
-        effect: String Optional (e.g., "allow" or "deny", default: "allow")
-        principal: String Optional (e.g., "arn:aws:iam::123456789012:root", default: "*")
+    extaccesspolicy: Optional String referencing an external managed policy prefix
 ```
 
-Custom policies are added to the bucket's S3 BucketPolicy. For public buckets, custom policies are merged with the existing public access policies. For non-public buckets, a new BucketPolicy is created if custompolicies are defined. The resource is always set to the bucket's object ARN (`arn:aws:s3:::bucket-name/*`). The `principal` field defaults to `"*"` (all principals) if not specified.
+Bucket custom policies are no longer supported. For external access requirements, attach policies via `extaccesspolicy` or create the policy outside of `easysam`.
 
 ### Queue Definitions
 
 ```yaml
 queues:
-  my-queue: null  # Simple queue (no custom policies)
+  my-queue: null  # Simple queue definition
   # OR
-  my-queue:
-    custompolicies: Optional Array of custom SQS queue policies
-      - action: String or Array (e.g., "sqs:SendMessage" or ["sqs:SendMessage", "sqs:ReceiveMessage"])
-        effect: String Optional (e.g., "allow" or "deny", default: "allow")
-        principal: String Optional (e.g., "arn:aws:iam::123456789012:root", default: "*")
+  my-queue: {}    # Explicit empty queue configuration
 ```
 
-Custom policies create an SQS QueuePolicy resource. The resource is always set to the queue's ARN. The `principal` field defaults to `"*"` (all principals) if not specified.
+Queue custom policies are no longer supported. Use IAM roles or separate CloudFormation stacks if you require additional resource policies.
 
 ### Stream Definitions
 

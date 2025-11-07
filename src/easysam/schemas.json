@@ -23,71 +23,17 @@
       "required": ["action"],
       "additionalProperties": false
     },
-    "bucket_custom_policy_schema": {
-      "type": "object",
-      "properties": {
-        "action": {
-          "oneOf": [
-            {"type": "string"},
-            {"type": "array", "items": {"type": "string"}}
-          ]
-        },
-        "effect": {
-          "type": "string",
-          "enum": ["allow", "deny"],
-          "default": "allow"
-        },
-        "principal": {
-          "type": "string",
-          "default": "*"
-        }
-      },
-      "required": ["action"],
-      "additionalProperties": false
-    },
-    "queue_custom_policy_schema": {
-      "type": "object",
-      "properties": {
-        "action": {
-          "oneOf": [
-            {"type": "string"},
-            {"type": "array", "items": {"type": "string"}}
-          ]
-        },
-        "effect": {
-          "type": "string",
-          "enum": ["allow", "deny"],
-          "default": "allow"
-        },
-        "principal": {
-          "type": "string",
-          "default": "*"
-        }
-      },
-      "required": ["action"],
-      "additionalProperties": false
-    },
     "buckets_schema": {
       "type": "object",
       "properties": {
         "public": {"type": "boolean"},
-        "extaccesspolicy": {"type": "string"},
-        "custompolicies": {
-          "type": "array",
-          "items": {"$ref": "#/definitions/bucket_custom_policy_schema"}
-        }
+        "extaccesspolicy": {"type": "string"}
       },
       "required": ["public"],
       "additionalProperties": false
     },
     "queues_schema": {
       "type": "object",
-      "properties": {
-        "custompolicies": {
-          "type": "array",
-          "items": {"$ref": "#/definitions/queue_custom_policy_schema"}
-        }
-      },
       "additionalProperties": false
     },
     "stream_bucket_schema": {

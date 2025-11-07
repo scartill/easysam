@@ -171,6 +171,10 @@ def preprocess_lambda(
 
     lg.debug(f'Adding lambda {lambda_name} to resources')
     resources_data['functions'][lambda_name] = lambda_resources
+
+    if custompolicies := lambda_def.get('custompolicies', []):
+        lambda_resources['custompolicies'] = custompolicies
+
     integration = lambda_def.get('integration', {})
 
     if integration:
