@@ -338,31 +338,7 @@ Resources:
             Principal: '*'
             Action: 's3:GetObjectAttributes'
             Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
-          {% if bucket.custompolicies is defined %}
-          {% for custom_policy in bucket.custompolicies %}
-          - Sid: CustomPolicy{{ loop.index }}
-            Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
-            Action: {{ custom_policy.action | tojson }}
-            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
-            Principal: {{ custom_policy.principal | default('*') | tojson }}
-          {% endfor %}
-          {% endif %}
   {% endif %}  # if bucket.public
-  {% if not bucket.public and bucket.custompolicies is defined %}
-  {{ lprefix }}{{ bucket_name.replace('-', '') }}BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref {{ lprefix }}{{ bucket_name }}Bucket
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          {% for custom_policy in bucket.custompolicies %}
-          - Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
-            Action: {{ custom_policy.action | tojson }}
-            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
-            Principal: {{ custom_policy.principal | default('*') | tojson }}
-          {% endfor %}
-  {% endif %}  # if not bucket.public and bucket.custompolicies is defined
 
   {% if bucket.extaccesspolicy is defined %}
   # External access bucket policy
@@ -391,24 +367,6 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub "{{ lprefix }}-{{ queue_name }}-${Stage}"
-  {% if queue is not none and queue.custompolicies is defined %}
-
-  {{ lprefix }}{{ queue_name.replace('-', '') }}QueuePolicy:
-    Type: AWS::SQS::QueuePolicy
-    Properties:
-      Queues:
-        - !Ref {{ lprefix }}{{ queue_name.replace('-', '') }}Queue
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          {% for custom_policy in queue.custompolicies %}
-          - Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
-            Action: {{ custom_policy.action | tojson }}
-            Resource: !GetAtt {{ lprefix }}{{ queue_name.replace('-', '') }}Queue.Arn
-            Principal:
-              AWS: {{ custom_policy.principal | tojson }}
-          {% endfor %}
-  {% endif %}
   {% endfor %}
   {% endif %}  # end queues
 

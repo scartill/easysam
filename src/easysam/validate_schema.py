@@ -177,6 +177,7 @@ def validate_lambda(resources_data: dict, errors: list[str]):
                 errors.append(f'Lambda {lambda_name}: Search {collection} must be a valid search')
 
                 continue
+
         if 'custompolicies' in details:
             validate_custom_policies(details['custompolicies'], f'Lambda {lambda_name}', errors)
 
