@@ -25,10 +25,13 @@ from easysam.inspect import inspect
 @click.option(
     '--context-file',
     type=click.Path(exists=True),
-    help='A YAML file containing additional context for the resources.yaml file. '
-    'For example, overrides for resource properties.',
+    help='A YAML file containing a default context for deployments. The context can override target_profile, target_region and environment. It can also be used to override resources.yaml properties.',  # noqa: E501
 )
-@click.option('--target-region', type=str, help='A region to use for generation')
+@click.option(
+    '--target-region',
+    type=str,
+    help='A region to use for generation'
+)
 @click.option(
     '--environment',
     type=str,
@@ -44,18 +47,31 @@ def easysam(
     target_region,
     environment,
 ):
+    default_deploy_ctx = benedict({
+        'target_profile': aws_profile,
+        'target_region': target_region,
+        'environment': environment,
+    })
+
     ctx.obj = {
         'verbose': verbose,
         'aws_profile': aws_profile,
-        'deploy_ctx': {'target_region': target_region, 'environment': environment},
+        'deploy_ctx': default_deploy_ctx,
     }
 
+    lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
+
     if context_file:
-        ctx.obj['deploy_ctx'] = benedict.from_yaml(Path(context_file))
+        ctx.obj['deploy_ctx'].update(
+            benedict.from_yaml(Path(context_file))
+        )
         lg.info(f'Loaded context from {context_file}')
 
-    lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
     lg.debug(f'Verbose: {verbose}')
+
+    lg.info(
+        f'Default deployment context:\n\n{ctx.obj.get("deploy_ctx").to_yaml(indent=4)}'
+    )
 
 
 @easysam.command(name='generate', help='Generate a SAM template from a directory')

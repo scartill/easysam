@@ -5,7 +5,6 @@ from typing import cast
 
 from benedict import benedict
 from jinja2 import Environment, FileSystemLoader
-import yaml
 from mergedeep import merge
 
 from easysam.prismarine import generate as generate_prismarine_clients
@@ -18,7 +17,7 @@ def generate(
     toolparams: dict,
     resources_dir: Path,
     pypath: list[Path],
-    deploy_ctx: dict[str, str],
+    default_deploy_ctx: benedict,
 ) -> ProcessingResult:
     """
     Generate a SAM template from a directory.
@@ -35,11 +34,13 @@ def generate(
 
     try:
         errors = []
-        resources_data = load_resources(resources_dir, pypath, deploy_ctx, errors)
+        resources_data = load_resources(resources_dir, pypath, default_deploy_ctx, errors)
         aws_profile = toolparams.get('aws_profile')
         scan_cloud(resources_data, errors, aws_profile)
 
-        lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
+        lg.debug(
+            f'Resources processed:\n\n{resources_data.to_yaml(indent=4)}'
+        )
 
         try:
             build_dir = Path(resources_dir, 'build')
