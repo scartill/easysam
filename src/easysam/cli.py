@@ -138,8 +138,8 @@ def generate_cmd(obj, directory, path):
 @click.argument('directory', type=click.Path(exists=True, path_type=Path))
 def deploy_cmd(obj, directory, **kwargs):
     obj.update(kwargs)  # noqa: F821
-    deploy_ctx = obj.get('deploy_ctx')
-    deploy(obj, directory, deploy_ctx)
+    deploy_ctxs = obj.get('deploy_ctxs')
+    deploy(obj, directory, deploy_ctxs)
 
 
 @easysam.command(name='delete', help='Delete the environment from AWS')
@@ -150,8 +150,11 @@ def deploy_cmd(obj, directory, **kwargs):
 )
 def delete_cmd(obj, **kwargs):
     obj.update(kwargs)  # noqa: F821
-    environment = obj.get('deploy_ctx').get('environment')
-    delete(obj, environment)
+
+    for deploy_ctx in obj.get('deploy_ctxs', []):
+        environment = deploy_ctx.get('environment')
+        lg.warning(f'Deleting environment {environment}')
+        delete(obj, environment)
 
 
 @easysam.command(name='cleanup', help='Remove common dependencies from the directory')
