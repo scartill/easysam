@@ -184,6 +184,11 @@ def _sam_build(
         ]
     )
 
+    if region := deploy_ctx.get('target_region'):
+        sam_params.extend(['--region', region])
+    else:
+        lg.info('No AWS region found in the target. Relying on the environment or profile to infer the region.')
+
     if toolparams.get('verbose'):
         sam_params.append('--debug')
 
@@ -234,7 +239,7 @@ def _sam_deploy(toolparams, directory, deploy_ctx, resources):
     if region:
         sam_params.extend(['--region', region])
     else:
-        lg.info('No AWS region found in target. Relying on the environment or profile to infer the region.')
+        lg.info('No AWS region found in the target. Relying on the environment or profile to infer the region.')
 
     aws_tags = list(toolparams.get('tag', []))
 
