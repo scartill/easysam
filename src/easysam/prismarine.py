@@ -49,9 +49,13 @@ def generate(directory: Path, resources: dict, errors: list[str]):
             continue
 
         content = client.build_client(
+<<<<<<< HEAD
             cluster, base_dir, base, access_module,
             extra_imports=extra_imports,
             model_library=modelling
+=======
+            cluster, base_dir, base, access_module, extra_imports=extra_imports
+>>>>>>> 2dadaf6 (refactor: convert triple quotes to double quotes and update f-strings)
         )
 
         if not errors:

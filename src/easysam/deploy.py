@@ -18,14 +18,14 @@ PIP_VERSION = '25.1.1'
 
 
 def deploy(toolparams: dict, directory: Path, deploy_ctx: benedict):
-    '''
+    """
     Deploy a SAM template to AWS.
 
     Args:
         toolparams: The CLI parameters.
         directory: The directory containing the SAM template.
         deploy_ctx: The deployment context.
-    '''
+    """
 
     resources, errors = generate(toolparams, directory, [], deploy_ctx)
 
@@ -142,7 +142,9 @@ def sam_build(toolparams, directory):
 
 
 def sam_deploy(toolparams, directory, deploy_ctx, resources):
-    lg.info(f'Deploying SAM template from {directory} to\n{json.dumps(deploy_ctx, indent=4)}')
+    lg.info(
+        f'Deploying SAM template from {directory} to\n{json.dumps(deploy_ctx, indent=4)}'
+    )
     sam_tool = toolparams['sam_tool']
     sam_params = sam_tool.split(' ')
 
@@ -151,15 +153,21 @@ def sam_deploy(toolparams, directory, deploy_ctx, resources):
     if not aws_stack:
         raise UserWarning('No AWS stack found in deploy context')
 
-    sam_params.extend([
-        'deploy',
-        '--parameter-overrides', f'ParameterKey=Stage,ParameterValue={aws_stack}',
-        '--stack-name', aws_stack,
-        '--no-fail-on-empty-changeset',
-        '--no-confirm-changeset',
-        '--resolve-s3',
-        '--capabilities', 'CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'
-    ])
+    sam_params.extend(
+        [
+            'deploy',
+            '--parameter-overrides',
+            f'ParameterKey=Stage,ParameterValue={aws_stack}',
+            '--stack-name',
+            aws_stack,
+            '--no-fail-on-empty-changeset',
+            '--no-confirm-changeset',
+            '--resolve-s3',
+            '--capabilities',
+            'CAPABILITY_IAM',
+            'CAPABILITY_NAMED_IAM',
+        ]
+    )
 
     region = deploy_ctx.get('target_region')
 
@@ -169,10 +177,7 @@ def sam_deploy(toolparams, directory, deploy_ctx, resources):
     aws_tags = list(toolparams.get('tag', []))
 
     if 'tags' in resources:
-        aws_tags.extend(
-            f'{name}={value}'
-            for name, value in resources['tags'].items()
-        )
+        aws_tags.extend(f'{name}={value}' for name, value in resources['tags'].items())
 
     aws_tag_string = ' '.join(aws_tags)
     lg.info(f'AWS tag string: {aws_tag_string}')
