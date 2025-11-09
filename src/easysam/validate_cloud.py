@@ -75,7 +75,9 @@ def validate_custom_layers(ssm, lambdas, resources_data, errors):
                 lg.info(f'Validating SSM layer name: {ssm_param}')
 
                 try:
-                    layer_handle = ssm.get_parameter(Name=ssm_param)['Parameter']['Value']
+                    layer_handle = ssm.get_parameter(Name=ssm_param)['Parameter'][
+                        'Value'
+                    ]
                     lg.info(f'Successfully resolved SSM layer name: {ssm_param}')
                     lg.info(f'Layer ARN received: {layer_handle}')
 
@@ -96,4 +98,6 @@ def validate_custom_layers(ssm, lambdas, resources_data, errors):
                     errors.append(f'Layer ARN {layer_handle} not found')
                     continue
 
-            errors.append(f'Custom layer {layer} in function {function} is not supported')
+            errors.append(
+                f'Custom layer {layer} in function {function} is not supported'
+            )

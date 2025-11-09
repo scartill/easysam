@@ -18,7 +18,12 @@ def inspect(obj):
 
 
 @inspect.command(name='common-deps', help='Inspect a lambda function')
-@click.option('--common-dir', type=str, default='common', help='The directory containing the common dependencies')
+@click.option(
+    '--common-dir',
+    type=str,
+    default='common',
+    help='The directory containing the common dependencies',
+)
 @click.argument('lambda-dir', type=click.Path(exists=True))
 def common_deps(common_dir, lambda_dir):
     common_dir = Path(common_dir)

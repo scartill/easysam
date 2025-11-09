@@ -285,6 +285,9 @@ def preprocess_file(
 
     validate_local_schema(entry_path, resolved_data, errors)
 
+    if lambda_def := entry_data.get('lambda'):
+        preprocess_lambda(resources_data, resources_dir, lambda_def, entry_path, entry_dir, errors)
+
     if lambda_def := resolved_data.get('lambda'):
         preprocess_lambda(resources_data, resources_dir, lambda_def, entry_path, entry_dir, errors)
 

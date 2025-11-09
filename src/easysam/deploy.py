@@ -142,7 +142,9 @@ def sam_build(toolparams, directory):
 
 
 def sam_deploy(toolparams, directory, deploy_ctx, resources):
-    lg.info(f'Deploying SAM template from {directory} to\n{json.dumps(deploy_ctx, indent=4)}')
+    lg.info(
+        f'Deploying SAM template from {directory} to\n{json.dumps(deploy_ctx, indent=4)}'
+    )
     sam_tool = toolparams['sam_tool']
     sam_params = sam_tool.split(' ')
 

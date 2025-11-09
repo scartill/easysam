@@ -205,8 +205,12 @@ def init(toolparams, prismarine=False):
     app_dir = Path('.')
     pyproject_path = app_dir / 'pyproject.toml'
     if not pyproject_path.exists():
-        raise UserWarning('pyproject.toml not found. Please run "uv init" first to initialize the project.')
-    lg.info(f'Initializing app in current directory {"with Prismarine support" if prismarine else ""}')
+        raise UserWarning(
+            'pyproject.toml not found. Please run "uv init" first to initialize the project.'
+        )
+    lg.info(
+        f'Initializing app in current directory {"with Prismarine support" if prismarine else ""}'
+    )
     lg.debug(f'Creating resources EasySAM file {app_dir / "resources.yaml"}')
     resources_content = RESOURCES_YAML_PRISMARINE if prismarine else RESOURCES_YAML
     app_dir.joinpath('resources.yaml').write_text(resources_content)
@@ -216,7 +220,9 @@ def init(toolparams, prismarine=False):
     if gitignore_path.exists():
         existing_entries = set(gitignore_path.read_text().strip().split('\n'))
         merged_entries = existing_entries | easysam_entries
-        gitignore_path.write_text('\n'.join(sorted(merged_entries, key=str.lower)) + '\n')
+        gitignore_path.write_text(
+            '\n'.join(sorted(merged_entries, key=str.lower)) + '\n'
+        )
     else:
         gitignore_path.write_text(ROOT_GITIGNORE)
 
@@ -274,6 +280,10 @@ def init(toolparams, prismarine=False):
     third_party_dir = app_dir / 'thirdparty'
     lg.debug(f'Creating third party directory {third_party_dir}')
     third_party_dir.mkdir(parents=True, exist_ok=True)
-    lg.debug(f'Creating third party requirements.txt file {third_party_dir / "requirements.txt"}')
-    requirements_content = REQUIREMENTS_TXT_PRISMARINE if prismarine else REQUIREMENTS_TXT
+    lg.debug(
+        f'Creating third party requirements.txt file {third_party_dir / "requirements.txt"}'
+    )
+    requirements_content = (
+        REQUIREMENTS_TXT_PRISMARINE if prismarine else REQUIREMENTS_TXT
+    )
     third_party_dir.joinpath('requirements.txt').write_text(requirements_content)
