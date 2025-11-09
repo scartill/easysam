@@ -29,6 +29,8 @@ def generate(
         - environment: the name of the environment (AWS stack) to deploy to
 
         A tuple containing the processed resources and any errors as a list.
+
+        Note: other deployment contexts can be discovered by inspecting the resources.yaml file.
     """
 
     try:
@@ -61,7 +63,7 @@ def generate(
                 errors=errors,
             )
 
-            results[deploy_ctx['name']] = generate_with_context(
+            results[deploy_ctx['name']] = _generate_with_context(
                 toolparams=toolparams,
                 resources_dir=resources_dir,
                 resources_data=resources_data,
@@ -72,10 +74,10 @@ def generate(
         return results, errors
 
     except FatalError as e:
-        return results, e.errors
+        return None, e.errors
 
 
-def generate_with_context(
+def _generate_with_context(
     *,
     toolparams: dict,
     resources_dir: Path,
@@ -140,13 +142,13 @@ def generate_with_context(
             traceback.print_exc()
 
         errors.append(f'Error generating template: {e}')
-        return resources_data, errors
+        return None
 
     if 'prismarine' in resources_data:
         lg.info('Generating prismarine clients')
         generate_prismarine_clients(resources_dir, resources_data, errors)
 
-    return resources_data, errors
+    return resources_data
 
 
 def invoke_plugin(
