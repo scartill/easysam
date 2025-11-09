@@ -15,7 +15,6 @@ from easysam.load import resources as load_resources
 def generate(
     toolparams: dict,
     resources_dir: Path,
-    pypath: list[Path],
     default_deploy_ctx: benedict,
 ) -> ProcessingResult:
     """
@@ -23,78 +22,117 @@ def generate(
 
     Args:
         resources_dir: The directory containing the resources.
-        pypath: The Python path to use.
-        deploy_ctx: The additional deployment context, including:
+        default_deploy_ctx: The default deployment context, including:
+        - target_profile: the AWS profile to use
+        - target_region: the AWS region to use
         - environment: the name of the environment (AWS stack) to deploy to
-        - region: the region to deploy to (AWS region)
 
         A tuple containing the processed resources and any errors as a list.
+
+        Note: other deployment contexts can be discovered by inspecting the resources.yaml file.
     """
 
     try:
         errors = []
-        resources_data = load_resources(resources_dir, pypath, default_deploy_ctx, errors)
 
-        lg.debug(f'Resources processed:\n\n{resources_data.to_yaml(indent=4)}')
+        resources_data = load_resources(
+            toolparams=toolparams,
+            resources_dir=resources_dir,
+            deploy_ctx=default_deploy_ctx,
+            errors=errors,
+        )
 
-        try:
-            build_dir = Path(resources_dir, 'build')
-            swagger = Path(build_dir, 'swagger.yaml')
-            template = Path(resources_dir, 'template.yml')
-
-            if plugins := resources_data.get('plugins'):
-                lg.info('The template has plugins, executing them')
-
-                for plugin_name, plugin in cast(dict, plugins).items():
-                    invoke_plugin(resources_dir, resources_data, plugin_name, plugin, errors)
-
-            searchpath = [
-                str(Path(__file__).parent.resolve()),
-                str(resources_dir.resolve()),
-            ]
-
-            template_path = 'template.j2'
-
-            if omt := toolparams.get('override_main_template'):
-                lg.info(f'Overriding main template with {omt}')
-                template_path = str(omt.name)
-                lg.info(f'Adding {omt.parent} to search path')
-                searchpath.append(str(omt.parent))
-
-            loader = FileSystemLoader(searchpath=searchpath)
-            jenv = Environment(loader=loader)
-
-            sam_template = jenv.get_template(template_path)
-            sam_output = sam_template.render(resources_data)
-
-            write_result(template, sam_output)
-            lg.info(f'SAM template generated: {template}')
-
-            if resources_data.get('paths'):
-                swagger_template = jenv.get_template('swagger.j2')
-                swagger_output = swagger_template.render(resources_data)
-                write_result(swagger, swagger_output)
-                lg.info(f'Swagger file generated: {swagger}')
-
-        except Exception as e:
-            if toolparams.get('verbose'):
-                traceback.print_exc()
-
-            errors.append(f'Error generating template: {e}')
-            return resources_data, errors
-
-        if 'prismarine' in resources_data:
-            lg.info('Generating prismarine clients')
-            generate_prismarine_clients(resources_dir, resources_data, errors)
-
-        return resources_data, errors
+        return generate_with_context(
+            toolparams=toolparams,
+            resources_dir=resources_dir,
+            resources_data=resources_data,
+            deploy_ctx=default_deploy_ctx,
+            errors=errors,
+        )
 
     except FatalError as e:
         return benedict(), e.errors
 
 
-def invoke_plugin(
+def generate_with_context(
+    *,
+    toolparams: dict,
     resources_dir: Path,
+    resources_data: benedict,
+    deploy_ctx: benedict,
+    errors: list[str],
+) -> ProcessingResult:
+    """
+    Generate a SAM template from a directory with a specific deployment context.
+    """
+
+    lg.debug(f'Resources processed:\n\n{resources_data.to_yaml(indent=4)}')
+
+    try:
+        ctx_name = deploy_ctx.get('name', 'default')
+        build_dir = Path(resources_dir, 'build', ctx_name)
+        swagger = Path(build_dir, 'swagger.yaml')
+        template = Path(build_dir, 'template.yml')
+
+        if plugins := resources_data.get('plugins'):
+            lg.info('The template has plugins, executing them')
+
+            for plugin_name, plugin in cast(dict, plugins).items():
+                invoke_plugin(
+                    resources_dir=resources_dir,
+                    resources_data=resources_data,
+                    plugin_name=plugin_name,
+                    plugin=plugin,
+                    build_dir=build_dir,
+                    errors=errors,
+                )
+
+        searchpath = [
+            str(Path(__file__).parent.resolve()),
+            str(resources_dir.resolve()),
+        ]
+
+        template_path = 'template.j2'
+
+        if omt := toolparams.get('override_main_template'):
+            lg.info(f'Overriding main template with {omt}')
+            template_path = str(omt.name)
+            lg.info(f'Adding {omt.parent} to search path')
+            searchpath.append(str(omt.parent))
+
+        loader = FileSystemLoader(searchpath=searchpath)
+        jenv = Environment(loader=loader)
+
+        sam_template = jenv.get_template(template_path)
+        sam_output = sam_template.render(resources_data)
+
+        write_result(template, sam_output)
+        lg.info(f'SAM template generated: {template}')
+
+        if resources_data.get('paths'):
+            swagger_template = jenv.get_template('swagger.j2')
+            swagger_output = swagger_template.render(resources_data)
+            write_result(swagger, swagger_output)
+            lg.info(f'Swagger file generated: {swagger}')
+
+    except Exception as e:
+        if toolparams.get('verbose'):
+            traceback.print_exc()
+
+        errors.append(f'Error generating template: {e}')
+        return resources_data, errors
+
+    if 'prismarine' in resources_data:
+        lg.info('Generating prismarine clients')
+        generate_prismarine_clients(resources_dir, resources_data, errors)
+
+    return resources_data, errors
+
+
+def invoke_plugin(
+    *,
+    resources_dir: Path,
+    build_dir: Path,
     resources_data: benedict,
     plugin_name: str,
     plugin: benedict,
@@ -114,7 +152,7 @@ def invoke_plugin(
     template = jenv.get_template(template_j2_filename)
     aux_data = dict(plugin.get('aux', {}))
     output = template.render(merge(resources_data, aux_data))
-    output_yaml_path = Path(resources_dir, plugin_name).with_suffix('.yaml')
+    output_yaml_path = Path(build_dir, plugin_name).with_suffix('.yaml')
     write_result(output_yaml_path, output)
 
 
