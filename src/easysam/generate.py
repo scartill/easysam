@@ -7,6 +7,7 @@ from benedict import benedict
 from jinja2 import Environment, FileSystemLoader
 from mergedeep import merge
 
+import easysam.utils as u
 from easysam.prismarine import generate as generate_prismarine_clients
 from easysam.definitions import FatalError, ProcessingResult
 from easysam.load import resources as load_resources
@@ -69,8 +70,7 @@ def generate_with_context(
     lg.debug(f'Resources processed:\n\n{resources_data.to_yaml(indent=4)}')
 
     try:
-        ctx_name = deploy_ctx.get('name', 'default')
-        build_dir = Path(resources_dir, 'build', ctx_name)
+        build_dir = u.get_build_dir(resources_dir, deploy_ctx)
         swagger = Path(build_dir, 'swagger.yaml')
         template = Path(build_dir, 'template.yml')
 
