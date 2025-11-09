@@ -17,17 +17,17 @@ SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
 
 
-def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
+def deploy(toolparams: dict, directory: Path, deploy_ctx: benedict):
     '''
     Deploy a SAM template to AWS.
 
     Args:
-        cliparams: The CLI parameters.
+        toolparams: The CLI parameters.
         directory: The directory containing the SAM template.
         deploy_ctx: The deployment context.
     '''
 
-    resources, errors = generate(cliparams, directory, [], deploy_ctx)
+    resources, errors = generate(toolparams, directory, [], deploy_ctx)
 
     if errors:
         lg.error(f'There were {len(errors)} errors:')
@@ -38,26 +38,26 @@ def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
         raise UserWarning('There were errors - aborting deployment')
 
     lg.info(f'Deploying SAM template from {directory}')
-    check_pip_version(cliparams)
-    check_sam_cli_version(cliparams)
+    check_pip_version(toolparams)
+    check_sam_cli_version(toolparams)
     remove_common_dependencies(directory)
     copy_common_dependencies(directory, resources)
 
     # Building the application from the SAM template
-    sam_build(cliparams, directory)
+    sam_build(toolparams, directory)
 
     # Deploying the application to AWS
-    sam_deploy(cliparams, directory, deploy_ctx, resources)
+    sam_deploy(toolparams, directory, deploy_ctx, resources)
 
-    if not cliparams.get('no_cleanup'):
+    if not toolparams.get('no_cleanup'):
         remove_common_dependencies(directory)
 
 
-def delete(cliparams, environment):
+def delete(toolparams, environment):
     lg.info(f'Deleting SAM template from {environment}')
-    force = cliparams.get('force')
-    await_deletion = cliparams.get('await_deletion')
-    cf = u.get_aws_client('cloudformation', cliparams)
+    force = toolparams.get('force')
+    await_deletion = toolparams.get('await_deletion')
+    cf = u.get_aws_client('cloudformation', toolparams)
     mode = 'FORCE_DELETE_STACK' if force else 'STANDARD'
     cf.delete_stack(StackName=environment, DeletionMode=mode)  # type: ignore
 
@@ -90,7 +90,7 @@ def delete(cliparams, environment):
     lg.info(f'Stack {environment} deleted')
 
 
-def check_pip_version(cliparams):
+def check_pip_version(toolparams):
     lg.info('Checking pip version')
 
     try:
@@ -104,9 +104,9 @@ def check_pip_version(cliparams):
         raise UserWarning('pip not found') from e
 
 
-def check_sam_cli_version(cliparams):
+def check_sam_cli_version(toolparams):
     lg.info('Checking SAM CLI version')
-    sam_tool = cliparams['sam_tool']
+    sam_tool = toolparams['sam_tool']
     sam_params = sam_tool.split(' ')
     sam_params.append('--version')
 
@@ -122,13 +122,13 @@ def check_sam_cli_version(cliparams):
         raise UserWarning(f'SAM CLI not found. Error: {e}') from e
 
 
-def sam_build(cliparams, directory):
+def sam_build(toolparams, directory):
     lg.info(f'Building SAM template from {directory}')
-    sam_tool = cliparams['sam_tool']
+    sam_tool = toolparams['sam_tool']
     sam_params = sam_tool.split(' ')
     sam_params.append('build')
 
-    if cliparams.get('verbose'):
+    if toolparams.get('verbose'):
         sam_params.append('--debug')
 
     try:
@@ -141,9 +141,9 @@ def sam_build(cliparams, directory):
         raise UserWarning('Failed to build SAM template') from e
 
 
-def sam_deploy(cliparams, directory, deploy_ctx, resources):
+def sam_deploy(toolparams, directory, deploy_ctx, resources):
     lg.info(f'Deploying SAM template from {directory} to\n{json.dumps(deploy_ctx, indent=4)}')
-    sam_tool = cliparams['sam_tool']
+    sam_tool = toolparams['sam_tool']
     sam_params = sam_tool.split(' ')
 
     aws_stack = deploy_ctx['environment']
@@ -166,7 +166,7 @@ def sam_deploy(cliparams, directory, deploy_ctx, resources):
     if region:
         sam_params.extend(['--region', region])
 
-    aws_tags = list(cliparams.get('tag', []))
+    aws_tags = list(toolparams.get('tag', []))
 
     if 'tags' in resources:
         aws_tags.extend(
@@ -178,16 +178,16 @@ def sam_deploy(cliparams, directory, deploy_ctx, resources):
     lg.info(f'AWS tag string: {aws_tag_string}')
     sam_params.extend(['--tags', aws_tag_string])
 
-    if cliparams.get('verbose'):
+    if toolparams.get('verbose'):
         sam_params.append('--debug')
 
-    if cliparams['dry_run']:
+    if toolparams['dry_run']:
         lg.info(f'Would run: {" ".join(sam_params)}')
         return
 
-    if cliparams.get('aws_profile'):
-        lg.info(f'Using AWS profile: {cliparams["aws_profile"]}')
-        sam_params.extend(['--profile', cliparams['aws_profile']])
+    if toolparams.get('aws_profile'):
+        lg.info(f'Using AWS profile: {toolparams["aws_profile"]}')
+        sam_params.extend(['--profile', toolparams['aws_profile']])
 
     try:
         lg.debug(f'Running command: {" ".join(sam_params)}')

@@ -3,20 +3,25 @@ import logging as lg
 from easysam.utils import get_aws_client
 
 
-def validate(cliparams: dict, resources_data: dict, environment: str, errors: list[str]):
+def validate(
+    toolparams: dict,
+    resources_data: dict,
+    environment: str,
+    errors: list[str],
+):
     '''
     Validate required external cloud resources.
 
     Args:
-        cliparams (dict): The CLI parameters (used: aws_profile)
+        toolparams (dict): The CLI parameters (used: aws_profile)
         resources_data (dict): The resources data.
         environment (str): The environment name.
         errors (list[str]): The list of errors.
     '''
 
-    iam = get_aws_client('iam', cliparams)
-    ssm = get_aws_client('ssm', cliparams)
-    lambdas = get_aws_client('lambda', cliparams)
+    iam = get_aws_client('iam', toolparams)
+    ssm = get_aws_client('ssm', toolparams)
+    lambdas = get_aws_client('lambda', toolparams)
 
     validate_bucket_policy(iam, resources_data, environment, errors)
     validate_custom_layers(ssm, lambdas, resources_data, errors)

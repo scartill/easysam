@@ -15,7 +15,7 @@ from easysam.cloud import scan as scan_cloud
 
 
 def generate(
-    cliparams: dict,
+    toolparams: dict,
     resources_dir: Path,
     pypath: list[Path],
     deploy_ctx: dict[str, str],
@@ -36,7 +36,7 @@ def generate(
     try:
         errors = []
         resources_data = load_resources(resources_dir, pypath, deploy_ctx, errors)
-        aws_profile = cliparams.get('aws_profile')
+        aws_profile = toolparams.get('aws_profile')
         scan_cloud(resources_data, errors, aws_profile)
 
         lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
@@ -61,7 +61,7 @@ def generate(
 
             template_path = 'template.j2'
 
-            if omt := cliparams.get('override_main_template'):
+            if omt := toolparams.get('override_main_template'):
                 lg.info(f'Overriding main template with {omt}')
                 template_path = str(omt.name)
                 lg.info(f'Adding {omt.parent} to search path')
@@ -83,7 +83,7 @@ def generate(
                 lg.info(f'Swagger file generated: {swagger}')
 
         except Exception as e:
-            if cliparams.get('verbose'):
+            if toolparams.get('verbose'):
                 traceback.print_exc()
 
             errors.append(f'Error generating template: {e}')
