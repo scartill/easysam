@@ -14,7 +14,7 @@ from easysam.load import resources as load_resources
 
 
 def generate(
-    cliparams: dict,
+    toolparams: dict,
     resources_dir: Path,
     pypath: list[Path],
     deploy_ctx: dict[str, str],
@@ -47,9 +47,7 @@ def generate(
                 lg.info('The template has plugins, executing them')
 
                 for plugin_name, plugin in cast(dict, plugins).items():
-                    invoke_plugin(
-                        resources_dir, resources_data, plugin_name, plugin, errors
-                    )
+                    invoke_plugin(resources_dir, resources_data, plugin_name, plugin, errors)
 
             searchpath = [
                 str(Path(__file__).parent.resolve()),
@@ -58,7 +56,7 @@ def generate(
 
             template_path = 'template.j2'
 
-            if omt := cliparams.get('override_main_template'):
+            if omt := toolparams.get('override_main_template'):
                 lg.info(f'Overriding main template with {omt}')
                 template_path = str(omt.name)
                 lg.info(f'Adding {omt.parent} to search path')
@@ -80,7 +78,7 @@ def generate(
                 lg.info(f'Swagger file generated: {swagger}')
 
         except Exception as e:
-            if cliparams.get('verbose'):
+            if toolparams.get('verbose'):
                 traceback.print_exc()
 
             errors.append(f'Error generating template: {e}')

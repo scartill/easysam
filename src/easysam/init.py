@@ -201,7 +201,7 @@ def handler(event, context):
 '''
 
 
-def init(cliparams, prismarine=False):
+def init(toolparams, prismarine=False):
     app_dir = Path('.')
     pyproject_path = app_dir / 'pyproject.toml'
     if not pyproject_path.exists():
