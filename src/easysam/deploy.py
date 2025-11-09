@@ -20,7 +20,7 @@ PIP_VERSION = '25.1.1'
 def deploy(
     toolparams: dict,
     directory: Path,
-    default_deploy_ctx: benedict,
+    deploy_ctxs: list[benedict],
 ):
     """
     Deploy a SAM template to AWS.
@@ -28,13 +28,13 @@ def deploy(
     Args:
         toolparams: The CLI parameters.
         directory: The directory containing the SAM template.
-        default_deploy_ctx: The default deployment context.
+        deploy_ctxs: The deployment contexts.
 
     Note: other deployment contexts can be discovered by inspecting the resources.yaml file.
     """
 
-    resources, errors = generate(
-        toolparams, directory, default_deploy_ctx
+    resources_set, errors = generate(
+        toolparams, directory, deploy_ctxs
     )
 
     if errors:
@@ -43,14 +43,24 @@ def deploy(
         for error in errors:
             lg.error(error)
 
-        raise UserWarning('There were errors - aborting deployment')
+        raise UserWarning(
+            f'There were {len(errors)} errors - aborting deployment'
+        )
 
-    return _deploy_with_context(
-        toolparams=toolparams,
-        resources=resources,
-        directory=directory,
-        deploy_ctx=default_deploy_ctx,
-    )
+    _check_pip_version(toolparams)
+    _check_sam_cli_version(toolparams)
+
+    for deploy_ctx in deploy_ctxs:
+        name = deploy_ctx.get('name', 'default')
+        lg.info(f'Invoking deployment for {name}')
+        resources = resources_set[name]
+
+        _deploy_with_context(
+            toolparams=toolparams,
+            resources=resources,
+            directory=directory,
+            deploy_ctx=deploy_ctx,
+        )
 
 
 def delete(toolparams, environment):
@@ -98,8 +108,6 @@ def _deploy_with_context(
     deploy_ctx: benedict,
 ):
     lg.info(f'Deploying SAM template from {directory}')
-    _check_pip_version(toolparams)
-    _check_sam_cli_version(toolparams)
     remove_common_dependencies(directory)
     copy_common_dependencies(directory, resources)
 
@@ -248,17 +256,19 @@ def _sam_deploy(toolparams, directory, deploy_ctx, resources):
     else:
         lg.warning('No AWS profile found in target. Relying on the environment to infer the profile.')
 
+    build_dir = u.get_build_dir(directory, deploy_ctx)
+    sam_build_dir = Path(build_dir, '.aws-sam')
+    run_description = f'{" ".join(sam_params)} in {sam_build_dir}'
+
     if toolparams['dry_run']:
-        lg.info(f'Would run: {" ".join(sam_params)}')
+        lg.info(f'Would run: {run_description}')
         return
 
-    build_dir = u.get_build_dir(directory, deploy_ctx)
-
     try:
-        lg.info(f'Running command: {" ".join(sam_params)}')
+        lg.info(f'Running command: {run_description}')
         subprocess.run(
             sam_params,
-            cwd=(build_dir / '.aws-sam').as_posix(),
+            cwd=sam_build_dir.as_posix(),
             text=True,
             check=True,
         )
