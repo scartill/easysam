@@ -23,7 +23,7 @@ from easysam.inspect import inspect
 @click.pass_context
 @click.option('--aws-profile', type=str, help='AWS profile to use')
 @click.option(
-    '--context-file',
+    '--with-context',
     type=click.Path(exists=True),
     help='A YAML file containing a default context for deployments. The context can override target_profile, target_region and environment. It can also be used to override resources.yaml properties.',  # noqa: E501
 )
@@ -43,7 +43,7 @@ def easysam(
     ctx,
     verbose,
     aws_profile,
-    context_file,
+    with_context,
     target_region,
     environment,
 ):
@@ -61,11 +61,11 @@ def easysam(
 
     lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
 
-    if context_file:
+    if with_context:
         ctx.obj['deploy_ctx'].update(
-            benedict.from_yaml(Path(context_file))
+            benedict.from_yaml(Path(with_context))
         )
-        lg.info(f'Loaded context from {context_file}')
+        lg.info(f'Loaded context from {with_context}')
 
     lg.debug(f'Verbose: {verbose}')
 

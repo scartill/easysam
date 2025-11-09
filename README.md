@@ -260,8 +260,18 @@ overrides:
   buckets/my-bucket/public: true
 ```
 
-Then pass it with:
+Use the `--with-context` option to specify the deploy context file.
 
+```pwsh
+easysam deploy <app-directory> --environment <aws-environment-name> --with-context deploy-context.yaml
+```
+The deploy context file is a YAML file that contains the overrides.
+
+## Development
+
+### Setting up the development environment
+
+1. Clone the repository:
 ```bash
 uv run easysam --environment dev --context-file deploy-context.yaml deploy .
 ```
