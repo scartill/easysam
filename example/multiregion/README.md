@@ -5,7 +5,7 @@ This example shows how to deploy a EasySAM application to multiple regions. It a
 ## CLI Deployment
 
 ```
-uv run easysam --environment easysamdev --with-context ./on_eu_west_1.yaml deploy ./example/multiregion/
+uv run easysam --environment easysamdev --with-context .\example\multiregion\on_eu_west_1.yaml --with-context .\example\multiregion\on_eu_west_2.yaml deploy .\example\multiregion\
 ```
 
 Note that all paths here are relative to the root of the EasySAM project. Amend accordingly to your project structure.
