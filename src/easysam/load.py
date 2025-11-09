@@ -31,8 +31,8 @@ STREAM_INTERVAL_SECONDS = 300
 
 
 def resources(
+    toolparams: dict,
     resources_dir: Path,
-    pypath: list[Path],
     deploy_ctx: dict[str, str],
     errors: list[str],
 ) -> benedict:
@@ -41,7 +41,6 @@ def resources(
 
     Args:
         resources_dir: The directory containing the resources.yaml file.
-        pypath: The additional Python path to use.
         deploy_ctx: The deployment context dictionary.
         errors: The list of errors.
 
@@ -70,7 +69,7 @@ def resources(
     apply_overrides(resources_data, deploy_ctx)
 
     lg.info('Processing resources')
-    pypath = [resources_dir] + list(pypath)
+    pypath = [resources_dir] + list(toolparams.get('pypath', []))
     preprocess_resources(resources_data, resources_dir, pypath, errors)
 
     lg.info('Validating resources')
