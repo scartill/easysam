@@ -49,11 +49,16 @@ def common_deps(common_dir, lambda_dir):
 def schema(obj, directory, path, select):
     errors = []
     directory = Path(directory)
-    pypath = [Path(p) for p in path]
+    obj['pypath'] = [Path(p) for p in path]
     deploy_ctx = obj.get('deploy_ctx', {})
 
     try:
-        resources_data = load_resources(directory, pypath, deploy_ctx, errors)
+        resources_data = load_resources(
+            toolparams=obj,
+            resources_dir=directory,
+            deploy_ctx=deploy_ctx,
+            errors=errors,
+        )
 
     except FatalError as e:
         lg.error('There were fatal errors. Interrupting schema validation.')
@@ -79,7 +84,7 @@ def schema(obj, directory, path, select):
 @click.argument('directory', type=click.Path(exists=True))
 def cloud(obj, directory, path):
     directory = Path(directory)
-    pypath = [Path(p) for p in path]
+    obj['pypath'] = [Path(p) for p in path]
     errors = []
     deploy_ctx = obj.get('deploy_ctx', {})
 
@@ -89,7 +94,7 @@ def cloud(obj, directory, path):
     environment = deploy_ctx['environment']
 
     try:
-        resources_data = load_resources(directory, pypath, deploy_ctx, errors)
+        resources_data = load_resources(directory, deploy_ctx, errors)
 
         if errors:
             rich.print(

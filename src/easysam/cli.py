@@ -74,7 +74,10 @@ def easysam(
     )
 
 
-@easysam.command(name='generate', help='Generate a SAM template from a directory')
+@easysam.command(
+    name='generate',
+    help='Generate a SAM template from a directory',
+)
 @click.pass_obj
 @click.option(
     '--path', multiple=True, help='A additional Python path to use for generation'
@@ -82,9 +85,9 @@ def easysam(
 @click.argument('directory', type=click.Path(exists=True))
 def generate_cmd(obj, directory, path):
     directory = Path(directory)
-    pypath = [Path(p) for p in path]
+    obj['pypath'] = [Path(p) for p in path]
     deploy_ctx = obj.get('deploy_ctx')
-    resources_data, errors = generate(obj, directory, pypath, deploy_ctx)
+    resources_data, errors = generate(obj, directory, deploy_ctx)
 
     if errors:
         for error in errors:
