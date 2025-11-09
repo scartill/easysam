@@ -1,0 +1,10 @@
+lambda:
+  name: myfunction
+  custompolicies:
+    - action: ec2:CreateSecurityGroup
+      effect: allow
+  allowinvoke: arn:aws:iam::123456789012:root
+  integration:
+    path: /process
+    open: true
+    greedy: false

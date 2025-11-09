@@ -97,16 +97,23 @@ tables:
 
 ```yaml
 buckets:
-  - name: String (e.g., my-bucket)
-    public Boolean Optional (e.g., true), means Public read policy
+  my-bucket:
+    public: Boolean Optional (e.g., true), means Public read policy
+    extaccesspolicy: Optional String referencing an external managed policy prefix
 ```
+
+Bucket custom policies are no longer supported. For external access requirements, attach policies via `extaccesspolicy` or create the policy outside of `easysam`.
 
 ### Queue Definitions
 
 ```yaml
 queues:
-  - name: String (e.g., my-queue)
+  my-queue: null  # Simple queue definition
+  # OR
+  my-queue: {}    # Explicit empty queue configuration
 ```
+
+Queue custom policies are no longer supported. Use IAM roles or separate CloudFormation stacks if you require additional resource policies.
 
 ### Stream Definitions
 
@@ -118,7 +125,8 @@ streams:
 ## Lambda Definition
 
 ```yaml
-  - name: String (e.g., my-lambda)
+functions:
+  my-lambda:
     uri: String (i.e., local path to the source)
     tables:
       - String (e.g., Items)
@@ -131,7 +139,13 @@ streams:
     services:
       - comprehend  # Grants ComprehendBasicAccessPolicy
       - bedrock     # Grants bedrock:InvokeModel permission
+    custompolicies: Optional Array of custom IAM policies
+      - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
+        effect: String Optional (e.g., "allow" or "deny", default: "allow")
+        resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for "*", default: "any")
 ```
+
+Custom policies are added to the Lambda function's IAM execution role as inline policy statements. The `resource` value of "any" translates to "*" (any resource). Note that IAM role policies do not include a `Principal` field (they are identity-based policies attached to the role).
 
 ### API Gateway Definition
 
@@ -193,6 +207,10 @@ lambda:
       - <queue>
     polls:
       - <stream>
+    custompolicies: Optional Array of custom IAM policies
+      - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
+        effect: String Optional (e.g., "allow" or "deny", default: "allow")
+        resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for "*", default: "any")
   integration:
     path: <path>
     open: <boolean>
@@ -200,7 +218,7 @@ lambda:
     authorizer: <authorizer-lambda-name>
 ```
 
-Locally-defined lambda URI is set to the path of the `easysam.yaml` file.
+Locally-defined lambda URI is set to the path of the `easysam.yaml` file. Custom policies work the same way as in the main `resources.yaml` file.
 
 #### Local Import
 
