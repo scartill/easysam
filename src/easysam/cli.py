@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 
 from benedict import benedict
 import click
+from rich.logging import RichHandler
 
 from easysam.generate import generate
 from easysam.deploy import deploy, delete
@@ -24,8 +25,10 @@ from easysam.inspect import inspect
 @click.option('--aws-profile', type=str, help='AWS profile to use')
 @click.option(
     '--with-context',
-    type=click.Path(exists=True),
-    help='A YAML file containing a default context for deployments. The context can override target_profile, target_region and environment. It can also be used to override resources.yaml properties.',  # noqa: E501
+    'with_contexts',
+    multiple=True,
+    type=click.Path(exists=True, path_type=Path, dir_okay=False),
+    help='A YAML file containing a default context for deployments. The context can override target_profile, target_region and environment. It can also be used to override resources.yaml properties. Can be used multiple times to deploy to multiple contexts.',  # noqa: E501
 )
 @click.option(
     '--target-region',
@@ -43,7 +46,7 @@ def easysam(
     ctx,
     verbose,
     aws_profile,
-    with_context,
+    with_contexts,
     target_region,
     environment,
 ):
@@ -56,22 +59,35 @@ def easysam(
     ctx.obj = {
         'verbose': verbose,
         'aws_profile': aws_profile,
-        'deploy_ctx': default_deploy_ctx,
+        'default_deploy_ctx': default_deploy_ctx,
     }
 
-    lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
-
-    if with_context:
-        ctx.obj['deploy_ctx'].update(
-            benedict.from_yaml(Path(with_context))
-        )
-        lg.info(f'Loaded context from {with_context}')
-
+    lg.basicConfig(
+        level=lg.DEBUG if verbose else lg.INFO,
+        handlers=[RichHandler(rich_tracebacks=True)],
+    )
     lg.debug(f'Verbose: {verbose}')
 
-    lg.info(
-        f'Default deployment context:\n\n{ctx.obj.get("deploy_ctx").to_yaml(indent=4)}'
-    )
+    if with_contexts:
+        ctx.obj['deploy_ctxs'] = []
+
+        for with_context in with_contexts:
+            deploy_ctx = default_deploy_ctx.copy()
+
+            deploy_ctx.update(
+                benedict.from_yaml(with_context)
+            )
+
+            ctx.obj['deploy_ctxs'].append(deploy_ctx)
+            lg.info(f'Loaded context from {with_context}')
+    else:
+        ctx.obj['deploy_ctxs'] = [ctx.obj['default_deploy_ctx']]
+
+    lg.info('Deployment contexts:')
+
+    for deploy_ctx in ctx.obj['deploy_ctxs']:
+        name = deploy_ctx.get("name", "default")
+        lg.info(f'\n--- {name} ---\n{deploy_ctx.to_yaml(indent=4)}')
 
 
 @easysam.command(
@@ -86,8 +102,8 @@ def easysam(
 def generate_cmd(obj, directory, path):
     directory = Path(directory)
     obj['pypath'] = [Path(p) for p in path]
-    deploy_ctx = obj.get('deploy_ctx')
-    resources_data, errors = generate(obj, directory, deploy_ctx)
+    deploy_ctxs = obj.get('deploy_ctxs')
+    resources_set, errors = generate(obj, directory, deploy_ctxs)
 
     if errors:
         for error in errors:
@@ -101,7 +117,7 @@ def generate_cmd(obj, directory, path):
         sys.exit(1)
 
     else:
-        click.echo(resources_data.to_yaml())
+        click.echo(resources_set.to_yaml())
         lg.info('Resources generated successfully')
         sys.exit(0)
 
