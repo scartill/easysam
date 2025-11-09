@@ -112,7 +112,7 @@ Resources:
         'Fn::Transform':
           Name: 'AWS::Include'
           Parameters:
-            Location: './build/swagger.yaml'
+            Location: './swagger.yaml'
 
   ApiLogGroup:
     Type: AWS::Logs::LogGroup
@@ -437,7 +437,7 @@ Resources:
     Properties:
       LayerName: !Sub {{ lprefix }}-pythonthirdparty-${Stage}
       Description: Dependencies for all python lambdas
-      ContentUri: thirdparty/.
+      ContentUri: ../../thirdparty/.
       CompatibleRuntimes:
         - python3.13
     Metadata:
@@ -455,7 +455,7 @@ Resources:
       Timeout: {{ function.timeout}}
       {% endif %}
       FunctionName: !Sub "{{ function_name }}-${Stage}"
-      CodeUri: {{ function.uri }}
+      CodeUri: ../../{{ function.uri }}
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*

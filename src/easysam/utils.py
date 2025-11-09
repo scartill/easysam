@@ -1,3 +1,4 @@
+from pathlib import Path
 import boto3
 
 
@@ -16,3 +17,7 @@ def get_aws_client(service, toolparams, resource=False):
 def get_aws_resource(service, toolparams):
     '''Create and return an AWS resource with optional profile'''
     return get_aws_client(service, toolparams, resource=True)
+
+
+def get_build_dir(directory, deploy_ctx):
+    return Path(directory, 'build', deploy_ctx.get('name', 'default'))

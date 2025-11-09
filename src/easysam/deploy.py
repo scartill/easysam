@@ -17,17 +17,25 @@ SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
 
 
-def deploy(toolparams: dict, directory: Path, deploy_ctx: benedict):
+def deploy(
+    toolparams: dict,
+    directory: Path,
+    default_deploy_ctx: benedict,
+):
     """
     Deploy a SAM template to AWS.
 
     Args:
         toolparams: The CLI parameters.
         directory: The directory containing the SAM template.
-        deploy_ctx: The deployment context.
+        default_deploy_ctx: The default deployment context.
+
+    Note: other deployment contexts can be discovered by inspecting the resources.yaml file.
     """
 
-    resources, errors = generate(toolparams, directory, [], deploy_ctx)
+    resources, errors = generate(
+        toolparams, directory, default_deploy_ctx
+    )
 
     if errors:
         lg.error(f'There were {len(errors)} errors:')
@@ -37,20 +45,12 @@ def deploy(toolparams: dict, directory: Path, deploy_ctx: benedict):
 
         raise UserWarning('There were errors - aborting deployment')
 
-    lg.info(f'Deploying SAM template from {directory}')
-    check_pip_version(toolparams)
-    check_sam_cli_version(toolparams)
-    remove_common_dependencies(directory)
-    copy_common_dependencies(directory, resources)
-
-    # Building the application from the SAM template
-    sam_build(toolparams, directory)
-
-    # Deploying the application to AWS
-    sam_deploy(toolparams, directory, deploy_ctx, resources)
-
-    if not toolparams.get('no_cleanup'):
-        remove_common_dependencies(directory)
+    return _deploy_with_context(
+        toolparams=toolparams,
+        resources=resources,
+        directory=directory,
+        deploy_ctx=default_deploy_ctx,
+    )
 
 
 def delete(toolparams, environment):
@@ -90,7 +90,30 @@ def delete(toolparams, environment):
     lg.info(f'Stack {environment} deleted')
 
 
-def check_pip_version(toolparams):
+def _deploy_with_context(
+    *,
+    toolparams: dict,
+    resources: benedict,
+    directory: Path,
+    deploy_ctx: benedict,
+):
+    lg.info(f'Deploying SAM template from {directory}')
+    _check_pip_version(toolparams)
+    _check_sam_cli_version(toolparams)
+    remove_common_dependencies(directory)
+    copy_common_dependencies(directory, resources)
+
+    # Building the application from the SAM template
+    _sam_build(toolparams, directory, deploy_ctx)
+
+    # Deploying the application to AWS
+    _sam_deploy(toolparams, directory, deploy_ctx, resources)
+
+    if not toolparams.get('no_cleanup'):
+        remove_common_dependencies(directory)
+
+
+def _check_pip_version(toolparams):
     lg.info('Checking pip version')
 
     try:
@@ -104,7 +127,7 @@ def check_pip_version(toolparams):
         raise UserWarning('pip not found') from e
 
 
-def check_sam_cli_version(toolparams):
+def _check_sam_cli_version(toolparams):
     lg.info('Checking SAM CLI version')
     sam_tool = toolparams['sam_tool']
     sam_params = sam_tool.split(' ')
@@ -122,18 +145,48 @@ def check_sam_cli_version(toolparams):
         raise UserWarning(f'SAM CLI not found. Error: {e}') from e
 
 
-def sam_build(toolparams, directory):
+def _sam_build(
+    toolparams: dict,
+    directory: Path,
+    deploy_ctx: benedict,
+):
     lg.info(f'Building SAM template from {directory}')
-    sam_tool = toolparams['sam_tool']
+    build_dir = u.get_build_dir(directory, deploy_ctx)
+    template = Path(build_dir, 'template.yml')
+
+    if not template.exists():
+        raise UserWarning(
+            f'Template {template} not found in build directory {build_dir}'
+        )
+
+    sam_tool: str = toolparams['sam_tool']
     sam_params = sam_tool.split(' ')
-    sam_params.append('build')
+
+    sam_build_dir = Path(
+        build_dir.relative_to(directory), '.aws-sam'
+    )
+
+    sam_params.extend(
+        [
+            'build',
+            '--template-file',
+            template.relative_to(directory).as_posix(),
+            '--build-dir',
+            sam_build_dir.as_posix(),
+        ]
+    )
 
     if toolparams.get('verbose'):
         sam_params.append('--debug')
 
     try:
-        lg.debug(f'Running command: {" ".join(sam_params)}')
-        subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
+        lg.info(f'Running command: {" ".join(sam_params)}')
+        subprocess.run(
+            sam_params,
+            cwd=directory.as_posix(),
+            text=True,
+            check=True,
+        )
         lg.info('Successfully built SAM template')
 
     except subprocess.CalledProcessError as e:
@@ -141,13 +194,12 @@ def sam_build(toolparams, directory):
         raise UserWarning('Failed to build SAM template') from e
 
 
-def sam_deploy(toolparams, directory, deploy_ctx, resources):
+def _sam_deploy(toolparams, directory, deploy_ctx, resources):
     lg.info(
         f'Deploying SAM template from {directory} to\n{json.dumps(deploy_ctx, indent=4)}'
     )
     sam_tool = toolparams['sam_tool']
     sam_params = sam_tool.split(' ')
-
     aws_stack = deploy_ctx['environment']
 
     if not aws_stack:
@@ -173,6 +225,8 @@ def sam_deploy(toolparams, directory, deploy_ctx, resources):
 
     if region:
         sam_params.extend(['--region', region])
+    else:
+        lg.info('No AWS region found in target. Relying on the environment or profile to infer the region.')
 
     aws_tags = list(toolparams.get('tag', []))
 
@@ -186,17 +240,28 @@ def sam_deploy(toolparams, directory, deploy_ctx, resources):
     if toolparams.get('verbose'):
         sam_params.append('--debug')
 
+    if target_profile := deploy_ctx.get('target_profile'):
+        lg.info(
+            f'Using AWS profile from target: {target_profile}'
+        )
+        sam_params.extend(['--profile', target_profile])
+    else:
+        lg.warning('No AWS profile found in target. Relying on the environment to infer the profile.')
+
     if toolparams['dry_run']:
         lg.info(f'Would run: {" ".join(sam_params)}')
         return
 
-    if toolparams.get('aws_profile'):
-        lg.info(f'Using AWS profile: {toolparams["aws_profile"]}')
-        sam_params.extend(['--profile', toolparams['aws_profile']])
+    build_dir = u.get_build_dir(directory, deploy_ctx)
 
     try:
-        lg.debug(f'Running command: {" ".join(sam_params)}')
-        subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
+        lg.info(f'Running command: {" ".join(sam_params)}')
+        subprocess.run(
+            sam_params,
+            cwd=(build_dir / '.aws-sam').as_posix(),
+            text=True,
+            check=True,
+        )
         lg.info('Successfully deployed SAM template')
 
     except subprocess.CalledProcessError as e:
