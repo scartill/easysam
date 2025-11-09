@@ -16,43 +16,63 @@ from easysam.load import resources as load_resources
 def generate(
     toolparams: dict,
     resources_dir: Path,
-    default_deploy_ctx: benedict,
-) -> ProcessingResult:
+    deploy_ctxs: list[benedict],
+) -> benedict[str, ProcessingResult]:
     """
     Generate a SAM template from a directory.
 
     Args:
         resources_dir: The directory containing the resources.
-        default_deploy_ctx: The default deployment context, including:
+        deploy_ctxs: The deployment contexts, including:
         - target_profile: the AWS profile to use
         - target_region: the AWS region to use
         - environment: the name of the environment (AWS stack) to deploy to
 
         A tuple containing the processed resources and any errors as a list.
-
-        Note: other deployment contexts can be discovered by inspecting the resources.yaml file.
     """
 
     try:
         errors = []
+        context_names = set()
 
-        resources_data = load_resources(
-            toolparams=toolparams,
-            resources_dir=resources_dir,
-            deploy_ctx=default_deploy_ctx,
-            errors=errors,
-        )
+        for deploy_ctx in deploy_ctxs:
+            name = deploy_ctx.get('name', 'default')
+            if name in context_names:
+                errors.append(
+                    f'Deployment context {name} already defined'
+                )
+                continue
 
-        return generate_with_context(
-            toolparams=toolparams,
-            resources_dir=resources_dir,
-            resources_data=resources_data,
-            deploy_ctx=default_deploy_ctx,
-            errors=errors,
-        )
+            context_names.add(name)
+
+            if 'name' not in deploy_ctx:
+                deploy_ctx['name'] = 'default'
+
+        if errors:
+            raise FatalError(errors)
+
+        results = benedict()
+
+        for deploy_ctx in deploy_ctxs:
+            resources_data = load_resources(
+                toolparams=toolparams,
+                resources_dir=resources_dir,
+                deploy_ctx=deploy_ctx,
+                errors=errors,
+            )
+
+            results[deploy_ctx['name']] = generate_with_context(
+                toolparams=toolparams,
+                resources_dir=resources_dir,
+                resources_data=resources_data,
+                deploy_ctx=deploy_ctx,
+                errors=errors,
+            )
+
+        return results, errors
 
     except FatalError as e:
-        return benedict(), e.errors
+        return results, e.errors
 
 
 def generate_with_context(
