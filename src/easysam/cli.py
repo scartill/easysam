@@ -16,35 +16,38 @@ from easysam.init import init
 from easysam.inspect import inspect
 
 
-@click.group(help='EasySAM is a tool for generating SAM templates from simple YAML files')
+@click.group(
+    help='EasySAM is a tool for generating SAM templates from simple YAML files'
+)
 @click.version_option(version('easysam'))
 @click.pass_context
+@click.option('--aws-profile', type=str, help='AWS profile to use')
 @click.option(
-    '--aws-profile', type=str, help='AWS profile to use'
-)
-@click.option(
-    '--context-file', type=click.Path(exists=True),
+    '--context-file',
+    type=click.Path(exists=True),
     help='A YAML file containing additional context for the resources.yaml file. '
-         'For example, overrides for resource properties.'
+    'For example, overrides for resource properties.',
 )
+@click.option('--target-region', type=str, help='A region to use for generation')
 @click.option(
-    '--target-region', type=str, help='A region to use for generation'
+    '--environment',
+    type=str,
+    help='An environment (AWS stack) to use in generation',
+    default='dev',
 )
-@click.option(
-    '--environment', type=str, help='An environment (AWS stack) to use in generation',
-    default='dev'
-)
-@click.option(
-    '--verbose', is_flag=True
-)
-def easysam(ctx, verbose, aws_profile, context_file, target_region, environment):
+@click.option('--verbose', is_flag=True)
+def easysam(
+    ctx,
+    verbose,
+    aws_profile,
+    context_file,
+    target_region,
+    environment,
+):
     ctx.obj = {
         'verbose': verbose,
         'aws_profile': aws_profile,
-        'deploy_ctx': {
-            'target_region': target_region,
-            'environment': environment
-        }
+        'deploy_ctx': {'target_region': target_region, 'environment': environment},
     }
 
     if context_file:
@@ -86,15 +89,9 @@ def generate_cmd(obj, directory, path):
 
 @easysam.command(name='deploy', help='Deploy the application to an AWS environment')
 @click.pass_obj
-@click.option(
-    '--tag', type=str, multiple=True, help='AWS Tags'
-)
-@click.option(
-    '--dry-run', is_flag=True, help='Dry run the deployment'
-)
-@click.option(
-    '--sam-tool', type=str, help='Path to the SAM CLI', default='uv run sam'
-)
+@click.option('--tag', type=str, multiple=True, help='AWS Tags')
+@click.option('--dry-run', is_flag=True, help='Dry run the deployment')
+@click.option('--sam-tool', type=str, help='Path to the SAM CLI', default='uv run sam')
 @click.option(
     '--no-cleanup', is_flag=True, help='Do not clean the directory before deploying'
 )
@@ -112,9 +109,7 @@ def deploy_cmd(obj, directory, **kwargs):
 
 @easysam.command(name='delete', help='Delete the environment from AWS')
 @click.pass_obj
-@click.option(
-    '--force', is_flag=True, help='Force delete the environment'
-)
+@click.option('--force', is_flag=True, help='Force delete the environment')
 @click.option(
     '--await', 'await_deletion', is_flag=True, help='Await the deletion to complete'
 )
@@ -131,9 +126,16 @@ def cleanup_cmd(obj, directory):
     remove_common_dependencies(directory)
 
 
-@easysam.command(name='init', help='Initialize a new application in the current directory (requires uv init to be run first)')
+@easysam.command(
+    name='init',
+    help='Initialize a new application in the current directory (requires uv init to be run first)',
+)
 @click.pass_obj
-@click.option('--prismarine', is_flag=True, help='Scaffold a minimal application with Prismarine support')
+@click.option(
+    '--prismarine',
+    is_flag=True,
+    help='Scaffold a minimal application with Prismarine support',
+)
 def init_cmd(obj, prismarine):
     init(obj, prismarine=prismarine)
 

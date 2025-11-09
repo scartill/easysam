@@ -34,9 +34,9 @@ def resources(
     resources_dir: Path,
     pypath: list[Path],
     deploy_ctx: dict[str, str],
-    errors: list[str]
+    errors: list[str],
 ) -> benedict:
-    '''
+    """
     Load the resources from the resources.yaml file.
 
     Args:
@@ -47,13 +47,15 @@ def resources(
 
     Returns:
         A dictionary containing the resources.
-    '''
+    """
 
     resources = Path(resources_dir, 'resources.yaml')
 
     try:
         yaml.SafeLoader.add_constructor('!Conditional', conditional_constructor)
-        raw_resources_data = benedict(yaml.safe_load(Path(resources).read_text(encoding='utf-8')))
+        raw_resources_data = benedict(
+            yaml.safe_load(Path(resources).read_text(encoding='utf-8'))
+        )
     except Exception as e:
         errors.append(f'Error loading resources file {resources}: {e}')
         return benedict()
@@ -86,7 +88,7 @@ def prismarine_dynamo_tables(
     package: str,
     resources_dir: Path,
     pypath: list[Path],
-    errors: list[str]
+    errors: list[str],
 ):
     lg.debug(f'Generating prismarine dynamo tables for {prefix}')
 
@@ -104,10 +106,7 @@ def prismarine_dynamo_tables(
 
 
 def preprocess_prismarine(
-    resources_data: dict,
-    resources_dir: Path,
-    pypath: list[Path],
-    errors: list[str]
+    resources_data: dict, resources_dir: Path, pypath: list[Path], errors: list[str]
 ):
     prefix = resources_data['prefix']
     prisma = resources_data['prismarine']
@@ -146,7 +145,7 @@ def preprocess_lambda(
     lambda_def: dict,
     entry_path: Path,
     entry_dir: Path,
-    errors: list[str]
+    errors: list[str],
 ):
     if 'functions' not in resources_data:
         resources_data['functions'] = {}
@@ -202,17 +201,16 @@ def preprocess_lambda(
 
 
 def preprocess_tables(
-    resources_data: dict,
-    table_def: dict,
-    entry_path: Path,
-    errors: list[str]
+    resources_data: dict, table_def: dict, entry_path: Path, errors: list[str]
 ):
     if 'tables' not in resources_data:
         resources_data['tables'] = {}
 
     for table_name, table_data in table_def.items():
         if table_name in resources_data['tables']:
-            errors.append(f'Import file {entry_path} contains duplicate table {table_name}')
+            errors.append(
+                f'Import file {entry_path} contains duplicate table {table_name}'
+            )
             continue
 
         lg.debug(f'Adding table {table_name} to resources')
@@ -220,10 +218,7 @@ def preprocess_tables(
 
 
 def preprocess_file(
-    resources_data: dict,
-    resources_dir: Path,
-    entry_path: Path,
-    errors: list[str]
+    resources_data: dict, resources_dir: Path, entry_path: Path, errors: list[str]
 ):
     lg.info(f'Processing import file {entry_path}')
     try:
@@ -296,7 +291,7 @@ def process_default_streams(resources_data: dict, errors: list[str]):
                 'private': {
                     'bucketname': stream['bucketname'],
                     'bucketprefix': stream.get('bucketprefix', ''),
-                    'intervalinseconds': stream.get('intervalinseconds')
+                    'intervalinseconds': stream.get('intervalinseconds'),
                 }
             }
 
@@ -362,10 +357,7 @@ def preprocess_defaults(resources_data: dict, errors: list[str]):
 
 
 def preprocess_resources(
-    resources_data: dict,
-    resources_dir: Path,
-    pypath: list[Path],
-    errors: list[str]
+    resources_data: dict, resources_dir: Path, pypath: list[Path], errors: list[str]
 ):
     def sort_dict(d):
         return dict(sorted(d.items(), key=lambda x: x[0]))
@@ -427,10 +419,7 @@ def conditional_constructor(loader, node):
 
 
 def check_condition(
-    condition: str,
-    value: str,
-    deploy_ctx: dict[str, str],
-    errors: list[str]
+    condition: str, value: str, deploy_ctx: dict[str, str], errors: list[str]
 ):
     if value == 'any':
         return True
@@ -459,9 +448,7 @@ def check_condition(
 
 
 def resolve_conditionals(
-    resources_data: dict,
-    deploy_ctx: dict[str, str],
-    errors: list[str]
+    resources_data: dict, deploy_ctx: dict[str, str], errors: list[str]
 ):
     resolved = benedict()
 
@@ -472,10 +459,12 @@ def resolve_conditionals(
             resolved_value = value
 
         if isinstance(key, Conditional):
-            include = all([
-                check_condition('environment', key.environment, deploy_ctx, errors),
-                check_condition('target_region', key.region, deploy_ctx, errors),
-            ])
+            include = all(
+                [
+                    check_condition('environment', key.environment, deploy_ctx, errors),
+                    check_condition('target_region', key.region, deploy_ctx, errors),
+                ]
+            )
 
             if include:
                 resolved[key.key] = resolved_value
@@ -501,6 +490,4 @@ def process_default_searches(resources_data: dict, errors: list[str]):
 
         if not resources_data['search']:
             lg.debug('Search is empty, adding searchable')
-            resources_data['search'] = {
-                'searchable': {}
-            }
+            resources_data['search'] = {'searchable': {}}

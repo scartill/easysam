@@ -48,8 +48,7 @@ def generate(directory: Path, resources: dict, errors: list[str]):
             continue
 
         content = client.build_client(
-            cluster, base_dir, base, access_module,
-            extra_imports=extra_imports
+            cluster, base_dir, base, access_module, extra_imports=extra_imports
         )
 
         if not errors:
