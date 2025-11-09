@@ -278,10 +278,10 @@ overrides:
   buckets/my-bucket/public: true
 ```
 
-Use the `--context-file` option to specify the deploy context file.
+Use the `--with-context` option to specify the deploy context file.
 
 ```pwsh
-easysam deploy <app-directory> --environment <aws-environment-name> --context-file deploy-context.yaml
+easysam deploy <app-directory> --environment <aws-environment-name> --with-context deploy-context.yaml
 ```
 The deploy context file is a YAML file that contains the overrides.
 
