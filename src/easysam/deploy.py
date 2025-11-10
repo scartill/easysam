@@ -15,6 +15,7 @@ import easysam.utils as u
 
 SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
+DEFAULT_SAM_TOOL = 'uv run sam'
 
 
 def deploy(
@@ -137,7 +138,7 @@ def _check_pip_version(toolparams):
 
 def _check_sam_cli_version(toolparams):
     lg.info('Checking SAM CLI version')
-    sam_tool = toolparams['sam_tool']
+    sam_tool = toolparams.get('sam_tool', DEFAULT_SAM_TOOL)
     sam_params = sam_tool.split(' ')
     sam_params.append('--version')
 
@@ -167,7 +168,7 @@ def _sam_build(
             f'Template {template} not found in build directory {build_dir}'
         )
 
-    sam_tool: str = toolparams['sam_tool']
+    sam_tool: str = toolparams.get('sam_tool', DEFAULT_SAM_TOOL)
     sam_params = sam_tool.split(' ')
 
     sam_build_dir = Path(
@@ -211,7 +212,7 @@ def _sam_deploy(toolparams, directory, deploy_ctx, resources):
     lg.info(
         f'Deploying SAM template from {directory} to\n{json.dumps(deploy_ctx, indent=4)}'
     )
-    sam_tool = toolparams['sam_tool']
+    sam_tool = toolparams.get('sam_tool', DEFAULT_SAM_TOOL)
     sam_params = sam_tool.split(' ')
     aws_stack = deploy_ctx['environment']
 
@@ -264,6 +265,9 @@ def _sam_deploy(toolparams, directory, deploy_ctx, resources):
     build_dir = u.get_build_dir(directory, deploy_ctx)
     sam_build_dir = Path(build_dir, '.aws-sam')
     run_description = f'{" ".join(sam_params)} in {sam_build_dir}'
+
+    if 'dry_run' not in toolparams:
+        raise UserWarning('dry_run must be present in `toolparams`')
 
     if toolparams['dry_run']:
         lg.info(f'Would run: {run_description}')
