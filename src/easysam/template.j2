@@ -424,6 +424,11 @@ Resources:
       StreamSpecification:
         StreamViewType: {{ stream_view_type_map[table.trigger.viewtype] }}
       {% endif %}
+      {% if table.ttl %}
+      TimeToLiveSpecification:
+        AttributeName: {{ table.ttl }}
+        Enabled: true
+      {% endif %}
     {% endfor %}
   {% endif %}  # end tables
 

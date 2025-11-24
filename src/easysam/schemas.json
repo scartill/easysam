@@ -250,7 +250,8 @@
             "additionalProperties": false
           }
         },
-        "trigger": {"$ref": "#/definitions/table_trigger_schema"}
+        "trigger": {"$ref": "#/definitions/table_trigger_schema"},
+        "ttl": {"type": "string"}
       },
       "required": ["attributes"],
       "additionalProperties": false
