@@ -7,11 +7,12 @@ requires-python = ">=3.12"
 
 dependencies = [
     "aws-sam-cli>=1.138.0",
-    "boto3>=1.38.15",
-    "click>=8.2.0",
+    "boto3>=1.40.6",
+    "click>=8.2.1",
     "jinja2-cli[yaml]>=0.8.2",
     "jsonschema>=4.23.0",
     "mergedeep>=1.3.4",
+    "pip>=25.3",
     "prismarine[pydantic]",
     "python-benedict[yaml]>=0.34.1",
     "rich>=13.9.4",
@@ -30,7 +31,6 @@ package = true
 [dependency-groups]
 dev = [
     "opensearch-py>=3.0.0",
-    "pip>=25.1.1",
     "ruff>=0.14.1",
     "twine>=6.1.0",
     "pytest>=8.3.2",
