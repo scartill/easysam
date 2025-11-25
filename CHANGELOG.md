@@ -1,3 +1,8 @@
+# 1.7.0
+
+- Added support for Pydantic models in Prismarine
+- Added support for DynamoDB TTL attributes
+
 # 1.6.0
 
 - Added support for the AWS Bedrock permissions

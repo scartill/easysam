@@ -14,6 +14,7 @@ def generate(directory: Path, resources: dict, errors: list[str]):
     prisma_tables = prisma['tables'] or []
     access_module = prisma.get('access-module') or 'prismarine.runtime.dynamo_default'
     extra_imports_def = prisma.get('extra-imports')
+    modelling = prisma.get('modelling', 'typed-dict')
 
     if extra_imports_def:
         extra_imports = [i.split(':') for i in extra_imports_def]
@@ -49,7 +50,8 @@ def generate(directory: Path, resources: dict, errors: list[str]):
 
         content = client.build_client(
             cluster, base_dir, base, access_module,
-            extra_imports=extra_imports
+            extra_imports=extra_imports,
+            model_library=modelling
         )
 
         if not errors:
