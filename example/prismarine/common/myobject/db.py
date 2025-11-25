@@ -1,4 +1,4 @@
-import prismarine_client as pc
+import common.myobject.prismarine_client as pc
 
 
 class ItemModel(pc.ItemModel):
