@@ -217,12 +217,15 @@ prismarine:
   access-module: <access-module-path>
   extra-imports:
     - <path.to.module:ClassName>
+  modelling: <typed-dict|pydantic>  # Optional (default: typed-dict)
   tables:
     - package: <package-to-import>
       base: <optional-base-path>
 ```
 
 For more information, see [Prismarine README](https://github.com/adsight-app/prismarine/blob/main/README.md).
+
+Set `modelling: pydantic` to generate Prisma clients backed by Pydantic models (see `example/prismapydantic`). Omit or set `modelling: typed-dict` to generate the default TypedDict-based clients.
 
 ### Conditional Resources
 
