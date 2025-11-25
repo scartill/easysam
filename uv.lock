@@ -504,7 +504,7 @@ dependencies = [
     { name = "jinja2-cli", extra = ["yaml"] },
     { name = "jsonschema" },
     { name = "mergedeep" },
-    { name = "prismarine" },
+    { name = "prismarine", extra = ["pydantic"] },
     { name = "python-benedict", extra = ["yaml"] },
     { name = "rich" },
 ]
@@ -525,7 +525,7 @@ requires-dist = [
     { name = "jinja2-cli", extras = ["yaml"], specifier = ">=0.8.2" },
     { name = "jsonschema", specifier = ">=4.23.0" },
     { name = "mergedeep", specifier = ">=1.3.4" },
-    { name = "prismarine", editable = "../prismarine" },
+    { name = "prismarine", extras = ["pydantic"], editable = "../prismarine" },
     { name = "python-benedict", extras = ["yaml"], specifier = ">=0.34.1" },
     { name = "rich", specifier = ">=13.9.4" },
 ]
@@ -1091,6 +1091,11 @@ dependencies = [
     { name = "gray-formatter" },
     { name = "mako" },
     { name = "types-boto3", extra = ["dynamodb"] },
+]
+
+[package.optional-dependencies]
+pydantic = [
+    { name = "pydantic" },
 ]
 
 [package.metadata]

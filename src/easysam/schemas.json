@@ -190,6 +190,10 @@
             "required": ["package"],
             "additionalProperties": false
           }
+        },
+        "modelling": {
+          "type": "string",
+          "enum": ["typed-dict", "pydantic"]
         }
       },
       "required": ["tables"],
