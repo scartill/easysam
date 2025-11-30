@@ -1,3 +1,7 @@
+# 1.7.1
+
+- Fixed a bug with Prismarine Pydantic models by upgrading to Prismarine 1.5.2
+
 # 1.7.0
 
 - Added support for Pydantic models in Prismarine

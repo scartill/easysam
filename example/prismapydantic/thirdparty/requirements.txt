@@ -1,2 +1,2 @@
 boto3
-prismarine[pydantic]
+prismarine[pydantic]==1.5.2
