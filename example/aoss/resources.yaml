@@ -3,9 +3,14 @@ prefix: Aoss
 tags:
   mytag: myvalue
 
-import:
+? !Conditional
+  key: import
+  environment: devaoss
+:
   - backend
 
-search:
-  # This is the default search index and can be omitted
+? !Conditional
+  key: search
+  environment: devaoss
+:
   searchable:

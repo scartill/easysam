@@ -152,8 +152,10 @@ def validate_lambda(resources_data: dict, errors: list[str]):
 
                 continue
 
+        search_resources = resources_data.get('search') or {}
+        print(f'SEARCH_RESOURCES: {search_resources}')
         for collection in details.get('searches', []):
-            if collection not in resources_data.get('search', {}):
+            if collection not in search_resources:
                 errors.append(
                     f'Lambda {lambda_name}: '
                     f'Search {collection} must be a valid search'

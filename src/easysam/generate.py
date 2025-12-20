@@ -36,6 +36,7 @@ def generate(
     try:
         errors = []
         resources_data = load_resources(resources_dir, pypath, deploy_ctx, errors)
+        print(f'RESOURCES DATA AFTER LOAD: {resources_data}')
         aws_profile = cliparams.get('aws_profile')
         scan_cloud(resources_data, errors, aws_profile)
 
