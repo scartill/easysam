@@ -221,17 +221,27 @@ def preprocess_file(
 ):
     lg.info(f'Processing import file {entry_path}')
     try:
-        print(f'ENTRY PATH: {entry_path}') # example\aoss\backend\database\easysam.yaml
         entry_dir = entry_path.parent
         entry_data = yaml.safe_load(entry_path.read_text(encoding='utf-8'))
-        print(f'ENTRY DATA: {entry_data}')
+        print(f'ENTRY DATA: {entry_data}') 
     except Exception as e:
         errors.append(f'Error loading import file {entry_path}: {e}')
         return
 
-    if not all(key in ['lambda', 'import', 'tables'] for key in entry_data.keys()):
+    if not all(key in ['lambda', 'import', 'tables', 'condition'] for key in entry_data.keys()):
         errors.append(f'Import file {entry_path} contains unexpected sections')
         return
+
+    if 'condition' in entry_data:
+        include = check_condition(
+            'environment',
+            entry_data.get('condition', {}).get('environment', 'any'),
+            deploy_ctx,
+            errors
+        )
+        if not include:
+            lg.info(f'Skipping import file {entry_path} due to condition')
+            return
 
     if lambda_def := entry_data.get('lambda'):
         preprocess_lambda(

@@ -1,14 +1,8 @@
-# tables:
-#   SearchableItem:
-#     attributes:
-#     - hash: true
-#       name: ItemID
-#     trigger: indexfunc
 tables:
-  condition:
-    environment: devaoss
   SearchableItem:
     attributes:
-      - hash: true
-        name: ItemID
+    - hash: true
+      name: ItemID
     trigger: indexfunc
+condition:
+  environment: devaoss

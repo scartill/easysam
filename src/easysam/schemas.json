@@ -329,17 +329,8 @@
     "prismarine": {"$ref": "#/definitions/prismarine_schema"},
     "tables": {
       "type": "object",
-      "properties": {
-        "condition": {
-          "type": "object",
-          "patternProperties": {
-          "^[a-zA-Z0-9-_]+$": { "type": "string" }
-          },
-          "additionalProperties": false
-        }
-      },
       "patternProperties": {
-        "^(?!condition$)[a-zA-Z0-9-]+$": {"$ref": "#/definitions/tables_schema"}
+        "^[a-zA-Z0-9-]+$": {"$ref": "#/definitions/tables_schema"}
       },
       "additionalProperties": false
     },
@@ -379,6 +370,13 @@
         },
         { "type": "null"}
       ]
+    },
+    "condition": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9-_]+$": { "type": "string" }
+      },
+      "additionalProperties": false
     }
   },
   "required": ["prefix"],
