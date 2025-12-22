@@ -223,7 +223,6 @@ def preprocess_file(
     try:
         entry_dir = entry_path.parent
         entry_data = yaml.safe_load(entry_path.read_text(encoding='utf-8'))
-        print(f'ENTRY DATA: {entry_data}') 
     except Exception as e:
         errors.append(f'Error loading import file {entry_path}: {e}')
         return
@@ -461,9 +460,7 @@ def check_condition(
     )
 
     include = value == context_value
-    print(f'INCLUDE VALUE: {include}, NEGATE: {negate}')
     result = include if not negate else not include
-    print(f'RESULT VALUE: {result}')
     return result
 
 
@@ -473,8 +470,6 @@ def resolve_conditionals(
     errors: list[str]
 ):
     resolved = benedict()
-    print(f'RESOLVED BEFORE {resolved}')
-    print(f'RESOURCES DATA BEFORE {resources_data}')
 
     for key, value in resources_data.items():
         if isinstance(value, dict):
@@ -486,13 +481,12 @@ def resolve_conditionals(
             include = all([
                 check_condition('environment', key.environment, deploy_ctx, errors),
                 check_condition('target_region', key.region, deploy_ctx, errors),
-            ])  # here we decide whether a resource is included or not
+            ])
             if include:
                 resolved[key.key] = resolved_value
         else:
             resolved[key] = resolved_value
-    
-    print(f'RESOLVED AFTER {resolved}')
+
     return resolved
 
 

@@ -5,4 +5,7 @@ tables:
       name: ItemID
     trigger: indexfunc
 condition:
-  environment: devaoss
+  environment: 
+    - devaoss
+    - prodsam
+    - stagingsam

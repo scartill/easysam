@@ -160,10 +160,6 @@ def validate_lambda(resources_data: dict, errors: list[str]):
                     f'Lambda {lambda_name}: '
                     f'Search {collection} must be a valid search'
                 )
-                # lg.info(
-                #     f'Lambda {lambda_name}: '
-                #     f'Search {collection} must be a valid search'
-                # )
                 continue
 
 
