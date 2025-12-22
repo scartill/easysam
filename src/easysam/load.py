@@ -69,7 +69,7 @@ def resources(
 
     lg.info('Processing resources')
     pypath = [resources_dir] + list(pypath)
-    preprocess_resources(resources_data, resources_dir, pypath, errors)
+    preprocess_resources(deploy_ctx, resources_data, resources_dir, pypath, errors)
 
     lg.info('Validating resources')
     validate_schema(resources_dir, resources_data, errors)
@@ -213,6 +213,7 @@ def preprocess_tables(
 
 
 def preprocess_file(
+    deploy_ctx: dict[str, str],
     resources_data: dict,
     resources_dir: Path,
     entry_path: Path,
@@ -220,8 +221,10 @@ def preprocess_file(
 ):
     lg.info(f'Processing import file {entry_path}')
     try:
+        print(f'ENTRY PATH: {entry_path}') # example\aoss\backend\database\easysam.yaml
         entry_dir = entry_path.parent
         entry_data = yaml.safe_load(entry_path.read_text(encoding='utf-8'))
+        print(f'ENTRY DATA: {entry_data}')
     except Exception as e:
         errors.append(f'Error loading import file {entry_path}: {e}')
         return
@@ -244,7 +247,7 @@ def preprocess_file(
             preprocess_file(resources_data, resources_dir, import_path, errors)
 
 
-def preprocess_imports(resources_data: dict, resources_dir: Path, errors: list[str]):
+def preprocess_imports(deploy_ctx: dict[str, str], resources_data: dict, resources_dir: Path, errors: list[str]):
     for import_dir_str in resources_data.get('import', []):
         import_dir = Path(resources_dir, import_dir_str)
         lg.info(f'Processing import directory {import_dir}')
@@ -254,7 +257,7 @@ def preprocess_imports(resources_data: dict, resources_dir: Path, errors: list[s
             continue
 
         for entry_path in import_dir.glob(f'**/{IMPORT_FILE}'):
-            preprocess_file(resources_data, resources_dir, entry_path, errors)
+            preprocess_file(deploy_ctx, resources_data, resources_dir, entry_path, errors)
 
 
 def process_default_functions(resources_data: dict, errors: list[str]):
@@ -355,6 +358,7 @@ def preprocess_defaults(resources_data: dict, errors: list[str]):
 
 
 def preprocess_resources(
+    deploy_ctx: dict[str, str],
     resources_data: dict,
     resources_dir: Path,
     pypath: list[Path],
@@ -367,7 +371,7 @@ def preprocess_resources(
         preprocess_prismarine(resources_data, resources_dir, pypath, errors)
 
     if 'import' in resources_data:
-        preprocess_imports(resources_data, resources_dir, errors)
+        preprocess_imports(deploy_ctx, resources_data, resources_dir, errors)
 
     preprocess_defaults(resources_data, errors)
 

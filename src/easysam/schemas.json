@@ -329,8 +329,17 @@
     "prismarine": {"$ref": "#/definitions/prismarine_schema"},
     "tables": {
       "type": "object",
+      "properties": {
+        "condition": {
+          "type": "object",
+          "patternProperties": {
+          "^[a-zA-Z0-9-_]+$": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
       "patternProperties": {
-        "^[a-zA-Z0-9-]+$": {"$ref": "#/definitions/tables_schema"}
+        "^(?!condition$)[a-zA-Z0-9-]+$": {"$ref": "#/definitions/tables_schema"}
       },
       "additionalProperties": false
     },
