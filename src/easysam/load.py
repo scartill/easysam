@@ -434,12 +434,19 @@ def conditional_constructor(loader, node):
 
 def check_condition(
     condition: str,
-    value: str,
+    value: list | str,
     deploy_ctx: dict[str, str],
     errors: list[str]
 ):
+    print(f'VALUE: {value}') # ['devaoss', 'prodsam', 'stagingsam']S
     if value == 'any':
         return True
+
+    if isinstance(value, list):
+        return any(
+            check_condition(condition, v, deploy_ctx, errors)
+            for v in value
+        )
 
     context_value = deploy_ctx.get(condition)
 
