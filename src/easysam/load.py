@@ -438,7 +438,6 @@ def check_condition(
     deploy_ctx: dict[str, str],
     errors: list[str]
 ):
-    print(f'VALUE: {value}') # ['devaoss', 'prodsam', 'stagingsam']S
     if value == 'any':
         return True
 

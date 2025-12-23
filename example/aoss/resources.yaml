@@ -8,7 +8,7 @@ import:
 
 ? !Conditional
   key: search
-  environment: 
+  environment:
     - devaoss
     - prodsam
     - stagingsam
