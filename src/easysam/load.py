@@ -253,7 +253,7 @@ def preprocess_file(
     if local_import_def := entry_data.get('import'):
         for import_file in local_import_def:
             import_path = Path(entry_dir, import_file)
-            preprocess_file(resources_data, resources_dir, import_path, errors)
+            preprocess_file(deploy_ctx, resources_data, resources_dir, import_path, errors)
 
 
 def preprocess_imports(deploy_ctx: dict[str, str], resources_data: dict, resources_dir: Path, errors: list[str]):
