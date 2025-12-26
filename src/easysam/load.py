@@ -195,6 +195,7 @@ def preprocess_lambda(
 
 
 def preprocess_tables(
+    deploy_ctx: dict[str, str],
     resources_data: dict,
     table_def: dict,
     entry_path: Path,
@@ -202,11 +203,30 @@ def preprocess_tables(
 ):
     if 'tables' not in resources_data:
         resources_data['tables'] = {}
-
     for table_name, table_data in table_def.items():
         if table_name in resources_data['tables']:
             errors.append(f'Import file {entry_path} contains duplicate table {table_name}')
             continue
+        # check if table has a trigger with a condition
+        trigger = table_data.get('trigger')
+        has_condition = (
+            isinstance(trigger, dict)
+            and isinstance(trigger.get('condition'), dict)
+        )
+        lg.debug(f'Table {table_name} has trigger condition: {has_condition}')
+        if has_condition:
+            include = check_condition(
+                'environment',
+                trigger.get('condition').get('environment', 'any'),
+                deploy_ctx,
+                errors
+            )
+            if not include:
+                print(
+                    f"Removing trigger {trigger.get('name')} "
+                    f"from table {table_name} due to condition"
+                )
+                table_data.pop('trigger', None)
 
         lg.debug(f'Adding table {table_name} to resources')
         resources_data['tables'][table_name] = table_data
@@ -248,7 +268,7 @@ def preprocess_file(
         )
 
     if tables_def := entry_data.get('tables'):
-        preprocess_tables(resources_data, tables_def, entry_path, errors)
+        preprocess_tables(deploy_ctx, resources_data, tables_def, entry_path, errors)
 
     if local_import_def := entry_data.get('import'):
         for import_file in local_import_def:

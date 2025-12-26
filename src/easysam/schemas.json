@@ -215,6 +215,14 @@
         {
           "type": "object",
           "properties": {
+            "name": {"type": "string"},
+            "condition": {"$ref": "#/definitions/condition_schema"}
+          },
+          "required": ["condition"]
+        },
+        {
+          "type": "object",
+          "properties": {
             "function": {"type": "string"},
             "viewtype": {
               "type": "string",
@@ -225,7 +233,9 @@
             "startingposition": {
               "type": "string",
               "enum": ["trim-horizon", "latest"]
-            }
+            },
+            "condition": {"$ref": "#/definitions/condition_schema"},
+            "name": {"type": "string"}
           },
           "required": ["function"],
           "additionalProperties": false
@@ -270,6 +280,26 @@
         "ttl": {"type": "integer", "minimum": 0, "maximum": 3600}
       },
       "required": ["function"],
+      "additionalProperties": false
+    },
+    "condition_schema": {
+      "type": "object",
+      "properties":{
+        "environment": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ]},
+        "region": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ]}
+      },
+      "oneOf": [
+        { "required": ["environment"] },
+        { "required": ["region"] }
+      ],
       "additionalProperties": false
     }
   },
@@ -371,13 +401,7 @@
         { "type": "null"}
       ]
     },
-    "condition": {
-      "type": "object",
-      "patternProperties": {
-        "^[a-zA-Z0-9-_]+$": { "type": "string" }
-      },
-      "additionalProperties": false
-    }
+    "condition": {"$ref": "#/definitions/condition_schema"}
   },
   "required": ["prefix"],
   "additionalProperties": false

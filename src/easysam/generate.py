@@ -72,7 +72,6 @@ def generate(
 
             sam_template = jenv.get_template(template_path)
             sam_output = sam_template.render(resources_data)
-
             write_result(template, sam_output)
             lg.info(f'SAM template generated: {template}')
 
