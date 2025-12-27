@@ -185,7 +185,8 @@
             "type": "object",
             "properties": {
               "package": {"type": "string"},
-              "base": {"type": "string"}
+              "base": {"type": "string"},
+              "trigger":{"$ref": "#/definitions/table_trigger_schema"}
             },
             "required": ["package"],
             "additionalProperties": false

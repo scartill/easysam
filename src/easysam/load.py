@@ -104,6 +104,7 @@ def prismarine_dynamo_tables(
 
 
 def preprocess_prismarine(
+    deploy_ctx: dict[str, str],
     resources_data: dict,
     resources_dir: Path,
     pypath: list[Path],
@@ -129,6 +130,31 @@ def preprocess_prismarine(
         tables = prismarine_dynamo_tables(
             prefix, base, package, resources_dir, pypath, errors
         )
+        trigger = prisma_integration.get('trigger')
+        has_condition = (
+            isinstance(trigger, dict)
+            and isinstance(trigger.get('condition'), dict)
+        )
+        if has_condition:
+            include = check_condition(
+                'environment',
+                trigger.get('condition').get('environment', 'any'),
+                deploy_ctx,
+                errors
+            )
+            if not include:
+                lg.debug(
+                    f"Removing trigger {trigger.get('name')} "
+                )
+                trigger_name = trigger.get('name')
+
+                for table_name, table in tables.items():
+                    if table.get('trigger') == trigger_name:
+                        lg.info(
+                            f'Removing trigger {trigger_name}'
+                            f'from table {table_name}'
+                        )
+                        table.pop('trigger', None)
 
         if not tables:
             lg.warning(f'No valid tables found for {package}, continuing')
@@ -222,7 +248,7 @@ def preprocess_tables(
                 errors
             )
             if not include:
-                print(
+                lg.debug(
                     f"Removing trigger {trigger.get('name')} "
                     f"from table {table_name} due to condition"
                 )
@@ -397,7 +423,7 @@ def preprocess_resources(
         return dict(sorted(d.items(), key=lambda x: x[0]))
 
     if 'prismarine' in resources_data:
-        preprocess_prismarine(resources_data, resources_dir, pypath, errors)
+        preprocess_prismarine(deploy_ctx, resources_data, resources_dir, pypath, errors)
 
     if 'import' in resources_data:
         preprocess_imports(deploy_ctx, resources_data, resources_dir, errors)

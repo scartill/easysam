@@ -54,18 +54,6 @@ def validate_queues(resources_data: dict, errors: list[str]):
     pass
 
 
-def is_function_enabled(function_name: str, resources_data: dict) -> bool:
-    functions = resources_data.get('functions', {})
-    fn = functions.get(function_name)
-
-    if not fn:
-        return False
-
-    condition = fn.get('condition')
-    if not condition:
-        return True
-
-
 def validate_tables(resources_data: dict, errors: list[str]):
     '''Validate table-specific rules.'''
     for table_name, table in resources_data.get('tables', {}).items():
@@ -73,14 +61,10 @@ def validate_tables(resources_data: dict, errors: list[str]):
             # trigger_config is always an object at this point (processed by load.py)
             trigger_function = trigger_config.get('function')
             if trigger_function not in resources_data.get('functions', {}):
-                # errors.append(
-                #     f'Table {table_name}: '
-                #     f'Trigger function {trigger_function} must be a valid function'
-                # )
-                lg.warning(
+                errors.append(
                     f'Table {table_name}: '
-                    f'Trigger function {trigger_function} is not a valid function'
-                ) 
+                    f'Trigger function {trigger_function} must be a valid function'
+                )
 
 
 def validate_streams(resources_data: dict, errors: list[str]):
