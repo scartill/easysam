@@ -131,6 +131,7 @@ def preprocess_prismarine(
             prefix, base, package, resources_dir, pypath, errors
         )
         trigger = prisma_integration.get('trigger')
+
         has_condition = (
             isinstance(trigger, dict)
             and isinstance(trigger.get('condition'), dict)
@@ -144,9 +145,9 @@ def preprocess_prismarine(
             )
             if not include:
                 lg.debug(
-                    f"Removing trigger {trigger.get('name')} "
+                    f"Removing trigger {trigger.get('function')} "
                 )
-                trigger_name = trigger.get('name')
+                trigger_name = trigger.get('function')
 
                 for table_name, table in tables.items():
                     if table.get('trigger') == trigger_name:

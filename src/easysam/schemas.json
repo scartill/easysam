@@ -216,14 +216,6 @@
         {
           "type": "object",
           "properties": {
-            "name": {"type": "string"},
-            "condition": {"$ref": "#/definitions/condition_schema"}
-          },
-          "required": ["condition"]
-        },
-        {
-          "type": "object",
-          "properties": {
             "function": {"type": "string"},
             "viewtype": {
               "type": "string",
