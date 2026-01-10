@@ -4,8 +4,3 @@ tables:
     - hash: true
       name: ItemID
     trigger: indexfunc
-condition:
-  environment: 
-    - devaoss
-    - prodsam
-    - stagingsam

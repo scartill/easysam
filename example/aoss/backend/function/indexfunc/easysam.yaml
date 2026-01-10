@@ -6,8 +6,3 @@ lambda:
     searches:
       # This is the default search index and can be omitted
       - searchable
-condition:
-    environment: 
-      - devaoss
-      - prodsam
-      - stagingsam

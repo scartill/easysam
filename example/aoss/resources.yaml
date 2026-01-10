@@ -6,11 +6,6 @@ tags:
 import:
   - backend
 
-? !Conditional
-  key: search
-  environment:
-    - devaoss
-    - prodsam
-    - stagingsam
-:
+search:
+  # This is the default search index and can be omitted
   searchable:
