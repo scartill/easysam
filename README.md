@@ -213,7 +213,7 @@ Locally-defined lambda URI is set to the path of the `easysam.yaml` file.
 `condition` defines environment-based conditions that control when this configuration is applied.
 `environment` - a list of environment names (e.g. `dev`, `staging`, `prod`) where this Lambda configuration should be deployed.
 If the current environment is not in this list, the configuration is skipped.
-If `condition` is not specified, the lambda is created unconditionally.
+If `condition` is not specified, the lambda is deployed unconditionally.
 
 #### Local Import
 
@@ -246,9 +246,9 @@ For more information, see [Prismarine README](https://github.com/adsight-app/pri
 
 Set `modelling: pydantic` to generate Prisma clients backed by Pydantic models (see `example/prismapydantic`). Omit or set `modelling: typed-dict` to generate the default TypedDict-based clients.
 
-The `trigger.condition` section defines environment-based rules that control whether a table trigger is created and activated during deployment.
+The `trigger.condition` section defines environment-based rules that control whether a table trigger is deployed.
 `environment` - a list of environment names where this trigger should be enabled.
-If `trigger.condition` is not specified, the trigger is created unconditionally.
+If `trigger.condition` is not specified, the trigger is deployed unconditionally.
 
 ### Conditional Resources
 
@@ -274,6 +274,51 @@ The `~` prefix negates the condition.
   environment: ~prod
   region: ~eu-west-2
 ```
+
+### Condition (easysam.yaml)
+
+The `condition` section in `easysam.yaml` allows controlling whether a resource or trigger is deployed based on the deployment environment or region. 
+
+#### Structure
+```yaml
+condition:
+  environment: <string | list[string]>
+  region: <string | list[string]>
+```
+
+`environment` – one or more environment names (e.g., `dev`, `prod`) where the resource or trigger should be deployed.
+`region` – one or more AWS regions where the resource or trigger should be deployed.
+At least one of these fields must be specified.
+
+#### Behavior
+
+* If a condition is specified, the resource or trigger is deployed only if the current environment or region matches.
+
+* If a condition is not specified, the resource or trigger is deployed unconditionally.
+
+* If the condition is not satisfied, the resource or trigger is skipped and no related permissions, integrations, or bindings are applied.
+
+#### Example: Lambda with environment condition
+```yaml
+lambda:
+  name: example-function
+condition:
+  environment:
+    - dev
+    - prod
+```
+The Lambda is deployed only in dev and prod environment.
+In other environments, it is not deployed.
+
+#### Example: Table trigger with region condition
+```yaml
+trigger:
+  function: process_updates
+  condition:
+     environment: prod
+```
+The trigger is deployed only in the prod environment.
+
 
 ### Deployment Context File
 
@@ -332,3 +377,4 @@ If you encounter any issues or have questions, please:
 ## Changelog
 
 See [CHANGELOG.md](https://github.com/adsight-app/easysam/blob/main/CHANGELOG.md) for a list of changes between versions.
+
