@@ -91,6 +91,10 @@ tables:
       #   batchsize: 10          # Optional: number of records per batch
       #   batchwindow: 5         # Optional: seconds to wait for batch
       #   startingposition: latest  # Optional: trim-horizon, latest (default: latest)
+      #   condition:
+      #     environment:
+      #       - dev
+      #       - prod
 ```
 
 ### Bucket Definitions
@@ -198,9 +202,18 @@ lambda:
     open: <boolean>
     greedy: <boolean>
     authorizer: <authorizer-lambda-name>
+condition:
+  environment: 
+  - - <environment_name>
+  - - <environment_name>
 ```
 
 Locally-defined lambda URI is set to the path of the `easysam.yaml` file.
+
+`condition` defines environment-based conditions that control when this configuration is applied.
+`environment` - a list of environment names (e.g. `dev`, `staging`, `prod`) where this Lambda configuration should be deployed.
+If the current environment is not in this list, the configuration is skipped.
+If `condition` is not specified, the lambda is created unconditionally.
 
 #### Local Import
 
@@ -221,11 +234,21 @@ prismarine:
   tables:
     - package: <package-to-import>
       base: <optional-base-path>
+      trigger:
+        function: <function_name>
+        condition:
+          environment:
+            - <environment_name>
+            - <environment_name>
 ```
 
 For more information, see [Prismarine README](https://github.com/adsight-app/prismarine/blob/main/README.md).
 
 Set `modelling: pydantic` to generate Prisma clients backed by Pydantic models (see `example/prismapydantic`). Omit or set `modelling: typed-dict` to generate the default TypedDict-based clients.
+
+The `trigger.condition` section defines environment-based rules that control whether a table trigger is created and activated during deployment.
+`environment` - a list of environment names where this trigger should be enabled.
+If `trigger.condition` is not specified, the trigger is created unconditionally.
 
 ### Conditional Resources
 
