@@ -61,6 +61,9 @@ trigger:
   viewtype: new-and-old  # Optional, default
   batchsize: 10          # Optional
   startingposition: latest  # Optional, default
+  condition: # Optional
+    - dev
+    - prod 
 ```
 
 ## Stream View Types
