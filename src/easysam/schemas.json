@@ -271,7 +271,8 @@
     "mqtt_schema": {
       "type": "object",
       "properties": {
-        "authorizer": {"$ref": "#/definitions/mqtt_authorizer_schema"}
+        "authorizer": {"$ref": "#/definitions/mqtt_authorizer_schema"},
+        "topics": {"type": "array", "items": {"type": "string"}}
       },
       "required": ["authorizer"],
       "additionalProperties": false

@@ -141,12 +141,14 @@ streams:
 mqtt:
   authorizer:
     function: String  # Lambda function name for custom IoT authorizer
+  topics:  # Optional - only needed if not using authorizer-returned policies
+    - String  # Topic patterns for client subscribe/receive (e.g., "channels/*")
 ```
 
 The MQTT configuration provisions:
 - An IoT Core custom authorizer linked to the specified Lambda function
 - Lambda permissions for IoT to invoke the authorizer
-- An IoT policy allowing clients to connect, subscribe, and receive messages on `channels/*` topics
+- (Optional) An IoT client policy if `topics` is specified - typically not needed since custom authorizers return their own policy documents
 
 Lambda functions that need to publish to IoT topics should include `mqtt` in their `services` list.
 

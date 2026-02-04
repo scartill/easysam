@@ -722,6 +722,7 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: iot.amazonaws.com
 
+  {% if mqtt.topics %}
   {{ lprefix }}MqttClientPolicy:
     Type: AWS::IoT::Policy
     Properties:
@@ -739,6 +740,9 @@ Resources:
               - iot:Subscribe
               - iot:Receive
             Resource:
-              - !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:topicfilter/channels/*"
-              - !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:topic/channels/*"
+              {% for topic in mqtt.topics %}
+              - !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:topicfilter/{{ topic }}"
+              - !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:topic/{{ topic }}"
+              {% endfor %}
+  {% endif %}
   {% endif %}  # end mqtt
