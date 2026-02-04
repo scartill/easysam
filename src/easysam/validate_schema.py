@@ -33,6 +33,7 @@ def validate(resources_dir: Path, resources_data: dict, errors: list[str]):
     validate_prismarine(resources_dir, resources_data, errors)
     validate_authorizers(resources_data, errors)
     validate_search(resources_data, errors)
+    validate_mqtt(resources_data, errors)
 
 
 def load_schema() -> dict:
@@ -151,6 +152,13 @@ def validate_lambda(resources_data: dict, errors: list[str]):
                 )
 
                 continue
+
+        if 'mqtt' in details.get('services', []):
+            if not resources_data.get('mqtt'):
+                errors.append(
+                    f'Lambda {lambda_name}: '
+                    f'Service mqtt requires mqtt to be defined in resources'
+                )
 
         for collection in details.get('searches', []):
             if collection not in resources_data.get('search', {}):
@@ -307,6 +315,20 @@ def validate_authorizers(resources_data: dict, errors: list[str]):
 
         if details['function'] not in resources_data.get('functions', {}):
             errors.append(f"Authorizer '{authorizer}' function must be a valid function")
+
+
+def validate_mqtt(resources_data: dict, errors: list[str]):
+    '''Validate MQTT-specific rules.'''
+    mqtt = resources_data.get('mqtt')
+
+    if not mqtt:
+        return
+
+    auth_function = mqtt.get('authorizer', {}).get('function')
+    if auth_function and auth_function not in resources_data.get('functions', {}):
+        errors.append(
+            f"MQTT authorizer function '{auth_function}' must be a valid function"
+        )
 
 
 def validate_search(resources_data: dict, errors: list[str]):

@@ -13,6 +13,7 @@ EasySAM is a simple, opinionated tool for deploying cloud resources with a focus
   - SQS queues
   - Kinesis streams
   - API Gateway integrations
+  - MQTT/IoT Core with custom authorizers
 - Event-driven architecture:
   - DynamoDB Streams for table change notifications
   - SQS polling
@@ -131,7 +132,23 @@ streams:
     services:
       - comprehend  # Grants ComprehendBasicAccessPolicy
       - bedrock     # Grants bedrock:InvokeModel permission
+      - mqtt        # Grants iot:Publish and iot:DescribeEndpoint permissions
 ```
+
+### MQTT Definition
+
+```yaml
+mqtt:
+  authorizer:
+    function: String  # Lambda function name for custom IoT authorizer
+```
+
+The MQTT configuration provisions:
+- An IoT Core custom authorizer linked to the specified Lambda function
+- Lambda permissions for IoT to invoke the authorizer
+- An IoT policy allowing clients to connect, subscribe, and receive messages on `channels/*` topics
+
+Lambda functions that need to publish to IoT topics should include `mqtt` in their `services` list.
 
 ### API Gateway Definition
 

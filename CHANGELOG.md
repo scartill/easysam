@@ -1,3 +1,9 @@
+# 1.8.0
+
+- Added MQTT (IoT Core) support with custom Lambda authorizer
+- Added `mqtt` service for Lambda functions to publish to IoT topics
+- Automatic provisioning of IoT Authorizer, Lambda permissions, and client policies
+
 # 1.7.1
 
 - Fixed a bug with Prismarine Pydantic models by upgrading to Prismarine 1.5.2
