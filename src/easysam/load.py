@@ -24,6 +24,7 @@ SUPPORTED_SECTIONS = [
     'import',
     'lambda',
     'search',
+    'mqtt',
 ]
 
 

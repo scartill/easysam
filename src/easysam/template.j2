@@ -511,6 +511,15 @@ Resources:
               - bedrock:InvokeModelWithResponseStream
             Resource: '*'
           {% endif %}
+          {% if service == 'mqtt' %}
+        - Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+              - iot:Publish
+              - iot:DescribeEndpoint
+            Resource: '*'
+          {% endif %}
         {% endfor %}
         {% for search_collection in function.searches %}
         - Version: "2012-10-17"
@@ -695,3 +704,45 @@ Resources:
 
   {% endfor %}
   {% endif %}  # end search
+
+  # MQTT (IoT Core)
+  {% if mqtt is defined %}
+  {{ lprefix }}MqttAuthorizer:
+    Type: AWS::IoT::Authorizer
+    Properties:
+      AuthorizerName: !Sub "{{ lprefix }}-mqtt-authorizer-${Stage}"
+      AuthorizerFunctionArn: !GetAtt {{ mqtt.authorizer.function.replace('-', '') }}Function.Arn
+      Status: ACTIVE
+      SigningDisabled: true
+
+  {{ lprefix }}MqttAuthorizerPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt {{ mqtt.authorizer.function.replace('-', '') }}Function.Arn
+      Action: lambda:InvokeFunction
+      Principal: iot.amazonaws.com
+
+  {% if mqtt.topics %}
+  {{ lprefix }}MqttClientPolicy:
+    Type: AWS::IoT::Policy
+    Properties:
+      PolicyName: !Sub "{{ lprefix }}-mqtt-client-${Stage}"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - iot:Connect
+            Resource:
+              - !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:client/*"
+          - Effect: Allow
+            Action:
+              - iot:Subscribe
+              - iot:Receive
+            Resource:
+              {% for topic in mqtt.topics %}
+              - !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:topicfilter/{{ topic }}"
+              - !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:topic/{{ topic }}"
+              {% endfor %}
+  {% endif %}
+  {% endif %}  # end mqtt

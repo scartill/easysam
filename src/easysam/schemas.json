@@ -73,7 +73,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["comprehend", "bedrock"]
+            "enum": ["comprehend", "bedrock", "mqtt"]
           }
         },
         "searches": {"type": "array", "items": {"type": "string"}},
@@ -260,6 +260,23 @@
       "required": ["attributes"],
       "additionalProperties": false
     },
+    "mqtt_authorizer_schema": {
+      "type": "object",
+      "properties": {
+        "function": {"type": "string"}
+      },
+      "required": ["function"],
+      "additionalProperties": false
+    },
+    "mqtt_schema": {
+      "type": "object",
+      "properties": {
+        "authorizer": {"$ref": "#/definitions/mqtt_authorizer_schema"},
+        "topics": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["authorizer"],
+      "additionalProperties": false
+    },
     "authorizer_schema": {
       "type": "object",
       "properties": {
@@ -353,6 +370,12 @@
         }
       },
       "additionalProperties": false
+    },
+    "mqtt": {
+      "oneOf": [
+        {"$ref": "#/definitions/mqtt_schema"},
+        {"type": "null"}
+      ]
     },
     "search": {
       "oneOf": [
