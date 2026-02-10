@@ -1,3 +1,7 @@
+# 1.8.1
+
+- Added `ACCOUNT_ID` global environment variable for all Lambda functions (`AWS::AccountId`)
+
 # 1.8.0
 
 - Added MQTT (IoT Core) support with custom Lambda authorizer
