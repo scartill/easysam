@@ -1,0 +1,2 @@
+overrides:
+  streams/complex/buckets/external/extbucketarn: 'arn:aws:s3:::easysam-kinesis-external'

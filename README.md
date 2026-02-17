@@ -1,341 +1,280 @@
-# EasySAM - Opinionated Modular Cloud Deployment Tool
+# EasySAM
 
-EasySAM is a simple, opinionated tool for deploying cloud resources with a focus on simplicity and modularity. It provides a streamlined way to define and deploy AWS resources using YAML configuration files, making cloud infrastructure management more accessible and maintainable.
+EasySAM is an opinionated YAML-to-SAM generator for modular AWS serverless applications.
 
-## Features
+It helps you define Lambda functions, API Gateway routes, DynamoDB tables, S3 buckets, SQS queues, Kinesis streams, OpenSearch Serverless collections, and IoT Core authorizers in a compact `resources.yaml` model, then generate and deploy the resulting SAM stack.
 
-- Simple YAML-based resource definitions
-- Modular architecture with import support
-- Comprehensive AWS resource support:
-  - Lambda functions
-  - DynamoDB tables with stream support
-  - S3 buckets
-  - SQS queues
-  - Kinesis streams
-  - API Gateway integrations
-  - MQTT/IoT Core with custom authorizers
-- Event-driven architecture:
-  - DynamoDB Streams for table change notifications
-  - SQS polling
-  - Kinesis stream processing
-- Easy initialization of new projects
+## Why EasySAM
+
+- Simple YAML-first resource definitions
+- Recursive import system (`import` + local `easysam.yaml`)
+- Modular app structure with shared `common/` code support
+- Built-in validation (`inspect schema`, `inspect cloud`)
+- Native support for:
+  - DynamoDB stream triggers from table definitions
+  - DynamoDB TTL
+  - Prismarine model-driven tables
+  - OpenSearch Serverless search collections
+  - MQTT/IoT Core custom authorizers
+
+## Prerequisites
+
+- Python 3.12+
+- AWS credentials configured (named profile recommended)
+- AWS SAM CLI 1.138.0+
+- `pip` 25.1.1+ (used in deployment checks)
+- One of:
+  - `uv` (recommended for project-local workflows)
+  - `pipx` (recommended for global CLI install)
+  - `pip`
 
 ## Installation
 
-## Quick Start (using uv)
+Choose one installation method.
 
-1. Initialize a new project with uv:
-```pwsh
-uv init
-uv add --dev pip
+### Option A: project-local with uv
+
+```bash
 uv add --dev easysam
 ```
 
-2. Initialize EasySAM in the current directory:
+Use as:
 
-```pwsh
-uv run easysam init
-```
-
-Or with Prismarine support:
-
-```pwsh
-uv run easysam init --prismarine
-```
-
-3. Make sure that AWS credentials are configured. The recommended way is to use a named profile and use the `--aws-profile` option.
-
-4. Deploy your application:
-
-```pwsh
-uv run easysam deploy --tag my-tag=my-value --environment my-environment-name .
-```
-
-For more options, use the `--help` flag:
-```pwsh
+```bash
 uv run easysam --help
 ```
 
-## Prerequisites  
+### Option B: global with pipx
 
-* uv 0.5 or higher
-* AWS Credentials Configured
-
-## Resource Definitions
-
-The entry point for all cloud resources definitions in the `resources.yaml` file. See [example applications](./example) for how applications are structures.
-
-### Table Definitions
-
-```yaml
-tables:
-  - name: String (e.g., Items)
-    attributes:
-      - name: String (e.g., ItemID)
-        type: String (e.g., S), dynamodb type
-        hash: Boolean Optional (e.g., true), means Partition Key
-        range: Boolean Optional (e.g., true) means Sort Key
-    indices:
-      - name: String
-        attributes:
-          - name: String
-            type: String
-            hash: Boolean Optional
-            range: Boolean Optional
-    trigger: String or Object - lambda function to trigger on table changes
-      # Simple form (just function name, uses defaults):
-      # trigger: my-lambda
-      # Advanced form (with options):
-      # trigger:
-      #   function: my-lambda
-      #   viewtype: new-and-old  # Optional: keys-only, new, old, new-and-old (default: new-and-old)
-      #   batchsize: 10          # Optional: number of records per batch
-      #   batchwindow: 5         # Optional: seconds to wait for batch
-      #   startingposition: latest  # Optional: trim-horizon, latest (default: latest)
+```bash
+pipx install easysam
 ```
 
-### Bucket Definitions
+Use as:
 
-```yaml
-buckets:
-  - name: String (e.g., my-bucket)
-    public Boolean Optional (e.g., true), means Public read policy
+```bash
+easysam --help
 ```
 
-### Queue Definitions
+### Option C: global/local with pip
 
-```yaml
-queues:
-  - name: String (e.g., my-queue)
+```bash
+pip install easysam
 ```
 
-### Stream Definitions
+## Quick start (5 minutes)
 
-```yaml
-streams:
-  - name: String (e.g., my-stream)
+1. Create a Python project and initialize EasySAM:
+
+```bash
+mkdir my-easysam-app
+cd my-easysam-app
+uv init
+uv add --dev easysam
+uv run easysam init
 ```
 
-## Lambda Definition
+For a Prismarine scaffold:
 
-```yaml
-  - name: String (e.g., my-lambda)
-    uri: String (i.e., local path to the source)
-    functionurl: Boolean or Object  # Optional: Enable Lambda Function URL
-      # Simple form:
-      # functionurl: true
-      # Advanced form:
-      # functionurl:
-      #   auth_type: NONE  # Optional: NONE (default) or AWS_IAM
-      #   invoke_mode: BUFFERED  # Optional: BUFFERED (default) or RESPONSE_STREAM
-      #   cors:
-      #     allow_origins: ["*"]
-      #     allow_methods: ["GET", "POST"]
-    tables:
-      - String (e.g., Items)
-    polls:
-      - String (e.g., my-stream) - incoming stream's name
-    buckets:
-      - String (e.g., my-bucket)
-    send:
-      - String (e.g., my-queue) - outgoing queue's name
-    services:
-      - comprehend  # Grants ComprehendBasicAccessPolicy
-      - bedrock     # Grants bedrock:InvokeModel permission
-      - mqtt        # Grants iot:Publish and iot:DescribeEndpoint permissions
+```bash
+uv run easysam init --prismarine
 ```
 
-### MQTT Definition
+2. Validate your resources:
 
-```yaml
-mqtt:
-  authorizer:
-    function: String  # Lambda function name for custom IoT authorizer
-  topics:  # Optional - only needed if not using authorizer-returned policies
-    - String  # Topic patterns for client subscribe/receive (e.g., "channels/*")
+```bash
+uv run easysam --environment dev inspect schema .
 ```
 
-The MQTT configuration provisions:
-- An IoT Core custom authorizer linked to the specified Lambda function
-- Lambda permissions for IoT to invoke the authorizer
-- (Optional) An IoT client policy if `topics` is specified - typically not needed since custom authorizers return their own policy documents
+3. Generate templates:
 
-Lambda functions that need to publish to IoT topics should include `mqtt` in their `services` list.
-
-### API Gateway Definition
-
-#### Lambda Function Integration
-
-```yaml
-  path: # (e.g., /my-lambda)
-    function: String # (e.g., my-lambda)
-    authorizer: String # (e.g., my-authorizer)
-    greedy: Boolean # (e.g., false)
+```bash
+uv run easysam --environment dev generate .
 ```
 
-#### Direct DynamoDB Integration
+4. Deploy to AWS:
 
-```yaml
-  path: # (e.g., /my-lambda)
-    integration: dynamo
-    method: String # (e.g., get)
-    parameters: [String] # (e.g., [channel])
-    role: GatewayDynamoRole
-    action: String # (e.g., GetItem)
-    requestTemplate: VTL Template 
-    responseTemplateFile: VTL File Path
+```bash
+uv run easysam --environment dev --aws-profile my-profile deploy . --tag project=easysam-demo
 ```
 
-#### Direct SQS Integration
+5. Delete stack when done:
 
-```yaml
-  path: # (e.g., /my-lambda)
-    integration: sqs
-    method: String # (e.g., post)
-    role: GatewaySQSRole
-    queue: String # (e.g., my-queue)
-    requestTemplate: String # VTL Template
-    responseTemplateFile: String # VTL File Path
-    authorizer: String # (e.g., my-authorizer)
+```bash
+uv run easysam --environment dev --aws-profile my-profile delete --await
 ```
 
-### Import
+For all options:
+
+```bash
+uv run easysam --help
+```
+
+## Minimal `resources.yaml`
 
 ```yaml
+prefix: MyApp
+
 import:
-  - <directory>
+  - backend
 ```
 
-The `import` directive searches recursively for `easysam.yaml` files (local definitions) in the specified directory and merges them into the current template.
+EasySAM recursively finds `easysam.yaml` files under `backend/` and merges them.
 
-#### Local Lambda Definition
+## Local import file format (`easysam.yaml`)
 
 ```yaml
 lambda:
-  name: <name>
+  name: myfunction
   resources:
     tables:
-      - <table>
-    buckets:
-      - <bucket>
-    send:
-      - <queue>
-    polls:
-      - <stream>
-  functionurl: <boolean|object>
+      - MyItem
   integration:
-    path: <path>
-    open: <boolean>
-    greedy: <boolean>
-    authorizer: <authorizer-lambda-name>
+    path: /items
+    open: true
+    greedy: false
 ```
 
-Locally-defined lambda URI is set to the path of the `easysam.yaml` file.
-
-#### Local Import
+You can also define tables locally:
 
 ```yaml
-import:
-  - <file>
+tables:
+  MyItem:
+    attributes:
+      - name: ItemID
+        hash: true
 ```
 
-### Prismarine Support
+## Key concepts
+
+### DynamoDB table triggers
+
+Trigger a Lambda directly from table changes:
 
 ```yaml
-prismarine:
-  default-base: <base-path>
-  access-module: <access-module-path>
-  extra-imports:
-    - <path.to.module:ClassName>
-  modelling: <typed-dict|pydantic>  # Optional (default: typed-dict)
-  tables:
-    - package: <package-to-import>
-      base: <optional-base-path>
+tables:
+  SearchableItem:
+    attributes:
+      - name: ItemID
+        hash: true
+    trigger: indexfunc
 ```
 
-For more information, see [Prismarine README](https://github.com/scartill/prismarine/blob/main/README.md).
-
-Set `modelling: pydantic` to generate Prisma clients backed by Pydantic models (see `example/prismapydantic`). Omit or set `modelling: typed-dict` to generate the default TypedDict-based clients.
-
-### Conditional Resources
-
-Conditional resources are defined using the `!Conditional` tag.
+Advanced trigger configuration:
 
 ```yaml
-? !Conditional
-  key: my-bucket
-  environment: prod
-  region: eu-west-2
-:
-  extaccesspolicy: ProdPolicy
-  public: true
+tables:
+  SearchableItem:
+    attributes:
+      - name: ItemID
+        hash: true
+    trigger:
+      function: indexfunc
+      viewtype: new-and-old
+      batchsize: 10
+      batchwindow: 5
+      startingposition: latest
 ```
 
-#### Negation
+### Conditional resources
 
-The `~` prefix negates the condition.
+Conditional keys are resolved against deploy context (`environment`, `target_region`):
 
 ```yaml
-? !Conditional
-  key: my-bucket
-  environment: ~prod
-  region: ~eu-west-2
+buckets:
+  ? !Conditional
+    key: my-bucket
+    environment: prod
+    region: eu-west-2
+  :
+    public: true
+    extaccesspolicy: ProdPolicy
 ```
 
-### Deployment Context File
+Negation is supported using `~` (example: `environment: ~prod`).
 
-The deployment context file is used to further control resources, especially in CI. This version has the following features:
+### Deployment context overrides
 
-* override the resources.yaml file with the values in CI with `<path>: <value>` pairs.
+Use a context file for CI/environment-specific patches:
 
 ```yaml
 overrides:
   buckets/my-bucket/public: true
 ```
 
-Use the `--context-file` option to specify the deploy context file.
+Then pass it with:
 
-```pwsh
-easysam deploy <app-directory> --environment <aws-environment-name> --context-file deploy-context.yaml
-```
-The deploy context file is a YAML file that contains the overrides.
-
-## Development
-
-### Setting up the development environment
-
-1. Clone the repository:
 ```bash
-git clone https://github.com/scartill/easysam.git
-cd easysam
+uv run easysam --environment dev --context-file deploy-context.yaml deploy .
 ```
 
-2. Install development dependencies and activate the virtual environment:
-```bash
-uv sync
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+### Prismarine integration
+
+```yaml
+prismarine:
+  default-base: common
+  access-module: common.dynamo_access
+  modelling: typed-dict
+  tables:
+    - package: myobject
 ```
+
+Set `modelling: pydantic` for Pydantic-based generated clients.
+
+### MQTT / IoT Core custom authorizer
+
+```yaml
+mqtt:
+  authorizer:
+    function: mqtt-auth
+  topics:
+    - channels/*
+```
+
+If a function publishes to IoT topics, add `mqtt` in function `services`.
+
+## Documentation
+
+- [CLI reference](docs/CLI_REFERENCE.md)
+- [Resource reference](docs/RESOURCE_REFERENCE.md)
+- [Production hardening guide](docs/PRODUCTION_HARDENING.md)
+- [Examples catalog](example/README.md)
 
 ## Examples
 
-See `example` folder for examples:
+All examples live under `example/` and include focused scenarios such as:
 
-* `myapp`- a simple [application](example/myapp) with a lambda function and a table.
-* `prismarine`- a simple [application](example/prismarine) with a lambda function and a table, using Prismarine.
-* `appwitherrors`- an [application](example/appwitherrors) with some errors in the resources.yaml file, to test the error handling.
-* `conditionals`- an [application](example/conditionals) with conditional resources.
-* `aoss`- an [application](example/aoss) with Amazon OpenSearch Serverless and DynamoDB Streams integration.
+- minimal app bootstrap
+- conditionals and deploy context overrides
+- custom Lambda layers
+- global env vars and plugins
+- DynamoDB TTL (plain + Prismarine)
+- Prismarine TypedDict and Pydantic modelling
+- OpenSearch Serverless + DynamoDB streams
+- Kinesis with multiple S3 destinations
 
-## License
+See the full index: [example/README.md](example/README.md).
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Development
 
-## Support
-
-If you encounter any issues or have questions, please:  
-1. Search [existing issues](https://github.com/scartill/easysam/issues)  
-2. Create a new issue if needed
+```bash
+git clone https://github.com/adsight-app/easysam.git
+cd easysam
+uv sync
+source .venv/bin/activate
+```
 
 ## Changelog
 
-See [CHANGELOG.md](https://github.com/scartill/easysam/blob/main/CHANGELOG.md) for a list of changes between versions.
+See [CHANGELOG.md](CHANGELOG.md).
+
+## Support
+
+If you hit an issue:
+
+1. Search [existing issues](https://github.com/adsight-app/easysam/issues)
+2. Open a new issue with a reproducible example
+
+## License
+
+MIT. See [LICENSE](LICENSE).
