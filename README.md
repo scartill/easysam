@@ -242,7 +242,7 @@ prismarine:
       base: <optional-base-path>
 ```
 
-For more information, see [Prismarine README](https://github.com/adsight-app/prismarine/blob/main/README.md).
+For more information, see [Prismarine README](https://github.com/scartill/prismarine/blob/main/README.md).
 
 Set `modelling: pydantic` to generate Prisma clients backed by Pydantic models (see `example/prismapydantic`). Omit or set `modelling: typed-dict` to generate the default TypedDict-based clients.
 
@@ -295,7 +295,7 @@ The deploy context file is a YAML file that contains the overrides.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/adsight-app/easysam.git
+git clone https://github.com/scartill/easysam.git
 cd easysam
 ```
 
@@ -322,9 +322,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support
 
 If you encounter any issues or have questions, please:  
-1. Search [existing issues](https://github.com/adsight-app/easysam/issues)  
+1. Search [existing issues](https://github.com/scartill/easysam/issues)  
 2. Create a new issue if needed
 
 ## Changelog
 
-See [CHANGELOG.md](https://github.com/adsight-app/easysam/blob/main/CHANGELOG.md) for a list of changes between versions.
+See [CHANGELOG.md](https://github.com/scartill/easysam/blob/main/CHANGELOG.md) for a list of changes between versions.

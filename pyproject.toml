@@ -1,6 +1,6 @@
 [project]
 name = "easysam"
-version = "1.8.1"
+version = "1.8.2"
 description = "Opinionated Modular Cloud Deployment Tool (EasySAM)"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -19,8 +19,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/adsight-app/easysam"
-Changelog = "https://github.com/adsight-app/easysam/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/scartill/easysam"
+Changelog = "https://github.com/scartill/easysam/blob/main/CHANGELOG.md"
 
 [project.scripts]
 easysam = "easysam.cli:main"

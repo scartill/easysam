@@ -1,3 +1,7 @@
+# 1.8.2
+
+- Fixed repository links
+
 # 1.8.1
 
 - Added `ACCOUNT_ID` global environment variable for all Lambda functions (`AWS::AccountId`)
