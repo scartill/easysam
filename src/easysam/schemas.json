@@ -4,10 +4,16 @@
     "buckets_schema": {
       "type": "object",
       "properties": {
-        "public": {"type": "boolean"},
-        "extaccesspolicy": {"type": "string"}
+        "public": {
+          "type": "boolean"
+        },
+        "extaccesspolicy": {
+          "type": "string"
+        }
       },
-      "required": ["public"],
+      "required": [
+        "public"
+      ],
       "additionalProperties": false
     },
     "queues_schema": {
@@ -18,16 +24,24 @@
     "stream_bucket_schema": {
       "type": "object",
       "properties": {
-        "bucketname": {"type": "string"},
-        "bucketprefix": {"type": "string"},
-        "extbucketarn": {"type": "string"},
+        "bucketname": {
+          "type": "string"
+        },
+        "bucketprefix": {
+          "type": "string"
+        },
+        "extbucketarn": {
+          "type": "string"
+        },
         "intervalinseconds": {
           "type": "integer",
           "minimum": 60,
           "maximum": 900
         }
       },
-      "required": ["bucketprefix"],
+      "required": [
+        "bucketprefix"
+      ],
       "additionalProperties": false
     },
     "streams_schema": {
@@ -36,7 +50,9 @@
         "buckets": {
           "type": "object",
           "patternProperties": {
-            "^[a-z0-9-]+$": {"$ref": "#/definitions/stream_bucket_schema"}
+            "^[a-z0-9-]+$": {
+              "$ref": "#/definitions/stream_bucket_schema"
+            }
           }
         }
       }
@@ -46,31 +62,77 @@
       "items": {
         "type": "object",
         "properties": {
-          "name": {"type": "string"},
-          "batchsize": {"type": "integer"},
-          "batchwindow": {"type": "integer"}
+          "name": {
+            "type": "string"
+          },
+          "batchsize": {
+            "type": "integer"
+          },
+          "batchwindow": {
+            "type": "integer"
+          }
         },
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "additionalProperties": false
       }
     },
-    "lambda_function_url_schema": {
+    "lambda_functionurl_schema": {
       "oneOf": [
-        {"type": "boolean"},
+        {
+          "type": "boolean"
+        },
         {
           "type": "object",
           "properties": {
-            "auth_type": {"type": "string", "enum": ["NONE", "AWS_IAM"]},
-            "invoke_mode": {"type": "string", "enum": ["BUFFERED", "RESPONSE_STREAM"]},
+            "auth_type": {
+              "type": "string",
+              "enum": [
+                "NONE",
+                "AWS_IAM"
+              ]
+            },
+            "invoke_mode": {
+              "type": "string",
+              "enum": [
+                "BUFFERED",
+                "RESPONSE_STREAM"
+              ]
+            },
             "cors": {
               "type": "object",
               "properties": {
-                "allow_credentials": {"type": "boolean"},
-                "allow_headers": {"type": "array", "items": {"type": "string"}},
-                "allow_methods": {"type": "array", "items": {"type": "string"}},
-                "allow_origins": {"type": "array", "items": {"type": "string"}},
-                "expose_headers": {"type": "array", "items": {"type": "string"}},
-                "max_age": {"type": "integer"}
+                "allow_credentials": {
+                  "type": "boolean"
+                },
+                "allow_headers": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "allow_methods": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "allow_origins": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "expose_headers": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "max_age": {
+                  "type": "integer"
+                }
               },
               "additionalProperties": false
             }
@@ -82,38 +144,86 @@
     "lambda_schema": {
       "type": "object",
       "properties": {
-        "resources": {"type": "object"},
+        "resources": {
+          "type": "object"
+        },
         "timeout": {
           "type": "integer",
           "minimum": 1,
           "maximum": 900
         },
-        "buckets": {"type": "array", "items": {"type": "string"}},
-        "send": {"type": "array", "items": {"type": "string"}},
-        "streams": {"type": "array", "items": {"type": "string"}},
-        "tables": {"type": "array", "items": {"type": "string"}},
-        "queues": {"type": "array", "items": {"type": "string"}},
-        "polls": {"$ref": "#/definitions/lambda_poll_schema"},
-        "function_url": {"$ref": "#/definitions/lambda_function_url_schema"},
+        "buckets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "send": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "streams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "queues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "polls": {
+          "$ref": "#/definitions/lambda_poll_schema"
+        },
+        "functionurl": {
+          "$ref": "#/definitions/lambda_functionurl_schema"
+        },
         "services": {
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["comprehend", "bedrock", "mqtt"]
+            "enum": [
+              "comprehend",
+              "bedrock",
+              "mqtt"
+            ]
           }
         },
-        "searches": {"type": "array", "items": {"type": "string"}},
-        "uri": {"type": "string"},
-        "schedule": {"type": "string"},
+        "searches": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "uri": {
+          "type": "string"
+        },
+        "schedule": {
+          "type": "string"
+        },
         "layers": {
           "type": "object",
           "patternProperties": {
-            "^[a-z0-9-]+$": {"type": "string"}
+            "^[a-z0-9-]+$": {
+              "type": "string"
+            }
           },
           "additionalProperties": false
         }
       },
-      "required": ["uri"],
+      "required": [
+        "uri"
+      ],
       "additionalProperties": false
     },
     "lambda_path_schema": {
@@ -121,14 +231,28 @@
       "properties": {
         "integration": {
           "type": "string",
-          "enum": ["lambda"]
+          "enum": [
+            "lambda"
+          ]
         },
-        "function": {"type": "string"},
-        "authorizer": {"type": "string"},
-        "greedy": {"type": "boolean"},
-        "open": {"type": "boolean"}
+        "function": {
+          "type": "string"
+        },
+        "authorizer": {
+          "type": "string"
+        },
+        "greedy": {
+          "type": "boolean"
+        },
+        "open": {
+          "type": "boolean"
+        }
       },
-      "required": ["integration", "function", "greedy"],
+      "required": [
+        "integration",
+        "function",
+        "greedy"
+      ],
       "additionalProperties": false
     },
     "dynamo_path_schema": {
@@ -136,23 +260,37 @@
       "properties": {
         "integration": {
           "type": "string",
-          "enum": ["dynamo"]
+          "enum": [
+            "dynamo"
+          ]
         },
         "method": {
           "type": "string",
-          "enum": ["get"]
+          "enum": [
+            "get"
+          ]
         },
         "parameters": {
           "type": "array",
-          "items": {"type": "string"}
+          "items": {
+            "type": "string"
+          }
         },
         "action": {
           "type": "string",
-          "enum": ["GetItem"]
+          "enum": [
+            "GetItem"
+          ]
         },
-        "role": {"type": "string"},
-        "requestTemplate": {"type": "string"},
-        "responseTemplateFile": {"type": "string"}
+        "role": {
+          "type": "string"
+        },
+        "requestTemplate": {
+          "type": "string"
+        },
+        "responseTemplateFile": {
+          "type": "string"
+        }
       },
       "required": [
         "integration",
@@ -170,19 +308,37 @@
       "properties": {
         "integration": {
           "type": "string",
-          "enum": ["sqs"]
+          "enum": [
+            "sqs"
+          ]
         },
         "method": {
           "type": "string",
-          "enum": ["post"]
+          "enum": [
+            "post"
+          ]
         },
-        "role": {"type": "string"},
-        "queue": {"type": "string"},
-        "requestTemplate": {"type": "string"},
-        "requestTemplateFile": {"type": "string"},
-        "responseTemplate": {"type": "string"},
-        "responseTemplateFile": {"type": "string"},
-        "authorizer": {"type": "string"}
+        "role": {
+          "type": "string"
+        },
+        "queue": {
+          "type": "string"
+        },
+        "requestTemplate": {
+          "type": "string"
+        },
+        "requestTemplateFile": {
+          "type": "string"
+        },
+        "responseTemplate": {
+          "type": "string"
+        },
+        "responseTemplateFile": {
+          "type": "string"
+        },
+        "authorizer": {
+          "type": "string"
+        }
       },
       "required": [
         "integration",
@@ -194,66 +350,118 @@
     },
     "path_schema": {
       "oneOf": [
-        {"$ref": "#/definitions/lambda_path_schema"},
-        {"$ref": "#/definitions/dynamo_path_schema"},
-        {"$ref": "#/definitions/sqs_path_schema"}
+        {
+          "$ref": "#/definitions/lambda_path_schema"
+        },
+        {
+          "$ref": "#/definitions/dynamo_path_schema"
+        },
+        {
+          "$ref": "#/definitions/sqs_path_schema"
+        }
       ]
     },
     "prismarine_schema": {
       "type": "object",
       "properties": {
-        "default-base": {"type": "string"},
-        "access-module": {"type": "string"},
-        "extra-imports": {"type": "array", "items": {"type": "string"}},
+        "default-base": {
+          "type": "string"
+        },
+        "access-module": {
+          "type": "string"
+        },
+        "extra-imports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "tables": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "package": {"type": "string"},
-              "base": {"type": "string"}
+              "package": {
+                "type": "string"
+              },
+              "base": {
+                "type": "string"
+              }
             },
-            "required": ["package"],
+            "required": [
+              "package"
+            ],
             "additionalProperties": false
           }
         },
         "modelling": {
           "type": "string",
-          "enum": ["typed-dict", "pydantic"]
+          "enum": [
+            "typed-dict",
+            "pydantic"
+          ]
         }
       },
-      "required": ["tables"],
+      "required": [
+        "tables"
+      ],
       "additionalProperties": false
     },
     "table_attribute_schema": {
       "type": "object",
       "properties": {
-        "name": {"type": "string"},
-        "hash": {"type": "boolean"},
-        "range": {"type": "boolean"}
+        "name": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "boolean"
+        },
+        "range": {
+          "type": "boolean"
+        }
       },
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "additionalProperties": false
     },
     "table_trigger_schema": {
       "oneOf": [
-        {"type": "string"},
+        {
+          "type": "string"
+        },
         {
           "type": "object",
           "properties": {
-            "function": {"type": "string"},
+            "function": {
+              "type": "string"
+            },
             "viewtype": {
               "type": "string",
-              "enum": ["keys-only", "new", "old", "new-and-old"]
+              "enum": [
+                "keys-only",
+                "new",
+                "old",
+                "new-and-old"
+              ]
             },
-            "batchsize": {"type": "integer"},
-            "batchwindow": {"type": "integer"},
+            "batchsize": {
+              "type": "integer"
+            },
+            "batchwindow": {
+              "type": "integer"
+            },
             "startingposition": {
               "type": "string",
-              "enum": ["trim-horizon", "latest"]
+              "enum": [
+                "trim-horizon",
+                "latest"
+              ]
             }
           },
-          "required": ["function"],
+          "required": [
+            "function"
+          ],
           "additionalProperties": false
         }
       ]
@@ -263,124 +471,196 @@
       "properties": {
         "attributes": {
           "type": "array",
-          "items": {"$ref": "#/definitions/table_attribute_schema"}
+          "items": {
+            "$ref": "#/definitions/table_attribute_schema"
+          }
         },
         "indices": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "name": {"type": "string"},
+              "name": {
+                "type": "string"
+              },
               "attributes": {
                 "type": "array",
-                "items": {"$ref": "#/definitions/table_attribute_schema"}
+                "items": {
+                  "$ref": "#/definitions/table_attribute_schema"
+                }
               }
             },
-            "required": ["name", "attributes"],
+            "required": [
+              "name",
+              "attributes"
+            ],
             "additionalProperties": false
           }
         },
-        "trigger": {"$ref": "#/definitions/table_trigger_schema"},
-        "ttl": {"type": "string"}
+        "trigger": {
+          "$ref": "#/definitions/table_trigger_schema"
+        },
+        "ttl": {
+          "type": "string"
+        }
       },
-      "required": ["attributes"],
+      "required": [
+        "attributes"
+      ],
       "additionalProperties": false
     },
     "mqtt_authorizer_schema": {
       "type": "object",
       "properties": {
-        "function": {"type": "string"}
+        "function": {
+          "type": "string"
+        }
       },
-      "required": ["function"],
+      "required": [
+        "function"
+      ],
       "additionalProperties": false
     },
     "mqtt_schema": {
       "type": "object",
       "properties": {
-        "authorizer": {"$ref": "#/definitions/mqtt_authorizer_schema"},
-        "topics": {"type": "array", "items": {"type": "string"}}
+        "authorizer": {
+          "$ref": "#/definitions/mqtt_authorizer_schema"
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       },
-      "required": ["authorizer"],
+      "required": [
+        "authorizer"
+      ],
       "additionalProperties": false
     },
     "authorizer_schema": {
       "type": "object",
       "properties": {
-        "function": {"type": "string"},
-        "token": {"type": "string"},
-        "query": {"type": "string"},
-        "headers": {"type": "array", "items": {"type": "string"}},
-        "ttl": {"type": "integer", "minimum": 0, "maximum": 3600}
+        "function": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "query": {
+          "type": "string"
+        },
+        "headers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ttl": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3600
+        }
       },
-      "required": ["function"],
+      "required": [
+        "function"
+      ],
       "additionalProperties": false
     }
   },
   "type": "object",
   "properties": {
-    "prefix": {"type": "string"},
+    "prefix": {
+      "type": "string"
+    },
     "tags": {
       "type": "object",
       "patternProperties": {
-        "^[a-z0-9-]+$": {"type": "string"}
+        "^[a-z0-9-]+$": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "envvars": {
       "type": "object",
       "patternProperties": {
-        "^[A-Z][A-Z0-9-_]+$": {"type": "string"}
+        "^[A-Z][A-Z0-9-_]+$": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "buckets": {
       "type": "object",
       "patternProperties": {
-        "^[a-z0-9-]+$": {"$ref": "#/definitions/buckets_schema"}
+        "^[a-z0-9-]+$": {
+          "$ref": "#/definitions/buckets_schema"
+        }
       },
       "additionalProperties": false
     },
     "queues": {
       "type": "object",
       "patternProperties": {
-        "^[a-z0-9-]+$": {"type": "null"}
+        "^[a-z0-9-]+$": {
+          "type": "null"
+        }
       },
       "additionalProperties": false
     },
     "streams": {
       "type": "object",
       "patternProperties": {
-        "^[a-z0-9-]+$": {"$ref": "#/definitions/streams_schema"}
+        "^[a-z0-9-]+$": {
+          "$ref": "#/definitions/streams_schema"
+        }
       },
       "additionalProperties": false
     },
     "functions": {
       "type": "object",
       "patternProperties": {
-        "^[a-z0-9-]+$": {"$ref": "#/definitions/lambda_schema"}
+        "^[a-z0-9-]+$": {
+          "$ref": "#/definitions/lambda_schema"
+        }
       },
       "additionalProperties": false
     },
     "paths": {
       "type": "object",
       "patternProperties": {
-        "^[a-zA-Z0-9\\{\\}/]+$": {"$ref": "#/definitions/path_schema"}
+        "^[a-zA-Z0-9\\{\\}/]+$": {
+          "$ref": "#/definitions/path_schema"
+        }
       },
       "additionalProperties": false
     },
-    "import": {"type": "array", "items": {"type": "string"}},
-    "prismarine": {"$ref": "#/definitions/prismarine_schema"},
+    "import": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "prismarine": {
+      "$ref": "#/definitions/prismarine_schema"
+    },
     "tables": {
       "type": "object",
       "patternProperties": {
-        "^[a-zA-Z0-9-]+$": {"$ref": "#/definitions/tables_schema"}
+        "^[a-zA-Z0-9-]+$": {
+          "$ref": "#/definitions/tables_schema"
+        }
       },
       "additionalProperties": false
     },
     "authorizers": {
       "type": "object",
       "patternProperties": {
-        "^[a-z0-9-]+$": {"$ref": "#/definitions/authorizer_schema"}
+        "^[a-z0-9-]+$": {
+          "$ref": "#/definitions/authorizer_schema"
+        }
       },
       "additionalProperties": false
     },
@@ -390,8 +670,12 @@
         "^[a-z0-9-]+$": {
           "type": "object",
           "properties": {
-            "template": {"type": "string"},
-            "aux": {"type": "object"}
+            "template": {
+              "type": "string"
+            },
+            "aux": {
+              "type": "object"
+            }
           }
         }
       },
@@ -399,8 +683,12 @@
     },
     "mqtt": {
       "oneOf": [
-        {"$ref": "#/definitions/mqtt_schema"},
-        {"type": "null"}
+        {
+          "$ref": "#/definitions/mqtt_schema"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "search": {
@@ -410,17 +698,25 @@
           "patternProperties": {
             "^[a-z0-9-]+$": {
               "oneOf": [
-                { "type": "object" },
-                { "type": "null"}
+                {
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
               ]
             }
           },
           "additionalProperties": false
         },
-        { "type": "null"}
+        {
+          "type": "null"
+        }
       ]
     }
   },
-  "required": ["prefix"],
+  "required": [
+    "prefix"
+  ],
   "additionalProperties": false
 }

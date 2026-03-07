@@ -6,10 +6,10 @@ import:
 functions:
   hello-world:
     uri: backend/function/hello-world
-    function_url: true
+    functionurl: true
   hello-custom:
     uri: backend/function/hello-custom
-    function_url:
+    functionurl:
       auth_type: NONE
       cors:
         allow_origins:

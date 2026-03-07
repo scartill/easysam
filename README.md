@@ -121,11 +121,11 @@ streams:
 ```yaml
   - name: String (e.g., my-lambda)
     uri: String (i.e., local path to the source)
-    function_url: Boolean or Object  # Optional: Enable Lambda Function URL
+    functionurl: Boolean or Object  # Optional: Enable Lambda Function URL
       # Simple form:
-      # function_url: true
+      # functionurl: true
       # Advanced form:
-      # function_url:
+      # functionurl:
       #   auth_type: NONE  # Optional: NONE (default) or AWS_IAM
       #   invoke_mode: BUFFERED  # Optional: BUFFERED (default) or RESPONSE_STREAM
       #   cors:
@@ -222,7 +222,7 @@ lambda:
       - <queue>
     polls:
       - <stream>
-  function_url: <boolean|object>
+  functionurl: <boolean|object>
   integration:
     path: <path>
     open: <boolean>
