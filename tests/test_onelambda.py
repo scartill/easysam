@@ -39,3 +39,9 @@ def test_onelambda_generation():
     assert 'myfunctionFunction' in resources
     myfunction = resources['myfunctionFunction']
     assert myfunction['Type'] == 'AWS::Serverless::Function'
+    
+    # Check if 'Events' is present and if so, if it's empty
+    if 'Events' in myfunction['Properties']:
+        events = myfunction['Properties']['Events']
+        assert events is not None, "Events property should not be None if present"
+        assert len(events) > 0, "Events property should not be empty if present"

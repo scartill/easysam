@@ -35,6 +35,9 @@ def test_myapp_generation():
         
     resources = template['Resources']
     
-    # Verify MyItemTable
-    assert 'MyAppMyItem' in resources
-    assert resources['MyAppMyItem']['Type'] == 'AWS::DynamoDB::Table'
+    # Verify myfunctionFunction
+    assert 'myfunctionFunction' in resources
+    myfunction = resources['myfunctionFunction']
+    assert myfunction['Type'] == 'AWS::Serverless::Function'
+    assert 'Events' in myfunction['Properties'], "Events property should be present if events are defined"
+    assert 'itemsAPI' in myfunction['Properties']['Events']

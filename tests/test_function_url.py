@@ -42,6 +42,7 @@ def test_functionurl_generation():
     hello_world = resources['helloworldFunction']
     assert hello_world['Type'] == 'AWS::Serverless::Function'
     assert hello_world['Properties']['FunctionUrlConfig']['AuthType'] == 'NONE'
+    assert 'Events' not in hello_world['Properties'], "Events property should not be present if no events are defined"
 
     # Verify hellocustomFunction
     hello_custom = resources['hellocustomFunction']
