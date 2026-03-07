@@ -1,3 +1,9 @@
+# 1.9.0
+
+- Added Lambda Function URL support for Lambda functions
+- Supports simple (`function_url: true`) and advanced (`auth_type`, `invoke_mode`, `cors`) configurations
+- Improved integration test coverage for example configurations
+
 # 1.8.2
 
 - Fixed repository links

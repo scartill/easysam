@@ -1,6 +1,6 @@
 [project]
 name = "easysam"
-version = "1.8.2"
+version = "1.9.0"
 description = "Opinionated Modular Cloud Deployment Tool (EasySAM)"
 readme = "README.md"
 requires-python = ">=3.12"
