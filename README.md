@@ -13,6 +13,7 @@ It helps you define Lambda functions, API Gateway routes, DynamoDB tables, S3 bu
 - Native support for:
   - DynamoDB stream triggers from table definitions
   - DynamoDB TTL
+  - Lambda Function URLs
   - Prismarine model-driven tables
   - OpenSearch Serverless search collections
   - MQTT/IoT Core custom authorizers

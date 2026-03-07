@@ -29,6 +29,7 @@ If EasySAM is installed project-locally with uv, replace `easysam` with `uv run 
 | `prismarine` | Prismarine TypedDict tables + stream trigger lambda | DynamoDB, Lambda, Prismarine |
 | `prismarinettl` | Prismarine model-level TTL (`ttl=...`) | DynamoDB, Prismarine |
 | `prismapydantic` | Prismarine Pydantic modelling + CRUD integration test | DynamoDB, Prismarine, Pydantic |
+| `functionurl` | Lambda Function URLs (simple + CORS) | Lambda |
 | `aoss` | OpenSearch Serverless + DynamoDB Streams indexing | DynamoDB, Lambda, AOSS |
 | `kinesismutltiplebuckets` | Kinesis stream delivery to multiple S3 destinations | Kinesis, Firehose, S3, Lambda |
 
@@ -96,6 +97,11 @@ easysam --environment prod --target-region eu-west-2 --context-file example/cond
 
 - Uses `prismarine.modelling: pydantic`.
 - Includes integration test `tests/test_item_crud.py` (real AWS interaction).
+
+### `functionurl`
+
+- Demonstrates simple (`functionurl: true`) and advanced CORS configuration.
+- Lambda outputs include the generated URL.
 
 ### `aoss`
 

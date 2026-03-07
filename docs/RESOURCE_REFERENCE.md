@@ -165,6 +165,7 @@ functions:
     searches:
       - searchable
     schedule: rate(5 minutes)
+    functionurl: true
     layers:
       ffmpeg: '{{resolve:ssm:/ffmpeg-latest-arn}}'
 ```
@@ -174,6 +175,52 @@ Notes:
 - `uri` is required for top-level function definitions.
 - For imported local lambdas, EasySAM derives `uri` from the `easysam.yaml` directory.
 - `services` supports: `comprehend`, `bedrock`, `mqtt`.
+
+## Function URLs (Lambda)
+
+Lambda Function URLs can be defined with simple or advanced configuration:
+
+Simple form (defaults to `AuthType: NONE`):
+
+```yaml
+functions:
+  hello-world:
+    uri: backend/function/hello-world
+    functionurl: true
+```
+
+Advanced form:
+
+```yaml
+functions:
+  hello-custom:
+    uri: backend/function/hello-custom
+    functionurl:
+      auth_type: NONE
+      invoke_mode: BUFFERED
+      cors:
+        allow_origins:
+          - "*"
+        allow_methods:
+          - GET
+          - POST
+        allow_headers:
+          - Content-Type
+        allow_credentials: true
+        max_age: 3600
+```
+
+Fields:
+
+- `auth_type` (enum: `NONE`, `AWS_IAM`, default: `NONE`)
+- `invoke_mode` (enum: `BUFFERED`, `RESPONSE_STREAM`, default: `BUFFERED`)
+- `cors` (object, optional):
+    - `allow_origins` (list of strings)
+    - `allow_methods` (list of strings)
+    - `allow_headers` (list of strings)
+    - `expose_headers` (list of strings)
+    - `allow_credentials` (boolean)
+    - `max_age` (integer)
 
 ## Paths (API Gateway)
 
