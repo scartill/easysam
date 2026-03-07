@@ -596,6 +596,16 @@ Resources:
           SEARCH_{{ search_collection.replace('-', '_').upper() }}_COLLECTION_ID: !GetAtt {{ search_collection.replace('-', '') }}Collection.Id
           {% endfor %}
           {% endif %}
+
+      {% set has_events = namespace(found=false) %}
+      {% if function.schedule %}{% set has_events.found = true %}{% endif %}
+      {% if function.polls %}{% set has_events.found = true %}{% endif %}
+      {% if paths is defined %}
+        {% for path_name, path in paths.items() %}
+          {% if path.function == function_name %}{% set has_events.found = true %}{% endif %}
+        {% endfor %}
+      {% endif %}
+      {% if has_events.found %}
       Events:
         {% if function.schedule%}
         InvocationLevel:
@@ -632,6 +642,7 @@ Resources:
         {% endif %}
         {% endfor %}
         {% endif %}
+      {% endif %}
   {% endfor %}
   {% endif %}  # end functions
 
@@ -760,12 +771,14 @@ Resources:
       Status: ACTIVE
       SigningDisabled: true
 
+  {% if has_mqtt_authorizer %}
   {{ lprefix }}MqttAuthorizerPermission:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !GetAtt {{ mqtt.authorizer.function.replace('-', '') }}Function.Arn
       Action: lambda:InvokeFunction
       Principal: iot.amazonaws.com
+  {% endif %}
 
   {% if mqtt.topics %}
   {{ lprefix }}MqttClientPolicy:
@@ -792,6 +805,14 @@ Resources:
   {% endif %}
   {% endif %}  # end mqtt
 
+{% set has_outputs = namespace(found=false) %}
+{% if functions is defined %}
+{% for function_name, function in functions.items() %}
+{% if function.functionurl is defined %}{% set has_outputs.found = true %}{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if has_outputs.found %}
 Outputs:
   {% if functions is defined %}
   {% for function_name, function in functions.items() %}
@@ -802,3 +823,4 @@ Outputs:
   {% endif %}
   {% endfor %}
   {% endif %}
+{% endif %}

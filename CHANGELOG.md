@@ -1,3 +1,9 @@
+# 1.9.1
+
+- Fixed a bug where a Lambda function without any event sources (API Gateway, SQS, etc.) would fail to deploy.
+- Fixed a bug where a SAM template without any defined outputs would fail to deploy.
+- Fixed a bug where MQTT authorizer permissions were rendered even when the authorizer was not defined.
+
 # 1.9.0
 
 - Added Lambda Function URL support for Lambda functions

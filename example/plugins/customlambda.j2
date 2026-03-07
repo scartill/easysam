@@ -4,4 +4,7 @@ Resources:
     Properties:
       FunctionName: !Sub "{{funname}}-${Stage}"
       CodeUri: custombackend
+{% if events is defined %}
       Events:
+        {{events}}
+{% endif %}
