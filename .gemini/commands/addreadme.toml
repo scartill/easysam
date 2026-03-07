@@ -1,0 +1,5 @@
+description = "Update the README's"
+args = "feature"
+prompt = """
+Scan the system of readme files in this project and add documentation for the {{args}} feature in a consistent manner.
+"""
