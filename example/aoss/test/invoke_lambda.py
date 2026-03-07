@@ -71,7 +71,7 @@ def trigger_stream_via_table(table_name, env, aws_profile=None):
 
 @click.command()
 @click.option('--env', default='easysamdev')
-@click.option('--aws-profile', default='easysam', help='AWS profile to use')
+@click.option('--aws-profile', default='easysam-a', help='AWS profile to use')
 @click.option(
     '--test-stream/--no-test-stream', default=True, help='Test DynamoDB Stream triggers'
 )

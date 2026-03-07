@@ -1,16 +1,16 @@
-# Prismarine Example with DynamoDB Triggers
+# Prismarine + DynamoDB Trigger Example
 
-This example demonstrates how to use **Prismarine models with DynamoDB triggers** in EasySAM.
+This example demonstrates model-driven table generation with Prismarine and automatic DynamoDB stream triggers.
 
-## Overview
+## What this example demonstrates
 
-This example shows how to configure a Lambda function to be triggered automatically when items are inserted, modified, or deleted in a DynamoDB table that is defined using Prismarine models.
+- Prismarine `TypedDict` model definitions
+- Trigger configuration in model decorator (`trigger='itemlogger'`)
+- Automatic stream + event source mapping generation
 
-## Key Components
+## Source configuration
 
-### 1. Prismarine Model with Trigger
-
-In `common/myobject/models.py`, the `Item` model is decorated with a `trigger` parameter:
+`common/myobject/models.py`:
 
 ```python
 @c.model(PK='Foo', SK='Bar', trigger='itemlogger')
@@ -20,61 +20,59 @@ class Item(TypedDict):
     Baz: NotRequired[str]
 ```
 
-The `trigger` parameter can be:
-- **String**: Simple function name (e.g., `trigger='itemlogger'`)
-- **Dict**: Full configuration with options:
-  ```python
-  trigger={
-      'function': 'itemlogger',
-      'viewtype': 'new-and-old',  # keys-only, new, old, or new-and-old
-      'batchsize': 100,            # Optional: number of records per batch
-      'batchwindow': 5,            # Optional: max seconds to wait for batch
-      'startingposition': 'latest' # trim-horizon or latest
-  }
-  ```
+Trigger can be:
 
-### 2. Trigger Lambda Function
+- string: `trigger='itemlogger'`
+- dict with advanced options (`viewtype`, `batchsize`, `batchwindow`, `startingposition`)
 
-The `backend/function/itemlogger/index.py` contains a Lambda handler that:
-- Receives DynamoDB stream events
-- Processes INSERT, MODIFY, and REMOVE operations
-- Logs all changes to CloudWatch
+`resources.yaml`:
 
-### 3. Resources Configuration
+```yaml
+prefix: MyAppWithPrismarine
 
-The `resources.yaml` file:
-- Imports backend functions
-- Configures Prismarine integration
-- EasySAM automatically creates the DynamoDB stream and EventSourceMapping
+import:
+  - backend
 
-## What Gets Generated
-
-When you run `easysam generate`, the following AWS resources are created:
-
-1. **DynamoDB Table** (`MyAppWithPrismarineItem`) with:
-   - StreamSpecification enabled (NEW_AND_OLD_IMAGES)
-   - Point-in-time recovery
-
-2. **Lambda Function** (`itemlogger`) with:
-   - Permissions to read from DynamoDB table
-   - Permissions to access DynamoDB streams
-
-3. **EventSourceMapping** that:
-   - Connects the DynamoDB stream to the Lambda function
-   - Configured with specified batch size, window, and starting position
-
-## Usage
-
-Generate the SAM template:
-```bash
-uv run easysam generate example/prismarine
+prismarine:
+  default-base: common
+  access-module: common.dynamo_access
+  tables:
+    - package: myobject
 ```
 
-The generated `template.yml` will include all necessary resources for the trigger to work.
+## Generate and inspect
 
-## Benefits
+```bash
+easysam --environment dev inspect schema example/prismarine
+easysam --environment dev generate example/prismarine
+```
 
-- **Declarative**: Define triggers directly in your model decorators
-- **Type-Safe**: Works seamlessly with TypedDict models
-- **Consistent**: Same trigger configuration as explicit YAML table definitions
-- **Automatic**: EasySAM handles all IAM permissions and resource dependencies
+Generated resources include:
+
+- `MyAppWithPrismarineItem` DynamoDB table
+- `itemlogger` Lambda function
+- DynamoDB `StreamSpecification`
+- `AWS::Lambda::EventSourceMapping` to connect table stream to lambda
+
+## Deploy
+
+```bash
+easysam --environment dev --aws-profile my-profile deploy example/prismarine
+```
+
+## Verify behavior
+
+After inserting/updating/deleting table items, check CloudWatch logs for:
+
+- function: `itemlogger-dev`
+- event names: `INSERT`, `MODIFY`, `REMOVE`
+
+## Extra reference
+
+See `common/myobject/advanced_example.py` for additional trigger patterns.
+
+## Cleanup
+
+```bash
+easysam --environment dev --aws-profile my-profile delete --await
+```

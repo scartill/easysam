@@ -1,0 +1,6 @@
+# Deployment context override file for conditionals example.
+
+overrides:
+  buckets/simple-bucket/public: true
+  buckets/new-bucket:
+    public: false

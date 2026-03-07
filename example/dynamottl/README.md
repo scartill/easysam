@@ -1,39 +1,36 @@
 # DynamoDB TTL Example
 
-This example demonstrates how to configure **DynamoDB Time To Live (TTL)** in EasySAM.
+This example shows how to configure DynamoDB Time To Live (TTL) with EasySAM.
 
-## Overview
+## What this example demonstrates
 
-This example shows how to define a DynamoDB table with TTL enabled, which allows DynamoDB to automatically delete items after a specified expiration time.
+- Table-level TTL in local `easysam.yaml`
+- Generated `TimeToLiveSpecification` in SAM template
+- Expected runtime behavior for expiring items
 
-## Key Components
+## Source configuration
 
-### 1. Table Definition with TTL
-
-In `backend/database/easysam.yaml`, the `MyItem` table is configured with a TTL attribute:
+`backend/database/easysam.yaml`:
 
 ```yaml
 tables:
   MyItem:
     attributes:
-    - hash: true
-      name: ItemID
+      - hash: true
+        name: ItemID
     ttl: ExpireAt
 ```
 
-The `ttl` parameter specifies the attribute name that will store the expiration timestamp. Items will be automatically deleted when their TTL timestamp has passed.
+`ttl: ExpireAt` means DynamoDB treats `ExpireAt` as a Unix timestamp (seconds since epoch).
 
-### 2. Generated DynamoDB Table
+## Generate and inspect
 
-When you run `easysam generate`, the following AWS resources are created:
+```bash
+easysam --environment dev inspect schema example/dynamottl
+easysam --environment dev generate example/dynamottl
+```
 
-1. **DynamoDB Table** (`DynTTLMyItem`) with:
-   - Hash key: `ItemID`
-   - Billing mode: PAY_PER_REQUEST
-   - Point-in-time recovery enabled (14 days)
-   - **TTL enabled** on the `ExpireAt` attribute
-
-The generated table includes:
+In generated `template.yml`, verify:
 
 ```yaml
 TimeToLiveSpecification:
@@ -41,27 +38,13 @@ TimeToLiveSpecification:
   Enabled: true
 ```
 
-## How TTL Works
-
-1. **Set TTL Value**: When creating or updating an item, set the `ExpireAt` attribute to a Unix timestamp (number of seconds since epoch).
-
-2. **Automatic Deletion**: DynamoDB automatically deletes items within 48 hours after the TTL timestamp has passed.
-
-3. **No Additional Cost**: TTL deletion is free and doesn't consume write capacity units.
-
-## Usage
-
-Generate the SAM template:
+## Deploy
 
 ```bash
-uv run easysam generate example/dynamottl
+easysam --environment dev --aws-profile my-profile deploy example/dynamottl
 ```
 
-The generated `template.yml` will include the DynamoDB table with TTL enabled.
-
-## Example: Setting TTL on Items
-
-When inserting items into the table, include the `ExpireAt` attribute:
+## Write an expiring item
 
 ```python
 import boto3
@@ -69,22 +52,23 @@ from datetime import datetime, timedelta
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('DynTTLMyItem-dev')
-
-# Item expires in 1 hour
 expire_at = int((datetime.now() + timedelta(hours=1)).timestamp())
 
 table.put_item(
     Item={
         'ItemID': 'item-123',
         'ExpireAt': expire_at,
-        # ... other attributes
     }
 )
 ```
 
-## Benefits
+## Important TTL behavior
 
-- **Automatic Cleanup**: No need to manually delete expired items
-- **Cost Effective**: TTL deletion is free
-- **Declarative**: Define TTL directly in your table configuration
-- **Simple**: EasySAM handles all the TTL specification setup automatically
+- Deletion is asynchronous (typically within up to 48 hours after expiry).
+- TTL deletions do not consume write capacity.
+
+## Cleanup
+
+```bash
+easysam --environment dev --aws-profile my-profile delete --await
+```

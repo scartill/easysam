@@ -1,3 +1,0 @@
-overrides:
-  # Set external bucket arn
-  streams/complex/buckets/external/extbucketarn: "arn:aws:s3:::easysam-kinesis-external"

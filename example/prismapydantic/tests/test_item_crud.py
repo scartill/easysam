@@ -7,10 +7,6 @@ EXAMPLE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(EXAMPLE_ROOT.absolute()))
 
 
-if 'AWS_PROFILE' not in os.environ:
-    os.environ['AWS_PROFILE'] = 'easysam-a'
-
-
 from common.myobject.db import ItemModel  # noqa: E402
 from common.myobject.models import Item, NestedItem  # noqa: E402
 
