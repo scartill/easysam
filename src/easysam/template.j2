@@ -459,6 +459,50 @@ Resources:
       {% endif %}
       FunctionName: !Sub "{{ function_name }}-${Stage}"
       CodeUri: {{ function.uri }}
+      {% if function.function_url is defined %}
+      FunctionUrlConfig:
+        {% if function.function_url is boolean %}
+        AuthType: NONE
+        {% else %}
+        AuthType: {{ function.function_url.auth_type|default('NONE') }}
+        {% if function.function_url.invoke_mode is defined %}
+        InvokeMode: {{ function.function_url.invoke_mode }}
+        {% endif %}
+        {% if function.function_url.cors is defined %}
+        Cors:
+          {% if function.function_url.cors.allow_credentials is defined %}
+          AllowCredentials: {{ function.function_url.cors.allow_credentials|lower }}
+          {% endif %}
+          {% if function.function_url.cors.allow_headers is defined %}
+          AllowHeaders:
+            {% for header in function.function_url.cors.allow_headers %}
+            - "{{ header }}"
+            {% endfor %}
+          {% endif %}
+          {% if function.function_url.cors.allow_methods is defined %}
+          AllowMethods:
+            {% for method in function.function_url.cors.allow_methods %}
+            - "{{ method }}"
+            {% endfor %}
+          {% endif %}
+          {% if function.function_url.cors.allow_origins is defined %}
+          AllowOrigins:
+            {% for origin in function.function_url.cors.allow_origins %}
+            - "{{ origin }}"
+            {% endfor %}
+          {% endif %}
+          {% if function.function_url.cors.expose_headers is defined %}
+          ExposeHeaders:
+            {% for header in function.function_url.cors.expose_headers %}
+            - "{{ header }}"
+            {% endfor %}
+          {% endif %}
+          {% if function.function_url.cors.max_age is defined %}
+          MaxAge: {{ function.function_url.cors.max_age }}
+          {% endif %}
+        {% endif %}
+        {% endif %}
+      {% endif %}
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*
@@ -747,3 +791,14 @@ Resources:
               {% endfor %}
   {% endif %}
   {% endif %}  # end mqtt
+
+Outputs:
+  {% if functions is defined %}
+  {% for function_name, function in functions.items() %}
+  {% if function.function_url is defined %}
+  {{ function_name.replace('-', '' )}}FunctionUrl:
+    Description: "Function URL for {{ function_name }}"
+    Value: !Ref {{ function_name.replace('-', '' )}}FunctionUrl
+  {% endif %}
+  {% endfor %}
+  {% endif %}

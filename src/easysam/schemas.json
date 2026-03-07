@@ -54,6 +54,31 @@
         "additionalProperties": false
       }
     },
+    "lambda_function_url_schema": {
+      "oneOf": [
+        {"type": "boolean"},
+        {
+          "type": "object",
+          "properties": {
+            "auth_type": {"type": "string", "enum": ["NONE", "AWS_IAM"]},
+            "invoke_mode": {"type": "string", "enum": ["BUFFERED", "RESPONSE_STREAM"]},
+            "cors": {
+              "type": "object",
+              "properties": {
+                "allow_credentials": {"type": "boolean"},
+                "allow_headers": {"type": "array", "items": {"type": "string"}},
+                "allow_methods": {"type": "array", "items": {"type": "string"}},
+                "allow_origins": {"type": "array", "items": {"type": "string"}},
+                "expose_headers": {"type": "array", "items": {"type": "string"}},
+                "max_age": {"type": "integer"}
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
     "lambda_schema": {
       "type": "object",
       "properties": {
@@ -69,6 +94,7 @@
         "tables": {"type": "array", "items": {"type": "string"}},
         "queues": {"type": "array", "items": {"type": "string"}},
         "polls": {"$ref": "#/definitions/lambda_poll_schema"},
+        "function_url": {"$ref": "#/definitions/lambda_function_url_schema"},
         "services": {
           "type": "array",
           "items": {

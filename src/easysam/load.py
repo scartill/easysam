@@ -166,6 +166,9 @@ def preprocess_lambda(
 
     lambda_resources = lambda_def.get('resources', {})
 
+    if 'function_url' in lambda_def:
+        lambda_resources['function_url'] = lambda_def['function_url']
+
     if 'uri' not in lambda_resources:
         lg.debug(f'Adding uri to lambda {lambda_name}')
         lambda_resources['uri'] = Path(entry_dir).relative_to(resources_dir).as_posix()

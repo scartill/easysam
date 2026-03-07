@@ -121,6 +121,16 @@ streams:
 ```yaml
   - name: String (e.g., my-lambda)
     uri: String (i.e., local path to the source)
+    function_url: Boolean or Object  # Optional: Enable Lambda Function URL
+      # Simple form:
+      # function_url: true
+      # Advanced form:
+      # function_url:
+      #   auth_type: NONE  # Optional: NONE (default) or AWS_IAM
+      #   invoke_mode: BUFFERED  # Optional: BUFFERED (default) or RESPONSE_STREAM
+      #   cors:
+      #     allow_origins: ["*"]
+      #     allow_methods: ["GET", "POST"]
     tables:
       - String (e.g., Items)
     polls:
@@ -212,6 +222,7 @@ lambda:
       - <queue>
     polls:
       - <stream>
+  function_url: <boolean|object>
   integration:
     path: <path>
     open: <boolean>
