@@ -771,7 +771,7 @@ Resources:
       Status: ACTIVE
       SigningDisabled: true
 
-  {% if has_mqtt_authorizer %}
+  {% if mqtt.authorizer is defined %}
   {{ lprefix }}MqttAuthorizerPermission:
     Type: AWS::Lambda::Permission
     Properties:
