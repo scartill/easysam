@@ -1,3 +1,7 @@
+# 1.9.2
+
+- Fixed MQTT Authorizer Bug
+
 # 1.9.1
 
 - Fixed a bug where a Lambda function without any event sources (API Gateway, SQS, etc.) would fail to deploy.
