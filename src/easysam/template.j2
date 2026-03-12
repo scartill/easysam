@@ -22,7 +22,7 @@ Parameters:
 
 Globals:
   Function:
-    Runtime: python3.13
+    Runtime: python{{ python | default('3.14') }}
     Handler: index.handler
     Architectures:
       - x86_64
@@ -442,9 +442,9 @@ Resources:
       Description: Dependencies for all python lambdas
       ContentUri: thirdparty/.
       CompatibleRuntimes:
-        - python3.13
+        - python{{ python | default('3.14') }}
     Metadata:
-      BuildMethod: python3.13
+      BuildMethod: python{{ python | default('3.14') }}
       BuildArchitecture: x86_64
   {% endif %}  # end lambda layer
 
