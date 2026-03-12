@@ -11,7 +11,6 @@ from mergedeep import merge
 from easysam.prismarine import generate as generate_prismarine_clients
 from easysam.definitions import FatalError, ProcessingResult
 from easysam.load import resources as load_resources
-from easysam.cloud import scan as scan_cloud
 
 
 def generate(
@@ -36,8 +35,6 @@ def generate(
     try:
         errors = []
         resources_data = load_resources(resources_dir, pypath, deploy_ctx, errors)
-        aws_profile = cliparams.get('aws_profile')
-        scan_cloud(resources_data, errors, aws_profile)
 
         lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
 
