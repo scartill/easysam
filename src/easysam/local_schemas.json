@@ -4,22 +4,29 @@
     "lambda_poll_schema": {
       "type": "array",
       "items": {
-        "type": "object",
-        "properties": {
-          "name": {
+        "oneOf": [
+          {
             "type": "string"
           },
-          "batchsize": {
-            "type": "integer"
-          },
-          "batchwindow": {
-            "type": "integer"
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "batchsize": {
+                "type": "integer"
+              },
+              "batchwindow": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false
           }
-        },
-        "required": [
-          "name"
-        ],
-        "additionalProperties": false
+        ]
       }
     },
     "lambda_functionurl_schema": {
@@ -88,9 +95,6 @@
     "lambda_resources_schema": {
       "type": "object",
       "properties": {
-        "resources": {
-          "type": "object"
-        },
         "timeout": {
           "type": "integer",
           "minimum": 1,
@@ -149,10 +153,17 @@
           }
         },
         "searches": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "uri": {
           "type": "string"
@@ -163,7 +174,7 @@
         "layers": {
           "type": "object",
           "patternProperties": {
-            "^[a-z0-9-]+$": {
+            "^[a-zA-Z0-9-]+$": {
               "type": "string"
             }
           },
@@ -183,6 +194,14 @@
         },
         "range": {
           "type": "boolean"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "S",
+            "N",
+            "B"
+          ]
         }
       },
       "required": [
