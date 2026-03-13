@@ -1,0 +1,9 @@
+prefix: Onelambda
+
+tags:
+  mytag: myvalue
+
+python: "3.14"
+
+import:
+  - backend
