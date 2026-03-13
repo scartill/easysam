@@ -1,7 +1,4 @@
-import pytest
-from pathlib import Path
 from easysam.load import resources
-from easysam.definitions import FatalError
 
 def test_local_validation_unexpected_section(tmp_path):
     resources_yaml = tmp_path / "resources.yaml"
