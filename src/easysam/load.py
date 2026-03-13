@@ -168,6 +168,9 @@ def preprocess_lambda(
     if 'functionurl' in lambda_def:
         lambda_resources['functionurl'] = lambda_def['functionurl']
 
+    if 'timeout' in lambda_def:
+        lambda_resources['timeout'] = lambda_def['timeout']
+
     if 'uri' not in lambda_resources:
         lg.debug(f'Adding uri to lambda {lambda_name}')
         lambda_resources['uri'] = Path(entry_dir).relative_to(resources_dir).as_posix()
