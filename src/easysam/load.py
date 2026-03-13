@@ -8,7 +8,10 @@ import yaml
 import prismarine.prisma_common as prisma_common
 import prismarine.prisma_easysam as prisma_easysam
 
-from easysam.validate_schema import validate as validate_schema
+from easysam.validate_schema import (
+    validate as validate_schema,
+    validate_local as validate_local_schema,
+)
 from easysam.definitions import FatalError
 
 
@@ -228,9 +231,7 @@ def preprocess_file(
         errors.append(f'Error loading import file {entry_path}: {e}')
         return
 
-    if not all(key in ['lambda', 'import', 'tables'] for key in entry_data.keys()):
-        errors.append(f'Import file {entry_path} contains unexpected sections')
-        return
+    validate_local_schema(entry_path, entry_data, errors)
 
     if lambda_def := entry_data.get('lambda'):
         preprocess_lambda(
