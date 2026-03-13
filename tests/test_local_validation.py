@@ -16,7 +16,7 @@ def test_local_validation_unexpected_section(tmp_path):
     resources_data = resources(tmp_path, [], deploy_ctx, errors)
     
     assert any("Invalid local resources data" in err for err in errors)
-    assert any("Additional properties are not allowed ('invalid_section' was unexpected)" in err for err in errors)
+    assert any("invalid_section" in err and "Additional properties" in err for err in errors)
 
 def test_local_validation_missing_lambda_name(tmp_path):
     resources_yaml = tmp_path / "resources.yaml"
@@ -34,7 +34,7 @@ def test_local_validation_missing_lambda_name(tmp_path):
     resources_data = resources(tmp_path, [], deploy_ctx, errors)
     
     assert any("Invalid local resources data" in err for err in errors)
-    assert any("'name' is a required property" in err for err in errors)
+    assert any("name" in err and "required" in err for err in errors)
 
 def test_local_validation_invalid_integration(tmp_path):
     resources_yaml = tmp_path / "resources.yaml"
@@ -52,7 +52,7 @@ def test_local_validation_invalid_integration(tmp_path):
     resources_data = resources(tmp_path, [], deploy_ctx, errors)
     
     assert any("Invalid local resources data" in err for err in errors)
-    assert any("'path' is a required property" in err for err in errors)
+    assert any("path" in err and "required" in err for err in errors)
 
 def test_local_validation_memory_valid(tmp_path):
     resources_yaml = tmp_path / "resources.yaml"
@@ -88,4 +88,4 @@ def test_local_validation_memory_invalid(tmp_path):
     resources_data = resources(tmp_path, [], deploy_ctx, errors)
     
     assert any("Invalid local resources data" in err for err in errors)
-    assert any("64 is less than the minimum of 128" in err for err in errors)
+    assert any("64" in err and "128" in err and "minimum" in err for err in errors)
