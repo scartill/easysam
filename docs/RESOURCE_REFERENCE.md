@@ -148,6 +148,7 @@ functions:
   myfunction:
     uri: backend/function/myfunction
     timeout: 30
+    memory: 1024
     tables:
       - MyItem
     buckets:
@@ -175,6 +176,8 @@ Notes:
 
 - `uri` is required for top-level function definitions.
 - For imported local lambdas, EasySAM derives `uri` from the `easysam.yaml` directory.
+- `timeout` (integer, optional, default: 30)
+- `memory` (integer, optional, default: 128)
 - `services` supports: `comprehend`, `bedrock`, `mqtt`.
 
 ## Function URLs (Lambda)
