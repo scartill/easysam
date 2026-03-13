@@ -96,6 +96,11 @@
           "minimum": 1,
           "maximum": 900
         },
+        "memory": {
+          "type": "integer",
+          "minimum": 128,
+          "maximum": 10240
+        },
         "buckets": {
           "type": "array",
           "items": {
@@ -285,6 +290,11 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 900
+        },
+        "memory": {
+          "type": "integer",
+          "minimum": 128,
+          "maximum": 10240
         },
         "functionurl": {
           "$ref": "#/definitions/lambda_functionurl_schema"

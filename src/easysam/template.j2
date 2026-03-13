@@ -454,8 +454,11 @@ Resources:
   {{ function_name.replace('-', '' )}}Function:
     Type: AWS::Serverless::Function
     Properties:
-      {% if function.timeout is defined%}
-      Timeout: {{ function.timeout}}
+      {% if function.timeout is defined %}
+      Timeout: {{ function.timeout }}
+      {% endif %}
+      {% if function.memory is defined %}
+      MemorySize: {{ function.memory }}
       {% endif %}
       FunctionName: !Sub "{{ function_name }}-${Stage}"
       CodeUri: {{ function.uri }}

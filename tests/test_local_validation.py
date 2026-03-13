@@ -56,3 +56,39 @@ def test_local_validation_invalid_integration(tmp_path):
     
     assert any("Invalid local resources data" in err for err in errors)
     assert any("'path' is a required property" in err for err in errors)
+
+def test_local_validation_memory_valid(tmp_path):
+    resources_yaml = tmp_path / "resources.yaml"
+    resources_yaml.write_text("prefix: test\nimport: [backend/func]", encoding="utf-8")
+    
+    backend_dir = tmp_path / "backend" / "func"
+    backend_dir.mkdir(parents=True)
+    
+    easysam_yaml = backend_dir / "easysam.yaml"
+    easysam_yaml.write_text("lambda:\n  name: myfunc\n  memory: 512\n  integration:\n    path: /test\n    open: true", encoding="utf-8")
+    
+    errors = []
+    deploy_ctx = {"environment": "dev", "target_region": "us-east-1"}
+    
+    resources_data = resources(tmp_path, [], deploy_ctx, errors)
+    
+    assert not errors
+    assert resources_data['functions']['myfunc']['memory'] == 512
+
+def test_local_validation_memory_invalid(tmp_path):
+    resources_yaml = tmp_path / "resources.yaml"
+    resources_yaml.write_text("prefix: test\nimport: [backend/func]", encoding="utf-8")
+    
+    backend_dir = tmp_path / "backend" / "func"
+    backend_dir.mkdir(parents=True)
+    
+    easysam_yaml = backend_dir / "easysam.yaml"
+    easysam_yaml.write_text("lambda:\n  name: myfunc\n  memory: 64\n  integration:\n    path: /test\n    open: true", encoding="utf-8")
+    
+    errors = []
+    deploy_ctx = {"environment": "dev", "target_region": "us-east-1"}
+    
+    resources_data = resources(tmp_path, [], deploy_ctx, errors)
+    
+    assert any("Invalid local resources data" in err for err in errors)
+    assert any("64 is less than the minimum of 128" in err for err in errors)
