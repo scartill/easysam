@@ -20,7 +20,7 @@ It helps you define Lambda functions, API Gateway routes, DynamoDB tables, S3 bu
 
 ## Prerequisites
 
-- Python 3.12+
+- Python 3.12+ (Your local/CI environment version should match the `python:` option in `resources.yaml` to ensure dependency compatibility)
 - AWS credentials configured (named profile recommended)
 - AWS SAM CLI 1.138.0+
 - `pip` 25.1.1+ (used in deployment checks)

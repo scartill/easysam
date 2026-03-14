@@ -24,7 +24,7 @@ import:
 | Key | Type | Required | Description |
 | --- | --- | --- | --- |
 | `prefix` | string | yes | Prefix used in generated resource names |
-| `python` | string | no | Target Python runtime version (default: 3.13) |
+| `python` | string | no | Target Python runtime version (default: 3.13). **Note:** Your local/CI build environment Python version should match this to ensure binary dependency compatibility. |
 | `tags` | map<string,string> | no | Stack tags merged into SAM deploy tags |
 | `envvars` | map<string,string> | no | Global Lambda environment variables |
 | `buckets` | map | no | S3 bucket definitions |

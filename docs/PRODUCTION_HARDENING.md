@@ -76,6 +76,8 @@ Recommended CI stages:
 4. `deploy --dry-run` for preview (optional)
 5. `deploy`
 
+**Note:** Ensure your CI environment's Python version matches the `python:` version defined in `resources.yaml`. This ensures that any binary dependencies or site-packages packaged during the build are compatible with the target Lambda runtime.
+
 Suggested commands:
 
 ```bash
