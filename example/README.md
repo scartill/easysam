@@ -20,6 +20,7 @@ If EasySAM is installed project-locally with uv, replace `easysam` with `uv run 
 | --- | --- | --- |
 | `myapp` | Minimal app with imported lambda + table | Lambda, API Gateway, DynamoDB |
 | `onelambda` | Smallest lambda-only application | Lambda |
+| `onelambda314` | Custom Python version and Lambda settings | Lambda |
 | `appwitherrors` | Intentional schema errors for validation testing | Validation flow |
 | `conditionals` | Conditional resources + context-file overrides | S3, Lambda, API Gateway, DynamoDB |
 | `customlayer` | Per-function external Lambda layer via SSM reference | Lambda, SSM |
@@ -44,6 +45,11 @@ If EasySAM is installed project-locally with uv, replace `easysam` with `uv run 
 
 - Simplest lambda declaration (`lambda.name`) without additional resources.
 - Good first smoke test for credentials and deployment pipeline.
+
+### `onelambda314`
+
+- Variation of `onelambda` that specifies `python: "3.14"`.
+- Demonstrates custom `timeout` and `memory` overrides in the local `easysam.yaml`.
 
 ### `appwitherrors`
 

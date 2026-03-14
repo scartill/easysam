@@ -8,7 +8,10 @@ import yaml
 import prismarine.prisma_common as prisma_common
 import prismarine.prisma_easysam as prisma_easysam
 
-from easysam.validate_schema import validate as validate_schema
+from easysam.validate_schema import (
+    validate as validate_schema,
+    validate_local as validate_local_schema,
+)
 from easysam.definitions import FatalError
 
 
@@ -168,6 +171,12 @@ def preprocess_lambda(
     if 'functionurl' in lambda_def:
         lambda_resources['functionurl'] = lambda_def['functionurl']
 
+    if 'timeout' in lambda_def:
+        lambda_resources['timeout'] = lambda_def['timeout']
+
+    if 'memory' in lambda_def:
+        lambda_resources['memory'] = lambda_def['memory']
+
     if 'uri' not in lambda_resources:
         lg.debug(f'Adding uri to lambda {lambda_name}')
         lambda_resources['uri'] = Path(entry_dir).relative_to(resources_dir).as_posix()
@@ -225,9 +234,7 @@ def preprocess_file(
         errors.append(f'Error loading import file {entry_path}: {e}')
         return
 
-    if not all(key in ['lambda', 'import', 'tables'] for key in entry_data.keys()):
-        errors.append(f'Import file {entry_path} contains unexpected sections')
-        return
+    validate_local_schema(entry_path, entry_data, errors)
 
     if lambda_def := entry_data.get('lambda'):
         preprocess_lambda(

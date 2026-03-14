@@ -24,6 +24,7 @@ import:
 | Key | Type | Required | Description |
 | --- | --- | --- | --- |
 | `prefix` | string | yes | Prefix used in generated resource names |
+| `python` | string | no | Target Python runtime version (default: 3.13). **Note:** Your local/CI build environment Python version should match this to ensure binary dependency compatibility. |
 | `tags` | map<string,string> | no | Stack tags merged into SAM deploy tags |
 | `envvars` | map<string,string> | no | Global Lambda environment variables |
 | `buckets` | map | no | S3 bucket definitions |
@@ -147,6 +148,7 @@ functions:
   myfunction:
     uri: backend/function/myfunction
     timeout: 30
+    memory: 1024
     tables:
       - MyItem
     buckets:
@@ -174,6 +176,8 @@ Notes:
 
 - `uri` is required for top-level function definitions.
 - For imported local lambdas, EasySAM derives `uri` from the `easysam.yaml` directory.
+- `timeout` (integer, optional, default: 30)
+- `memory` (integer, optional, default: 128)
 - `services` supports: `comprehend`, `bedrock`, `mqtt`.
 
 ## Function URLs (Lambda)
