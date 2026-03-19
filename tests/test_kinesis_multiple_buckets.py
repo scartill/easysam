@@ -44,3 +44,55 @@ def test_kinesis_multiple_buckets_generation():
     assert f'{lprefix}simpleprivateDelivery' in resources
     assert f'{lprefix}complexprivateDelivery' in resources
     assert f'{lprefix}complexexternalDelivery' in resources
+
+def test_kinesis_multiple_buckets_defaults_and_validation():
+    # Test our changes to process_default_streams
+    from easysam.load import process_default_streams
+
+    # Test that bucketname is properly expanded into buckets.private
+    data = {
+        'streams': {
+            'mystream': {
+                'bucketname': 'mybucket',
+                'intervalinseconds': 120,
+            }
+        }
+    }
+    errors = []
+    process_default_streams(data, errors)
+    assert not errors
+    stream = data['streams']['mystream']
+    assert 'bucketname' not in stream
+    assert 'bucketprefix' not in stream
+    assert 'intervalinseconds' not in stream
+    assert stream['buckets']['private']['bucketname'] == 'mybucket'
+    assert stream['buckets']['private']['bucketprefix'] == ''
+    assert stream['buckets']['private']['intervalinseconds'] == 120
+
+    # Test that both buckets and bucketname is flagged as error
+    data2 = {
+        'streams': {
+            'mystream2': {
+                'bucketname': 'mybucket',
+                'buckets': {'private': {'bucketname': 'mybucket'}}
+            }
+        }
+    }
+    errors2 = []
+    process_default_streams(data2, errors2)
+    assert len(errors2) == 1
+    assert 'cannot have both buckets and bucketname' in errors2[0]
+
+    # Test default interval
+    from easysam.load import STREAM_INTERVAL_SECONDS
+    data3 = {
+        'streams': {
+            'mystream3': {
+                'bucketname': 'mybucket',
+            }
+        }
+    }
+    errors3 = []
+    process_default_streams(data3, errors3)
+    assert not errors3
+    assert data3['streams']['mystream3']['buckets']['private']['intervalinseconds'] == STREAM_INTERVAL_SECONDS

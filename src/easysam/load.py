@@ -286,26 +286,15 @@ def process_default_streams(resources_data: dict, errors: list[str]):
         if 'bucketname' in stream:
             stream['buckets'] = {
                 'private': {
-                    'bucketname': stream['bucketname'],
-                    'bucketprefix': stream.get('bucketprefix', ''),
-                    'intervalinseconds': stream.get('intervalinseconds'),
+                    'bucketname': stream.pop('bucketname'),
+                    'bucketprefix': stream.pop('bucketprefix', ''),
+                    'intervalinseconds': stream.pop('intervalinseconds', STREAM_INTERVAL_SECONDS),
                 }
             }
 
-            del stream['bucketname']
-
-            if 'bucketprefix' in stream:
-                del stream['bucketprefix']
-
-            if 'intervalinseconds' in stream:
-                del stream['intervalinseconds']
-
         for bucket in stream.get('buckets', {}).values():
-            if 'bucketprefix' not in bucket:
-                bucket['bucketprefix'] = ''
-
-            if 'intervalinseconds' not in bucket:
-                bucket['intervalinseconds'] = STREAM_INTERVAL_SECONDS
+            bucket.setdefault('bucketprefix', '')
+            bucket.setdefault('intervalinseconds', STREAM_INTERVAL_SECONDS)
 
         new_streams[stream_name] = stream
 
@@ -404,15 +393,7 @@ def conditional_constructor(loader, node):
     if 'key' not in mapping:
         raise ValueError('All !Conditional keys must have a key')
 
-    attributes = {'key': mapping['key']}
-
-    if 'environment' in mapping:
-        attributes['environment'] = mapping['environment']
-
-    if 'region' in mapping:
-        attributes['region'] = mapping['region']
-
-    return Conditional(**attributes)
+    return Conditional(**mapping)
 
 
 def check_condition(
@@ -439,9 +420,7 @@ def check_condition(
         f'{value} (condition) == {context_value} (context) (negate={negate})'
     )
 
-    include = value == context_value
-    result = include if not negate else not include
-    return result
+    return (value == context_value) != negate
 
 
 def resolve_conditionals(
