@@ -607,7 +607,7 @@ requires-dist = [
     { name = "jsonschema", specifier = ">=4.23.0" },
     { name = "mergedeep", specifier = ">=1.3.4" },
     { name = "pip", specifier = ">=25.3" },
-    { name = "prismarine", editable = "../prismarine" },
+    { name = "prismarine", specifier = ">=1.5.4" },
     { name = "python-benedict", extras = ["yaml"], specifier = ">=0.34.1" },
     { name = "rich", specifier = ">=13.9.4" },
 ]
@@ -1262,7 +1262,7 @@ wheels = [
 [[package]]
 name = "prismarine"
 version = "1.5.4"
-source = { editable = "../prismarine" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
     { name = "case-converter" },
@@ -1271,26 +1271,9 @@ dependencies = [
     { name = "mako" },
     { name = "types-boto3", extra = ["dynamodb"] },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "boto3", specifier = ">=1.38.19" },
-    { name = "case-converter", specifier = ">=1.2.0" },
-    { name = "click", specifier = "==8.1.8" },
-    { name = "gray-formatter", specifier = ">=3.0.10" },
-    { name = "mako", specifier = ">=1.3.10" },
-    { name = "pydantic", marker = "extra == 'pydantic'", specifier = ">=2.9.0" },
-    { name = "types-boto3", extras = ["dynamodb"], specifier = ">=1.38.19" },
-]
-provides-extras = ["pydantic"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pip", specifier = ">=25.1.1" },
-    { name = "pydantic", specifier = ">=2.9.0" },
-    { name = "pytest", specifier = ">=8.3.3" },
-    { name = "ruff", specifier = ">=0.14.1" },
-    { name = "twine", specifier = ">=6.1.0" },
+sdist = { url = "https://files.pythonhosted.org/packages/c7/bb/61bd6c1bedb2cb6f4b717da8329c6ae073a288e33853e0753f469aebd22e/prismarine-1.5.4.tar.gz", hash = "sha256:35aeb387c02bc80d06aea5d7c71f662ccd60fb84c25945228ef66ad0b2483cea", size = 52132, upload-time = "2026-03-13T21:26:32.392Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3a/bf/138b91452ef2d5847d91281be23827c7b05ee6ead3a08a2caf80feb976ff/prismarine-1.5.4-py3-none-any.whl", hash = "sha256:35caf241b5dd9f18220e9ac998f8b7952f1d28ec36f88ede3dfff0f61e8f1d01", size = 16022, upload-time = "2026-03-13T21:26:30.471Z" },
 ]
 
 [[package]]
