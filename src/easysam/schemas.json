@@ -152,6 +152,11 @@
           "minimum": 1,
           "maximum": 900
         },
+        "memory": {
+          "type": "integer",
+          "minimum": 128,
+          "maximum": 10240
+        },
         "buckets": {
           "type": "array",
           "items": {
@@ -712,6 +717,14 @@
         {
           "type": "null"
         }
+      ]
+    },
+    "python": {
+      "type": "string",
+      "enum": [
+        "3.12",
+        "3.13",
+        "3.14"
       ]
     }
   },

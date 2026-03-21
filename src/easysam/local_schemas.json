@@ -1,0 +1,365 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "lambda_poll_schema": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "batchsize": {
+                "type": "integer"
+              },
+              "batchwindow": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "lambda_functionurl_schema": {
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "auth_type": {
+              "type": "string",
+              "enum": [
+                "NONE",
+                "AWS_IAM"
+              ]
+            },
+            "invoke_mode": {
+              "type": "string",
+              "enum": [
+                "BUFFERED",
+                "RESPONSE_STREAM"
+              ]
+            },
+            "cors": {
+              "type": "object",
+              "properties": {
+                "allow_credentials": {
+                  "type": "boolean"
+                },
+                "allow_headers": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "allow_methods": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "allow_origins": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "expose_headers": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "max_age": {
+                  "type": "integer"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "lambda_resources_schema": {
+      "type": "object",
+      "properties": {
+        "timeout": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 900
+        },
+        "memory": {
+          "type": "integer",
+          "minimum": 128,
+          "maximum": 10240
+        },
+        "buckets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "send": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "streams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "queues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "polls": {
+          "$ref": "#/definitions/lambda_poll_schema"
+        },
+        "functionurl": {
+          "$ref": "#/definitions/lambda_functionurl_schema"
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "comprehend",
+              "bedrock",
+              "mqtt"
+            ]
+          }
+        },
+        "searches": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "uri": {
+          "type": "string"
+        },
+        "schedule": {
+          "type": "string"
+        },
+        "layers": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z0-9-]+$": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "table_attribute_schema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "boolean"
+        },
+        "range": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "S",
+            "N",
+            "B"
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "table_trigger_schema": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "function": {
+              "type": "string"
+            },
+            "viewtype": {
+              "type": "string",
+              "enum": [
+                "keys-only",
+                "new",
+                "old",
+                "new-and-old"
+              ]
+            },
+            "batchsize": {
+              "type": "integer"
+            },
+            "batchwindow": {
+              "type": "integer"
+            },
+            "startingposition": {
+              "type": "string",
+              "enum": [
+                "trim-horizon",
+                "latest"
+              ]
+            }
+          },
+          "required": [
+            "function"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "tables_schema": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/table_attribute_schema"
+          }
+        },
+        "indices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/table_attribute_schema"
+                }
+              }
+            },
+            "required": [
+              "name",
+              "attributes"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "trigger": {
+          "$ref": "#/definitions/table_trigger_schema"
+        },
+        "ttl": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "attributes"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "lambda": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "resources": {
+          "$ref": "#/definitions/lambda_resources_schema"
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 900
+        },
+        "memory": {
+          "type": "integer",
+          "minimum": 128,
+          "maximum": 10240
+        },
+        "functionurl": {
+          "$ref": "#/definitions/lambda_functionurl_schema"
+        },
+        "integration": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "authorizer": {
+              "type": "string"
+            },
+            "greedy": {
+              "type": "boolean"
+            },
+            "open": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "path"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "tables": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9-]+$": {
+          "$ref": "#/definitions/tables_schema"
+        }
+      },
+      "additionalProperties": false
+    },
+    "import": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}
