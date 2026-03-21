@@ -1,3 +1,15 @@
+# 1.10.0
+
+- Added global `python` setting for configuring Lambda runtime version
+- Added `timeout` support to Lambda function configuration
+- Added local JSON schema validation for `easysam.yaml` files
+- Added Python 3.14 support and example configuration
+- Refactored load logic and eliminated redundant dictionary iterations
+- Updated local schemas with flexible poll, layers, and type support
+- Switched prismarine dependency to PyPI release `>=1.5.4`
+- Removed unused cloud.py and AWS VPC scanning logic
+- Changed default Python runtime version to 3.13
+
 # 1.9.2
 
 - Fixed MQTT Authorizer Bug
