@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.12"
 
 [[package]]
@@ -575,7 +575,7 @@ wheels = [
 
 [[package]]
 name = "easysam"
-version = "1.9.2"
+version = "1.10.0"
 source = { editable = "." }
 dependencies = [
     { name = "aws-sam-cli" },
