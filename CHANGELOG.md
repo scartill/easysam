@@ -1,3 +1,10 @@
+# 1.10.1
+
+- Added `schedule` support to the root of local lambda definitions (`easysam.yaml`)
+- Added `Scheduled Lambda Example` demonstrating the new `schedule` configuration
+- Removed unused `get_aws_resource` dead code from `cloud.py`
+- Standardized example function naming and updated documentation
+
 # 1.10.0
 
 - Added global `python` setting for configuring Lambda runtime version
