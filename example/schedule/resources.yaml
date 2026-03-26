@@ -1,9 +1,6 @@
 prefix: mysched
 
-import:
-  - backend/function/local-lambda
+python: "3.14"
 
-functions:
-  hello-world:
-    uri: backend/function/hello-world
-    schedule: rate(5 minutes)
+import:
+  - backend
