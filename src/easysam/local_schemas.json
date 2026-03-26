@@ -318,6 +318,9 @@
         "functionurl": {
           "$ref": "#/definitions/lambda_functionurl_schema"
         },
+        "schedule": {
+          "type": "string"
+        },
         "integration": {
           "type": "object",
           "properties": {

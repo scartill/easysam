@@ -1,0 +1,6 @@
+prefix: mysched
+
+python: "3.14"
+
+import:
+  - backend
