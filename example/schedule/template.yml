@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  mysched
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+Globals:
+  Function:
+    Runtime: python3.13
+    Handler: index.handler
+    Architectures:
+      - x86_64
+    Timeout: 30
+    Environment:
+      Variables:
+        ENV: !Ref Stage
+        ACCOUNT_ID: !Ref AWS::AccountId
+  Api:
+    Cors:
+      AllowOrigin: "'*'"
+      AllowHeaders: "'*'"
+      AllowMethods: "'*'"
+      AllowCredentials: False
+Resources:
+    # end paths
+  # Streams
+    # end streams
+  # Tables
+    # end tables
+  # Queues
+    # end queues
+  # Streams
+    # end streams
+  # Buckets
+    # end buckets
+  # Queues
+    # end queues
+  # Tables
+    # end tables
+  # Lambda Layer
+    # end lambda layer
+  # Functions
+  helloworldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "hello-world-${Stage}"
+      CodeUri: backend/function/hello-world
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*
+        - SSMParameterReadPolicy:
+            ParameterName: "*"
+      Environment:
+        Variables:
+          REGION: !Ref AWS::Region
+      Events:
+        InvocationLevel:
+          Type: Schedule
+          Properties:
+            Schedule: rate(5 minutes)
+  locallambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "local-lambda-${Stage}"
+      CodeUri: backend/function/local-lambda
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*
+        - SSMParameterReadPolicy:
+            ParameterName: "*"
+      Environment:
+        Variables:
+          REGION: !Ref AWS::Region
+      Events:
+        InvocationLevel:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 minute)
+    # end functions
+  # DynamoDB Stream Event Source Mappings (from table definitions)
+    # end stream event source mappings
+  # Search
+    # end search
+  # MQTT (IoT Core)
+    # end mqtt

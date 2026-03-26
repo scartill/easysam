@@ -1,0 +1,3 @@
+lambda:
+  name: local-lambda
+  schedule: rate(1 minute)

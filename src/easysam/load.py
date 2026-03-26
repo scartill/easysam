@@ -177,6 +177,9 @@ def preprocess_lambda(
     if 'memory' in lambda_def:
         lambda_resources['memory'] = lambda_def['memory']
 
+    if 'schedule' in lambda_def:
+        lambda_resources['schedule'] = lambda_def['schedule']
+
     if 'uri' not in lambda_resources:
         lg.debug(f'Adding uri to lambda {lambda_name}')
         lambda_resources['uri'] = Path(entry_dir).relative_to(resources_dir).as_posix()

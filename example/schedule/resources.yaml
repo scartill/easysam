@@ -1,0 +1,9 @@
+prefix: mysched
+
+import:
+  - backend/function/local-lambda
+
+functions:
+  hello-world:
+    uri: backend/function/hello-world
+    schedule: rate(5 minutes)
