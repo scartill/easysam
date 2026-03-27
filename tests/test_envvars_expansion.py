@@ -15,7 +15,9 @@ functions:
     uri: "src/$TEST_VAR"
 ''')
 
-    res = resources(tmp_path, [], {}, [])
+    errors = []
+    res = resources(tmp_path, [], {}, errors)
+    assert not errors
     assert res['prefix'] == 'test-prefix-my_test_value'
     assert res['functions']['myfunc']['uri'] == 'src/my_test_value'
 

@@ -151,7 +151,7 @@ tables:
 
 ### Environment Variables and `.env` files
 
-EasySAM automatically loads `.env` files if present in the target directory. It evaluates environment variables using the standard `${MY_VAR}` syntax in both global (`resources.yaml`) and local (`easysam.yaml`) files immediately after they are loaded.
+EasySAM automatically loads `.env` files if present in the target directory. It evaluates environment variables using the standard `$MY_VAR` or `${MY_VAR}` syntax in both global (`resources.yaml`) and local (`easysam.yaml`) files immediately after they are loaded.
 
 You can also pass environment variables to your functions directly using the `envvars` property.
 
