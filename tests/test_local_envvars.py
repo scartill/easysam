@@ -1,4 +1,6 @@
+import pytest
 from easysam.generate import generate
+from pathlib import Path
 from benedict import benedict
 
 def test_local_envvars(tmp_path):

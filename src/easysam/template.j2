@@ -595,8 +595,8 @@ Resources:
         Variables:
           REGION: !Ref AWS::Region
           {% if function.envvars is defined %}
-          {% for name, value in function.envvars.items() if name != 'REGION' %}
-          {{ name }}: '{{ value | replace("'", "''") }}'
+          {% for name, value in function.envvars.items() %}
+          {{ name }}: {{ value }}
           {% endfor %}
           {% endif %}
           {% if function.searches %}

@@ -38,14 +38,7 @@ STREAM_INTERVAL_SECONDS = 300
 
 
 def expand_env_vars(data: Any) -> Any:
-    """
-    Recursively expand environment variables in mappings, sequences, and strings.
-
-    For dictionaries, both string keys and values are passed through
-    os.path.expandvars. For lists, each element is processed recursively.
-    For plain strings, the string itself is expanded. All other types are
-    returned unchanged.
-    """
+    """Recursively expand environment variables in a dictionary or list."""
     if isinstance(data, dict):
         new_dict = {}
         for k, v in data.items():
