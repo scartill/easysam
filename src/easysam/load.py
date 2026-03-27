@@ -2,7 +2,10 @@ import logging as lg
 from pathlib import Path
 from typing import Any
 
+import os
+
 from benedict import benedict
+from dotenv import load_dotenv
 import yaml
 
 import prismarine.prisma_common as prisma_common
@@ -34,6 +37,18 @@ SUPPORTED_SECTIONS = [
 STREAM_INTERVAL_SECONDS = 300
 
 
+def expand_env_vars(data: Any) -> Any:
+    """Recursively expand environment variables in a dictionary or list."""
+    if isinstance(data, dict):
+        return {k: expand_env_vars(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [expand_env_vars(item) for item in data]
+    elif isinstance(data, str):
+        return os.path.expandvars(data)
+    else:
+        return data
+
+
 def resources(
     resources_dir: Path,
     pypath: list[Path],
@@ -55,11 +70,16 @@ def resources(
 
     resources = Path(resources_dir, 'resources.yaml')
 
+    env_file = Path(resources_dir, '.env')
+    if env_file.exists():
+        lg.info(f'Loading environment variables from {env_file}')
+        load_dotenv(env_file)
+
     try:
         yaml.SafeLoader.add_constructor('!Conditional', conditional_constructor)
-        raw_resources_data = benedict(
-            yaml.safe_load(Path(resources).read_text(encoding='utf-8'))
-        )
+        raw_data = yaml.safe_load(Path(resources).read_text(encoding='utf-8'))
+        raw_data = expand_env_vars(raw_data)
+        raw_resources_data = benedict(raw_data)
     except Exception as e:
         errors.append(f'Error loading resources file {resources}: {e}')
         return benedict()
@@ -233,6 +253,7 @@ def preprocess_file(
     try:
         entry_dir = entry_path.parent
         entry_data = yaml.safe_load(entry_path.read_text(encoding='utf-8'))
+        entry_data = expand_env_vars(entry_data)
     except Exception as e:
         errors.append(f'Error loading import file {entry_path}: {e}')
         return
