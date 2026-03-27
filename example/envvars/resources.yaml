@@ -1,0 +1,10 @@
+prefix: "$MY_PREFIX"
+functions:
+  myfunc:
+    uri: src/
+    envvars:
+      LOCAL_VAR: "$MY_FUNC_ENV"
+paths:
+  /$API_PATH:
+    function: myfunc
+    open: true

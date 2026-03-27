@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  test-prefix
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+Globals:
+  Function:
+    Runtime: python3.13
+    Handler: index.handler
+    Architectures:
+      - x86_64
+    Timeout: 30
+    Environment:
+      Variables:
+        ENV: !Ref Stage
+        ACCOUNT_ID: !Ref AWS::AccountId
+  Api:
+    Cors:
+      AllowOrigin: "'*'"
+      AllowHeaders: "'*'"
+      AllowMethods: "'*'"
+      AllowCredentials: False
+Resources:
+  ####### Necessary for API Gateway Logging ########
+  ApiGwAccountConfig:
+    Type: "AWS::ApiGateway::Account"
+    Properties:
+      CloudWatchRoleArn: !GetAtt "ApiGatewayLoggingRole.Arn"
+  ApiGatewayLoggingRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "apigateway.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+  ApiDeployment:
+    Type: AWS::Serverless::Api
+    Properties:
+      OpenApiVersion: 3.0.1
+      StageName: !Ref Stage
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiLogGroup.Arn
+        Format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","resourcePath":"$context.resourcePath","status":$context.status,"responseLatency":$context.responseLatency}'
+      DefinitionBody:
+        'Fn::Transform':
+          Name: 'AWS::Include'
+          Parameters:
+            Location: './build/swagger.yaml'
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+        LogGroupName: !Sub "apigw-${AWS::StackName}-${Stage}"
+        RetentionInDays: 7
+    # end paths
+  # Streams
+    # end streams
+  # Tables
+    # end tables
+  # Queues
+    # end queues
+  # Streams
+    # end streams
+  # Buckets
+    # end buckets
+  # Queues
+    # end queues
+  # Tables
+    # end tables
+  # Lambda Layer
+    # end lambda layer
+  # Functions
+  myfuncFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "myfunc-${Stage}"
+      CodeUri: src/
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*
+        - SSMParameterReadPolicy:
+            ParameterName: "*"
+      Environment:
+        Variables:
+          REGION: !Ref AWS::Region
+          LOCAL_VAR: my-func-env-value
+      Events:
+        myapiAPI:
+          Type: Api
+          Properties:
+            Method: ANY
+            Path: /myapi/{proxy+}
+            RestApiId: !Ref ApiDeployment
+            Auth:
+    # end functions
+  # DynamoDB Stream Event Source Mappings (from table definitions)
+    # end stream event source mappings
+  # Search
+    # end search
+  # MQTT (IoT Core)
+    # end mqtt
