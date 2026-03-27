@@ -40,7 +40,11 @@ STREAM_INTERVAL_SECONDS = 300
 def expand_env_vars(data: Any) -> Any:
     """Recursively expand environment variables in a dictionary or list."""
     if isinstance(data, dict):
-        return {k: expand_env_vars(v) for k, v in data.items()}
+        new_dict = {}
+        for k, v in data.items():
+            new_k = os.path.expandvars(k) if isinstance(k, str) else k
+            new_dict[new_k] = expand_env_vars(v)
+        return new_dict
     elif isinstance(data, list):
         return [expand_env_vars(item) for item in data]
     elif isinstance(data, str):

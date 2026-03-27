@@ -11,6 +11,7 @@ It helps you define Lambda functions, API Gateway routes, DynamoDB tables, S3 bu
 - Modular app structure with shared `common/` code support
 - Built-in validation (`inspect schema`, `inspect cloud`)
 - Native support for:
+  - Environment variable expansion and `.env` loading
   - DynamoDB stream triggers from table definitions
   - DynamoDB TTL
   - Lambda Function URLs
@@ -148,6 +149,21 @@ tables:
 
 ## Key concepts
 
+### Environment Variables and `.env` files
+
+EasySAM automatically loads `.env` files if present in the target directory. It evaluates environment variables using the standard `${MY_VAR}` syntax in both global (`resources.yaml`) and local (`easysam.yaml`) files immediately after they are loaded.
+
+You can also pass environment variables to your functions directly using the `envvars` property.
+
+```yaml
+functions:
+  myfunc:
+    uri: "src/"
+    envvars:
+      API_URL: "${API_URL}"
+      LOG_LEVEL: "DEBUG"
+```
+
 ### DynamoDB table triggers
 
 Trigger a Lambda directly from table changes:
@@ -248,7 +264,7 @@ All examples live under `example/` and include focused scenarios such as:
 - minimal app bootstrap
 - conditionals and deploy context overrides
 - custom Lambda layers
-- global env vars and plugins
+- global and local env vars (with `.env` file support) and plugins
 - DynamoDB TTL (plain + Prismarine)
 - Prismarine TypedDict and Pydantic modelling
 - OpenSearch Serverless + DynamoDB streams
