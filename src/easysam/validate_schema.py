@@ -24,7 +24,6 @@ def validate(resources_dir: Path, resources_data: dict, errors: list[str]):
 
     # More specific validations
     validate_buckets(resources_data, errors)
-    validate_queues(resources_data, errors)
     validate_streams(resources_data, errors)
     validate_tables(resources_data, errors)
     validate_lambda(resources_data, errors)
@@ -32,7 +31,6 @@ def validate(resources_dir: Path, resources_data: dict, errors: list[str]):
     validate_import(resources_dir, resources_data, errors)
     validate_prismarine(resources_dir, resources_data, errors)
     validate_authorizers(resources_data, errors)
-    validate_search(resources_data, errors)
     validate_mqtt(resources_data, errors)
 
 
@@ -75,11 +73,6 @@ def validate_buckets(resources_data: dict, errors: list[str]):
     for bucket, details in resources_data.get('buckets', {}).items():
         if bucket == 'private' and details['public']:
             errors.append(f"Bucket '{bucket}' cannot be public")
-
-
-def validate_queues(resources_data: dict, errors: list[str]):
-    """Validate queue-specific rules."""
-    pass
 
 
 def validate_tables(resources_data: dict, errors: list[str]):
@@ -356,9 +349,3 @@ def validate_mqtt(resources_data: dict, errors: list[str]):
         )
 
 
-def validate_search(resources_data: dict, errors: list[str]):
-    """Validate search-specific rules - no rules yet."""
-    search = resources_data.get('search', {})
-
-    if not search:
-        return
