@@ -148,7 +148,8 @@
             "enum": [
               "comprehend",
               "bedrock",
-              "mqtt"
+              "mqtt",
+              "budget"
             ]
           }
         },

@@ -568,6 +568,23 @@ Resources:
               - iot:DescribeEndpoint
             Resource: '*'
           {% endif %}
+          {% if service == 'budget' %}
+        - Version: "2012-10-17"
+          Statement:
+            - Sid: CostExplorerRead
+              Effect: Allow
+              Action:
+                - ce:GetCostAndUsage
+                - ce:GetCostForecast
+                - ce:GetAnomalies
+              Resource: "*"
+            - Sid: BudgetsRead
+              Effect: Allow
+              Action:
+                - budgets:ViewBudget
+                - budgets:DescribeBudget
+              Resource: "*"
+          {% endif %}
         {% endfor %}
         {% for search_collection in function.searches %}
         - Version: "2012-10-17"
