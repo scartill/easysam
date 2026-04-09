@@ -406,7 +406,7 @@ def check_lambda_layer(resources_dir: Path, resources_data: dict):
     resources_data['enable_lambda_layer'] = thirdparty_dir.exists()
 
 
-class Conditional(yaml.YAMLObject):
+class Conditional:
     def __init__(self, key, environment='any', region='any'):
         self.key = key
         self.environment = environment
