@@ -1,0 +1,3 @@
+- The project uses custom `FatalError` exceptions which might be redundant.
+- `Conditional` inheriting from `yaml.YAMLObject` is cargo-culting because it uses a custom constructor anyway.
+- `expand_env_vars` is a custom recursive function that might be over-engineered.
