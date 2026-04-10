@@ -178,7 +178,11 @@ Notes:
 - For imported local lambdas, EasySAM derives `uri` from the `easysam.yaml` directory.
 - `timeout` (integer, optional, default: 30)
 - `memory` (integer, optional, default: 128)
-- `services` supports: `comprehend`, `bedrock`, `mqtt`.
+- `services` supports:
+  - `comprehend` (grants comprehend basic access)
+  - `bedrock` (grants bedrock invoke model access)
+  - `mqtt` (grants IoT publish and describe endpoint access)
+  - `budget` (grants `CostExplorerRead` and `BudgetsRead` capabilities to access account cost information)
 
 ## Function URLs (Lambda)
 
