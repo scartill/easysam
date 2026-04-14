@@ -654,12 +654,13 @@ Resources:
         {% for path_name, path in paths.items() %}
         {% if path.function == function_name %}
         {% if path.greedy %}
+        {% set normalized_path = path_name.rstrip('/') or '/' %}
         {# Root and Proxy events are both needed for greedy paths to ensure correct permissions and routing #}
         {{ path_name.replace('/', '') }}RootAPI:
           Type: Api
           Properties:
             Method: ANY
-            Path: {{ path_name }}
+            Path: {{ normalized_path }}
             RestApiId: !Ref ApiDeployment
             {% if not path.open and path.authorizer %}
             Auth:
@@ -669,7 +670,7 @@ Resources:
           Type: Api
           Properties:
             Method: ANY
-            Path: {{ path_name.rstrip('/') }}/{proxy+}
+            Path: {{ normalized_path.rstrip('/') }}/{proxy+}
             RestApiId: !Ref ApiDeployment
             {% if not path.open and path.authorizer %}
             Auth:

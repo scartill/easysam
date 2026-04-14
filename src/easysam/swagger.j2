@@ -12,11 +12,12 @@ schemes:
 {% if paths is defined %}
 paths:
   {% for original_path_name, path_params in paths.items() %}
+  {% set normalized_path = original_path_name.rstrip('/') or '/' %}
   {# Ensure both root and proxy paths are defined for greedy integrations #}
   {% if (path_params.integration is not defined or path_params.integration == 'lambda') and path_params.get('greedy', True) %}
-    {% set expanded_paths = [original_path_name, original_path_name.rstrip('/') + '/{proxy+}'] %}
+    {% set expanded_paths = [normalized_path, normalized_path.rstrip('/') + '/{proxy+}'] %}
   {% else %}
-    {% set expanded_paths = [original_path_name] %}
+    {% set expanded_paths = [normalized_path] %}
   {% endif %}
 
   {% for path_name in expanded_paths %}
