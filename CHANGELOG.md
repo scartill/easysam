@@ -1,3 +1,11 @@
+# 1.11.0
+
+- Added `budget` service support for Lambda functions.
+- Added environment variable expansion and local `.env` support.
+- Added comprehensive deployment guide and expanded documentation for services.
+- Normalized greedy root paths for API Gateway routes.
+- Removed unused `yaml.YAMLObject` inheritance and validation stubs.
+
 # 1.10.1
 
 - Added `schedule` support to the root of local lambda definitions (`easysam.yaml`)

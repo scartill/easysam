@@ -1,6 +1,6 @@
 [project]
 name = "easysam"
-version = "1.10.1"
+version = "1.11.0"
 description = "Opinionated Modular Cloud Deployment Tool (EasySAM)"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -37,9 +37,15 @@ packages = ["src/easysam"]
 dev = [
     "opensearch-py>=3.0.0",
     "ruff>=0.14.1",
-    "twine>=6.1.0",
     "pytest>=8.3.2",
 ]
 
+[tool.ruff]
+line-length = 120
+
 [tool.ruff.format]
 quote-style = "single"
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+

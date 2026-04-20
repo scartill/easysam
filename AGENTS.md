@@ -77,3 +77,23 @@ uv run easysam --environment dev --aws-profile my-profile delete --await
 - **Testing:** Add or update tests in `tests/` when modifying core logic. Run tests using `pytest`.
 - **Schema Updates:** If adding a new resource type or property, update `src/easysam/schemas.json` and `src/easysam/template.j2`.
 - **Documentation:** Ensure any CLI or resource changes are reflected in the files under `docs/`.
+
+<!-- hippo:start -->
+## Project Memory (Hippo)
+
+At the start of every task, run:
+```bash
+hippo context --auto --budget 1500
+```
+Read the output before writing any code.
+
+On errors or unexpected behaviour:
+```bash
+hippo remember "<description of what went wrong>" --error
+```
+
+On task completion:
+```bash
+hippo outcome --good
+```
+<!-- hippo:end -->

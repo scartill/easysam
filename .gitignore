@@ -15,3 +15,4 @@ wheels/
 
 # uv
 .python-version
+.aider*
