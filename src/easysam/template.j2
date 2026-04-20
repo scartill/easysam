@@ -13,737 +13,736 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
-{{ prefix }}
+  {{ prefix }}
 
 Parameters:
-Stage:
-Type: String
-Default: dev
+  Stage:
+    Type: String
+    Default: dev
 
 Globals:
-Function:
-Runtime: python{{ python | default('3.13') }}
-Handler: index.handler
-Architectures:
-- x86_64
-Timeout: 30
-Environment:
-Variables:
-ENV: !Ref Stage
-ACCOUNT_ID: !Ref AWS::AccountId
-{% if envvars is defined %}
-{% for name, value in envvars.items() %}
-{{ name }}: {{ value }}
-{% endfor %}
-{% endif %}
-Api:
-Cors:
-AllowOrigin: "'*'"
-AllowHeaders: "'*'"
-AllowMethods: "'*'"
-AllowCredentials: False
+  Function:
+    Runtime: python{{ python | default('3.13') }}
+    Handler: index.handler
+    Architectures:
+      - x86_64
+    Timeout: 30
+    Environment:
+      Variables:
+        ENV: !Ref Stage
+        ACCOUNT_ID: !Ref AWS::AccountId
+        {% if envvars is defined %}
+        {% for name, value in envvars.items() %}
+        {{ name }}: {{ value }}
+        {% endfor %}
+        {% endif %}
+    Api:
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'*'"
+        AllowMethods: "'*'"
+        AllowCredentials: False
 
 Resources:
-{% if paths is defined %}
-####### Necessary for API Gateway Logging ########
-ApiGwAccountConfig:
-Type: "AWS::ApiGateway::Account"
-Properties:
-CloudWatchRoleArn: !GetAtt "ApiGatewayLoggingRole.Arn"
-ApiGatewayLoggingRole:
-Type: "AWS::IAM::Role"
-Properties:
-AssumeRolePolicyDocument:
-Version: "2012-10-17"
-Statement:
-- Effect: Allow
-Principal:
-Service:
-- "apigateway.amazonaws.com"
-Action: "sts:AssumeRole"
-Path: "/"
-ManagedPolicyArns:
-- !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
-ApiDeployment:
-Type: AWS::Serverless::Api
-Properties:
-OpenApiVersion: 3.0.1
-StageName: !Ref Stage
-AccessLogSetting:
-DestinationArn: !GetAtt ApiLogGroup.Arn
-Format:
-'{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","resourcePath":"$context.resourcePath","status":$context.status,"responseLatency":$context.responseLatency}'
+  {% if paths is defined %}
+  ####### Necessary for API Gateway Logging ########
+  ApiGwAccountConfig:
+    Type: "AWS::ApiGateway::Account"
+    Properties:
+      CloudWatchRoleArn: !GetAtt "ApiGatewayLoggingRole.Arn"
+  ApiGatewayLoggingRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "apigateway.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+  ApiDeployment:
+    Type: AWS::Serverless::Api
+    Properties:
+      OpenApiVersion: 3.0.1
+      StageName: !Ref Stage
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiLogGroup.Arn
+        Format:
+          '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","resourcePath":"$context.resourcePath","status":$context.status,"responseLatency":$context.responseLatency}'
 
-{% if authorizers is defined %}
-Auth:
-Authorizers:
-{% for auth_name, auth_params in authorizers.items() %}
-{{ auth_name }}:
-FunctionArn: !GetAtt {{ auth_name }}Function.Arn
+    {% if authorizers is defined %}
+    Auth:
+      Authorizers:
+        {% for auth_name, auth_params in authorizers.items() %}
+        {{ auth_name }}:
+          FunctionArn: !GetAtt {{ auth_name }}Function.Arn
 
-{% if 'token' in auth_params %}
-FunctionPayloadType: TOKEN
-{% elif 'headers' in auth_params or 'query' in auth_params %}
-FunctionPayloadType: REQUEST
-{% endif %}
+          {% if 'token' in auth_params %}
+          FunctionPayloadType: TOKEN
+          {% elif 'headers' in auth_params or 'query' in auth_params %}
+          FunctionPayloadType: REQUEST
+          {% endif %}
 
-Identity:
-{% if 'token' in auth_params %}
-Header: {{ auth_params.token }}
-{% elif 'headers' in auth_params %}
-Context:
-- httpMethod
-- resourcePath
-Headers:
-{% for header in auth_params.headers %}
-- {{ header }}
-{% endfor %}
-{% elif 'query' in auth_params %}
-QueryStrings:
-- {{ auth_params.query }}
-{% endif %}
+          Identity:
+            {% if 'token' in auth_params %}
+            Header: {{ auth_params.token }}
+            {% elif 'headers' in auth_params %}
+            Context:
+              - httpMethod
+              - resourcePath
+            Headers:
+              {% for header in auth_params.headers %}
+              - {{ header }}
+              {% endfor %}
+            {% elif 'query' in auth_params %}
+            QueryStrings:
+              - {{ auth_params.query }}
+            {% endif %}
 
-{% if 'ttl' in auth_params %}
-ReauthorizeEvery: {{ auth_params.ttl }}
-{% else %}
-ReauthorizeEvery: 300
-{% endif %}
-{% endfor %}
-{% endif %}
-DefinitionBody:
-'Fn::Transform':
-Name: 'AWS::Include'
-Parameters:
-Location: './swagger.yaml'
+          {% if 'ttl' in auth_params %}
+          ReauthorizeEvery: {{ auth_params.ttl }}
+          {% else %}
+          ReauthorizeEvery: 300
+          {% endif %}
+        {% endfor %}
+    {% endif %}
+    DefinitionBody:
+      'Fn::Transform':
+        Name: 'AWS::Include'
+        Parameters:
+          Location: './swagger.yaml'
 
-ApiLogGroup:
-Type: AWS::Logs::LogGroup
-Properties:
-LogGroupName: !Sub "apigw-${AWS::StackName}-${Stage}"
-RetentionInDays: 7
-{% endif %} # end paths
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "apigw-${AWS::StackName}-${Stage}"
+      RetentionInDays: 7
+  {% endif %} # end paths
 
 # Streams
-{% if streams is defined %}
-{{ lprefix }}DeliveryStreamPolicy:
-Type: AWS::IAM::Policy
-Properties:
-Roles:
-- !Ref {{ lprefix }}DeliveryStreamRole
-PolicyName: {{ lprefix }}_firehose_delivery_policy
-PolicyDocument:
-Version: 2012-10-17
-Statement:
-- Effect: Allow
-Action:
-- 's3:AbortMultipartUpload'
-- 's3:GetBucketLocation'
-- 's3:GetObject'
-- 's3:ListBucket'
-- 's3:ListBucketMultipartUploads'
-- 's3:PutObject'
-Resource:
-{% for stream_name, stream in streams.items() %}
-{% for bucket_name, bucket in stream.buckets.items() %}
-{% if bucket.bucketname is defined %}
-- !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket.bucketname.replace('-', '') }}Bucket}/*
-{% else %}
-- {{ bucket.extbucketarn }}/*
-{% endif %}
-{% endfor%}
-{% endfor%}
-- Effect: Allow
-Action:
-- 'kinesis:DescribeStream'
-- 'kinesis:GetShardIterator'
-- 'kinesis:GetRecords'
-- 'kinesis:ListShards'
-Resource:
-{% for stream_name, stream in streams.items() %}
-- !GetAtt {{ lprefix }}{{ stream_name.replace('-', '') }}Stream.Arn
-{% endfor %}
+  {% if streams is defined %}
+  {{ lprefix }}DeliveryStreamPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - !Ref {{ lprefix }}DeliveryStreamRole
+      PolicyName: {{ lprefix }}_firehose_delivery_policy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 's3:AbortMultipartUpload'
+              - 's3:GetBucketLocation'
+              - 's3:GetObject'
+              - 's3:ListBucket'
+              - 's3:ListBucketMultipartUploads'
+              - 's3:PutObject'
+            Resource:
+              {% for stream_name, stream in streams.items() %}
+              {% for bucket_name, bucket in stream.buckets.items() %}
+              {% if bucket.bucketname is defined %}
+              - !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket.bucketname.replace('-', '') }}Bucket}/*
+              {% else %}
+              - {{ bucket.extbucketarn }}/*
+              {% endif %}
+              {% endfor%}
+              {% endfor%}
+          - Effect: Allow
+            Action:
+              - 'kinesis:DescribeStream'
+              - 'kinesis:GetShardIterator'
+              - 'kinesis:GetRecords'
+              - 'kinesis:ListShards'
+            Resource:
+              {% for stream_name, stream in streams.items() %}
+              - !GetAtt {{ lprefix }}{{ stream_name.replace('-', '') }}Stream.Arn
+              {% endfor %}
 
-{{ lprefix }}DeliveryStreamRole:
-Type: AWS::IAM::Role
-Properties:
-#ToDo
-# RoleName: !Sub "DeliveryStreamRole-${Stage}"
-AssumeRolePolicyDocument:
-Version: 2012-10-17
-Statement:
-- Sid: ''
-Effect: Allow
-Principal:
-Service: firehose.amazonaws.com
-Action: 'sts:AssumeRole'
-Condition:
-StringEquals:
-'sts:ExternalId': !Ref 'AWS::AccountId'
-{% endif %} # end streams
+  {{ lprefix }}DeliveryStreamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      #ToDo
+      # RoleName: !Sub "DeliveryStreamRole-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                'sts:ExternalId': !Ref 'AWS::AccountId'
+  {% endif %} # end streams
 
 # Tables
-{% if tables is defined %}
-GatewayDynamoRole:
-Type: 'AWS::IAM::Role'
-Properties:
-AssumeRolePolicyDocument:
-Version: 2012-10-17
-Statement:
-- Action:
-- 'sts:AssumeRole'
-Effect: Allow
-Principal:
-Service:
-- apigateway.amazonaws.com
-Policies:
-- PolicyName: APIGatewayDynamoDBPolicy
-PolicyDocument:
-Version: 2012-10-17
-Statement:
-- Effect: Allow
-Action:
-- 'dynamodb:PutItem'
-- 'dynamodb:Query'
-- 'dynamodb:GetItem'
-## Todo: provide only required resources list
-Resource: '*'
-{% endif %} # end tables
+  {% if tables is defined %}
+  GatewayDynamoRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+      Policies:
+        - PolicyName: APIGatewayDynamoDBPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:Query'
+                  - 'dynamodb:GetItem'
+                ## Todo: provide only required resources list
+                Resource: '*'
+  {% endif %} # end tables
 
 # Queues
-{% if queues is defined %}
-GatewaySQSRole:
-Type: 'AWS::IAM::Role'
-Properties:
-AssumeRolePolicyDocument:
-Version: 2012-10-17
-Statement:
-- Effect: Allow
-Principal:
-Service:
-- apigateway.amazonaws.com
-Action:
-- 'sts:AssumeRole'
-Policies:
-- PolicyName: AllowSqsIntegration
-PolicyDocument:
-Version: 2012-10-17
-Statement:
-- Effect: Allow
-Action:
-- 'sqs:SendMessage'
-- 'sqs:GetQueueUrl'
-- 'sqs:SendMessageBatch'
-Resource: '*'
-{% if authorizers is defined %} # check if authorizers are defined
-- PolicyName: AuthorizerPolicy
-PolicyDocument:
-Version: '2012-10-17'
-Statement:
-- Effect: Allow
-Action:
-- lambda:InvokeFunction
-Resource:
-{% for auth_name, auth_params in authorizers.items() %}
-- !GetAtt {{ auth_name }}Function.Arn
-{% endfor %}
-{% endif %} # end authorizers
-{% endif %} # end queues
+  {% if queues is defined %}
+  GatewaySQSRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: AllowSqsIntegration
+          PolicyDocument:
+            Version 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'sqs:SendMessage'
+                  - 'sqs:GetQueueUrl'
+                  - 'sqs:SendMessageBatch'
+                Resource: '*'
+        {% if authorizers is defined %} # check if authorizers are defined
+        - PolicyName: AuthorizerPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  {% for auth_name, auth_params in authorizers.items() %}
+                  - !GetAtt {{ auth_name }}Function.Arn
+                  {% endfor %}
+        {% endif %} # end authorizers
+  {% endif %} # end queues
 
 # Streams
-{% if streams is defined %}
-{% for stream_name, stream in streams.items() %}
-{{ lprefix }}{{ stream_name.replace('-', '') }}Stream:
-Type: AWS::Kinesis::Stream
-Properties:
-Name: !Sub "{{ lprefix }}-{{ stream_name }}-${Stage}"
-RetentionPeriodHours: 24
-StreamModeDetails:
-StreamMode: ON_DEMAND
-{% for bucket_name, bucket in stream.buckets.items() %}
-{{ lprefix }}{{ stream_name.replace('-', '') }}{{ bucket_name.replace('-', '') }}Delivery:
-Type: AWS::KinesisFirehose::DeliveryStream
-DependsOn:
-- {{ lprefix }}DeliveryStreamPolicy
-Properties:
-DeliveryStreamName: !Sub "{{ lprefix }}-{{ stream_name }}{{ bucket_name }}-${Stage}"
-DeliveryStreamType: "KinesisStreamAsSource"
-KinesisStreamSourceConfiguration:
-KinesisStreamARN: !GetAtt {{ lprefix }}{{ stream_name.replace('-', '') }}Stream.Arn
-RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
-ExtendedS3DestinationConfiguration:
-{% if bucket.bucketname is defined %}
-BucketARN: !GetAtt {{ lprefix }}{{ bucket.bucketname }}Bucket.Arn
-{% else %}
-BucketARN: {{ bucket.extbucketarn }}
-{% endif %}
-BufferingHints:
-SizeInMBs: 128
-IntervalInSeconds: {{ bucket.intervalinseconds | default('300') }}
-CompressionFormat: "GZIP"
-EncryptionConfiguration:
-NoEncryptionConfig: "NoEncryption"
-Prefix: "{{ bucket.bucketprefix }}"
-RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
-{% endfor %}
-{% endfor %}
-{% endif %} # end streams
+  {% if streams is defined %}
+  {% for stream_name, stream in streams.items() %}
+  {{ lprefix }}{{ stream_name.replace('-', '') }}Stream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub "{{ lprefix }}-{{ stream_name }}-${Stage}"
+      RetentionPeriodHours: 24
+      StreamModeDetails:
+        StreamMode: ON_DEMAND
+    {% for bucket_name, bucket in stream.buckets.items() %}
+  {{ lprefix }}{{ stream_name.replace('-', '') }}{{ bucket_name.replace('-', '') }}Delivery:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    DependsOn:
+      - {{ lprefix }}DeliveryStreamPolicy
+    Properties:
+      DeliveryStreamName: !Sub "{{ lprefix }}-{{ stream_name }}{{ bucket_name }}-${Stage}"
+      DeliveryStreamType: "KinesisStreamAsSource"
+      KinesisStreamSourceConfiguration:
+        KinesisStreamARN: !GetAtt {{ lprefix }}{{ stream_name.replace('-', '') }}Stream.Arn
+        RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
+      ExtendedS3DestinationConfiguration:
+        {% if bucket.bucketname is defined %}
+        BucketARN: !GetAtt {{ lprefix }}{{ bucket.bucketname }}Bucket.Arn
+        {% else %}
+        BucketARN: {{ bucket.extbucketarn }}
+        {% endif %}
+        BufferingHints:
+          SizeInMBs: 128
+          IntervalInSeconds: {{ bucket.intervalinseconds | default('300') }}
+        CompressionFormat: "GZIP"
+        EncryptionConfiguration:
+          NoEncryptionConfig: "NoEncryption"
+        Prefix: "{{ bucket.bucketprefix }}"
+        RoleARN: !GetAtt {{ lprefix }}DeliveryStreamRole.Arn
+    {% endfor %}
+  {% endfor %}
+  {% endif %} # end streams
 
 # Buckets
-{% if buckets is defined %}
-{% for bucket_name, bucket in buckets.items() %}
-{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket:
-Type: AWS::S3::Bucket
-Properties:
-BucketName: !Sub "{{ lprefix }}{{ bucket_name }}-${Stage}"
-{% if bucket.public %}
-PublicAccessBlockConfiguration:
-BlockPublicAcls: false
-BlockPublicPolicy: false
-IgnorePublicAcls: false
-RestrictPublicBuckets: false
-CorsConfiguration:
-CorsRules:
-- AllowedHeaders:
-- "*"
-AllowedMethods:
-- GET
-- PUT
-- HEAD
-- POST
-- DELETE
-AllowedOrigins:
-- "*"
-WebsiteConfiguration:
-IndexDocument: index.html
+  {% if buckets is defined %}
+  {% for bucket_name, bucket in buckets.items() %}
+  {{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "{{ lprefix }}{{ bucket_name }}-${Stage}"
+      {% if bucket.public %}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - PUT
+              - HEAD
+              - POST
+              - DELETE
+            AllowedOrigins:
+              - "*"
+      WebsiteConfiguration:
+        IndexDocument: index.html
 
-{{ lprefix }}{{ bucket_name.replace('-', '') }}BucketPolicy:
-Type: AWS::S3::BucketPolicy
-Properties:
-Bucket: !Ref {{ lprefix }}{{ bucket_name }}Bucket
-PolicyDocument:
-Id: PublicReadPolicy
-Version: 2012-10-17
-Statement:
-- Sid: PublicReadForBucketObjects
-Effect: Allow
-Principal: '*'
-Action: 's3:GetObject'
-Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
-- Sid: PublicPutForBucketObjects
-Effect: Allow
-Principal: '*'
-Action: 's3:PutObject'
-Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
-- Sid: PublicGetObjectAttributes
-Effect: Allow
-Principal: '*'
-Action: 's3:GetObjectAttributes'
-Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
-{% endif %} # if bucket.public
+  {{ lprefix }}{{ bucket_name.replace('-', '') }}BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref {{ lprefix }}{{ bucket_name }}Bucket
+      PolicyDocument:
+        Id: PublicReadPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
+          - Sid: PublicPutForBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:PutObject'
+            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
+          - Sid: PublicGetObjectAttributes
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObjectAttributes'
+            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
+      {% endif %} # if bucket.public
 
-{% if bucket.extaccesspolicy is defined %}
-# External access bucket policy
-{{ lprefix }}{{ bucket_name.replace('-', '') }}ReadPolicy:
-Type: "AWS::IAM::ManagedPolicy"
-Properties:
-ManagedPolicyName: !Sub "{{ bucket.extaccesspolicy }}-${Stage}"
-PolicyDocument:
-Version: 2012-10-17
-Statement:
-- Action: s3:GetObject
-Effect: Allow
-Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
-- Action: s3:ListBucket
-Effect: Allow
-Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}
-
-{% endif %}
-{% endfor %}
-{% endif %} # end buckets
+    {% if bucket.extaccesspolicy is defined %}
+    # External access bucket policy
+  {{ lprefix }}{{ bucket_name.replace('-', '') }}ReadPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      ManagedPolicyName: !Sub "{{ bucket.extaccesspolicy }}-${Stage}"
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}/*
+          - Action: s3:ListBucket
+            Effect: Allow
+            Resource: !Sub arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket_name.replace('-', '') }}Bucket}
+    {% endif %}
+  {% endfor %}
+  {% endif %} # end buckets
 
 # Queues
-{% if queues is defined %}
-{% for queue_name, queue in queues.items() %}
-{{ lprefix }}{{ queue_name.replace('-', '') }}Queue:
-Type: AWS::SQS::Queue
-Properties:
-QueueName: !Sub "{{ lprefix }}-{{ queue_name }}-${Stage}"
-{% endfor %}
-{% endif %} # end queues
+  {% if queues is defined %}
+  {% for queue_name, queue in queues.items() %}
+  {{ lprefix }}{{ queue_name.replace('-', '') }}Queue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "{{ lprefix }}-{{ queue_name }}-${Stage}"
+  {% endfor %}
+  {% endif %} # end queues
 
 # Tables
-{% if tables is defined %}
-{% for table_name, table in tables.items() %}
-{{ prefix }}{{ table_name }}:
-Type: AWS::DynamoDB::Table
-Properties:
-TableName: !Sub {{ prefix }}{{ table_name }}-${Stage}
-AttributeDefinitions:
-{% for attribute in table.attributes %}
-- AttributeName: {{ attribute.name }}
-{% if 'type' in attribute %}
-AttributeType: {{ attribute.type }}
-{% else %}
-AttributeType: S
-{% endif %}
-{% endfor %}
-KeySchema:
-{% for attribute in table.attributes %}
-{% if attribute.hash %}
-- AttributeName: {{ attribute.name }}
-KeyType: HASH
-{% endif %}
-{% endfor %}
-{% for attribute in table.attributes %}
-{% if attribute.range %}
-- AttributeName: {{ attribute.name }}
-KeyType: RANGE
-{% endif %}
-{% endfor %}
-{% if table.indices %}
-GlobalSecondaryIndexes:
-{% for index in table.indices %}
-- IndexName: {{ index.name }}
-KeySchema:
-{% for attribute in index.attributes %}
-{% if attribute.hash %}
-- AttributeName: {{ attribute.name }}
-KeyType: HASH
-{% endif %}
-{% endfor %}
-{% for attribute in index.attributes %}
-{% if attribute.range %}
-- AttributeName: {{ attribute.name }}
-KeyType: RANGE
-{% endif %}
-{% endfor %}
-Projection:
-ProjectionType: ALL
-{% endfor %}
-{% endif %}
-BillingMode: PAY_PER_REQUEST
-PointInTimeRecoverySpecification:
-PointInTimeRecoveryEnabled: true
-RecoveryPeriodInDays: 14
-{% if table.trigger %}
-StreamSpecification:
-StreamViewType: {{ stream_view_type_map[table.trigger.viewtype] }}
-{% endif %}
-{% if table.ttl %}
-TimeToLiveSpecification:
-AttributeName: {{ table.ttl }}
-Enabled: true
-{% endif %}
-{% endfor %}
-{% endif %} # end tables
+  {% if tables is defined %}
+  {% for table_name, table in tables.items() %}
+  {{ prefix }}{{ table_name }}:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub {{ prefix }}{{ table_name }}-${Stage}
+      AttributeDefinitions:
+        {% for attribute in table.attributes %}
+        - AttributeName: {{ attribute.name }}
+          {% if 'type' in attribute %}
+          AttributeType: {{ attribute.type }}
+          {% else %}
+          AttributeType: S
+          {% endif %}
+        {% endfor %}
+      KeySchema:
+        {% for attribute in table.attributes %}
+        {% if attribute.hash %}
+        - AttributeName: {{ attribute.name }}
+          KeyType: HASH
+        {% endif %}
+        {% endfor %}
+        {% for attribute in table.attributes %}
+        {% if attribute.range %}
+        - AttributeName: {{ attribute.name }}
+          KeyType: RANGE
+        {% endif %}
+        {% endfor %}
+      {% if table.indices %}
+      GlobalSecondaryIndexes:
+        {% for index in table.indices %}
+        - IndexName: {{ index.name }}
+          KeySchema:
+            {% for attribute in index.attributes %}
+            {% if attribute.hash %}
+            - AttributeName: {{ attribute.name }}
+              KeyType: HASH
+            {% endif %}
+            {% endfor %}
+            {% for attribute in index.attributes %}
+            {% if attribute.range %}
+            - AttributeName: {{ attribute.name }}
+              KeyType: RANGE
+            {% endif %}
+            {% endfor %}
+          Projection:
+            ProjectionType: ALL
+        {% endfor %}
+      {% endif %}
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      RecoveryPeriodInDays: 14
+      {% if table.trigger %}
+      StreamSpecification:
+        StreamViewType: {{ stream_view_type_map[table.trigger.viewtype] }}
+      {% endif %}
+      {% if table.ttl %}
+      TimeToLiveSpecification:
+        AttributeName: {{ table.ttl }}
+        Enabled: true
+      {% endif %}
+  {% endfor %}
+  {% endif %} # end tables
 
 # Lambda Layer
-{% if enable_lambda_layer %}
-PythonLambdaLayer:
-Type: AWS::Serverless::LayerVersion
-Properties:
-LayerName: !Sub {{ lprefix }}-pythonthirdparty-${Stage}
-Description: Dependencies for all python lambdas
-ContentUri: ../../thirdparty/.
-CompatibleRuntimes:
-- python{{ python | default('3.13') }}
-Metadata:
-BuildMethod: python{{ python | default('3.13') }}
-BuildArchitecture: x86_64
-{% endif %} # end lambda layer
+  {% if enable_lambda_layer %}
+  PythonLambdaLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub {{ lprefix }}-pythonthirdparty-${Stage}
+      Description: Dependencies for all python lambdas
+      ContentUri: ../../thirdparty/.
+      CompatibleRuntimes:
+        - python{{ python | default('3.13') }}
+    Metadata:
+      BuildMethod: python{{ python | default('3.13') }}
+      BuildArchitecture: x86_64
+  {% endif %} # end lambda layer
 
 # Functions
-{% if functions is defined %}
-{% for function_name, function in functions.items() %}
-{{ function_name.replace('-', '' )}}Function:
-Type: AWS::Serverless::Function
-Properties:
-{% if function.timeout is defined %}
-Timeout: {{ function.timeout }}
-{% endif %}
-{% if function.memory is defined %}
-MemorySize: {{ function.memory }}
-{% endif %}
-FunctionName: !Sub "{{ function_name }}-${Stage}"
-{% if function.functionurl is defined %}
-FunctionUrlConfig:
-{% if function.functionurl is boolean %}
-AuthType: NONE
-{% else %}
-AuthType: {{ function.functionurl.auth_type|default('NONE') }}
-{% if function.functionurl.invoke_mode is defined %}
-InvokeMode: {{ function.functionurl.invoke_mode }}
-{% endif %}
-{% if function.functionurl.cors is defined %}
-Cors:
-{% if function.functionurl.cors.allow_credentials is defined %}
-AllowCredentials: {{ function.functionurl.cors.allow_credentials|lower }}
-{% endif %}
-{% if function.functionurl.cors.allow_headers is defined %}
-AllowHeaders:
-{% for header in function.functionurl.cors.allow_headers %}
-- "{{ header }}"
-{% endfor %}
-{% endif %}
-{% if function.functionurl.cors.allow_methods is defined %}
-AllowMethods:
-{% for method in function.functionurl.cors.allow_methods %}
-- "{{ method }}"
-{% endfor %}
-{% endif %}
-{% if function.functionurl.cors.allow_origins is defined %}
-AllowOrigins:
-{% for origin in function.functionurl.cors.allow_origins %}
-- "{{ origin }}"
-{% endfor %}
-{% endif %}
-{% if function.functionurl.cors.expose_headers is defined %}
-ExposeHeaders:
-{% for header in function.functionurl.cors.expose_headers %}
-- "{{ header }}"
-{% endfor %}
-{% endif %}
-{% if function.functionurl.cors.max_age is defined %}
-MaxAge: {{ function.functionurl.cors.max_age }}
-{% endif %}
-{% endif %}
-{% endif %}
-{% endif %}
-CodeUri: ../../{{ function.uri }}
-Policies:
-- AWSSecretsManagerGetSecretValuePolicy:
-SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*
-- SSMParameterReadPolicy:
-ParameterName: "*"
-{% for poll in function.polls %}
-- SQSPollerPolicy:
-QueueName: !GetAtt {{ lprefix }}{{ poll.name.replace('-', '') }}Queue.QueueName
-{% endfor %}
-{% for table in function.tables %}
-- DynamoDBCrudPolicy:
-TableName: !Ref {{ prefix }}{{ table }}
-{% endfor %}
-{% for bucket in function.buckets %}
-- S3CrudPolicy:
-BucketName: !Ref {{ lprefix }}{{ bucket.replace('-', '') }}Bucket
-{% endfor %}
-{% for stream in function.streams %}
-- KinesisCrudPolicy:
-StreamName: !Ref {{ lprefix }}{{ stream.replace('-', '') }}Stream
-{% endfor %}
-{% if tables is defined %}
-{% for table_name, table in tables.items() %}
-{% if table.trigger and table.trigger.function == function_name %}
-- Version: "2012-10-17"
-Statement:
-- Effect: Allow
-Action:
-- dynamodb:DescribeStream
-- dynamodb:GetRecords
-- dynamodb:GetShardIterator
-- dynamodb:ListStreams
-Resource: !GetAtt {{ prefix }}{{ table_name }}.StreamArn
-{% endif %}
-{% endfor %}
-{% endif %}
-{% for queue in function.send %}
-- SQSSendMessagePolicy:
-QueueName: !GetAtt {{ lprefix }}{{ queue.replace('-','') }}Queue.QueueName
-{% endfor %}
-{% for service in function.services %}
-{% if service == 'comprehend' %}
-- ComprehendBasicAccessPolicy: {}
-{% endif %}
-{% if service == 'bedrock' %}
-- Version: "2012-10-17"
-Statement:
-- Effect: Allow
-Action:
-- bedrock:InvokeModel
-- bedrock:InvokeModelWithResponseStream
-Resource: '*'
-{% endif %}
-{% if service == 'mqtt' %}
-- Version: "2012-10-17"
-Statement:
-- Effect: Allow
-Action:
-- iot:Publish
-- iot:DescribeEndpoint
-Resource: '*'
-{% endif %}
-{% if service == 'budget' %}
-- Version: "2012-10-17"
-Statement:
-- Sid: CostExplorerRead
-Effect: Allow
-Action:
-- ce:GetCostAndUsage
-- ce:GetCostForecast
-- ce:GetAnomalies
-Resource: "*"
-- Sid: BudgetsRead
-Effect: Allow
-Action:
-- budgets:ViewBudget
-- budgets:DescribeBudget
-Resource: "*"
-{% endif %}
-{% endfor %}
-{% for search_collection in function.searches %}
-- Version: "2012-10-17"
-Statement:
-- Effect: Allow
-Action:
-- aoss:*
-Resource:
-- !GetAtt {{ search_collection.replace('-', '') }}Collection.Arn
-{% endfor %}
-{% if function.custompolicies is defined %}
-{% for custom_policy in function.custompolicies %}
-- Version: "2012-10-17"
-Statement:
-- Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
-Action: {{ custom_policy.action | tojson }}
-Resource: {% if custom_policy.resource | default('any') == 'any' %}'*'{% else %}{{ custom_policy.resource | tojson }}{%
-endif %}
-{% endfor %}
-{% endif %}
-{% if enable_lambda_layer or function.layers %}
-Layers:
-{% endif %}
-{% if enable_lambda_layer %}
-# Common layer
-- !Ref PythonLambdaLayer
-{% endif %}
-{% if function.layers %}
-{% for layer_name, layer_arn in function.layers.items() %}
-# {{ layer_name }}
-- "{{ layer_arn }}"
-{% endfor %}
-{% endif %}
-Environment:
-Variables:
-REGION: !Ref AWS::Region
-{% if function.envvars is defined %}
-{% for name, value in function.envvars.items() %}
-{{ name }}: {{ value }}
-{% endfor %}
-{% endif %}
-{% if function.searches %}
-{% for search_collection in function.searches %}
-SEARCH_{{ search_collection.replace('-', '_').upper() }}_COLLECTION_ID: !GetAtt {{ search_collection.replace('-', '')
-}}Collection.Id
-{% endfor %}
-{% endif %}
+  {% if functions is defined %}
+  {% for function_name, function in functions.items() %}
+  {{ function_name.replace('-', '' )}}Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      {% if function.timeout is defined %}
+      Timeout: {{ function.timeout }}
+      {% endif %}
+      {% if function.memory is defined %}
+      MemorySize: {{ function.memory }}
+      {% endif %}
+      FunctionName: !Sub "{{ function_name }}-${Stage}"
+      {% if function.functionurl is defined %}
+      FunctionUrlConfig:
+        {% if function.functionurl is boolean %}
+        AuthType: NONE
+        {% else %}
+        AuthType: {{ function.functionurl.auth_type|default('NONE') }}
+        {% if function.functionurl.invoke_mode is defined %}
+        InvokeMode: {{ function.functionurl.invoke_mode }}
+        {% endif %}
+        {% if function.functionurl.cors is defined %}
+        Cors:
+          {% if function.functionurl.cors.allow_credentials is defined %}
+          AllowCredentials: {{ function.functionurl.cors.allow_credentials|lower }}
+          {% endif %}
+          {% if function.functionurl.cors.allow_headers is defined %}
+          AllowHeaders:
+            {% for header in function.functionurl.cors.allow_headers %}
+            - "{{ header }}"
+            {% endfor %}
+          {% endif %}
+          {% if function.functionurl.cors.allow_methods is defined %}
+          AllowMethods:
+            {% for method in function.functionurl.cors.allow_methods %}
+            - "{{ method }}"
+            {% endfor %}
+          {% endif %}
+          {% if function.functionurl.cors.allow_origins is defined %}
+          AllowOrigins:
+            {% for origin in function.functionurl.cors.allow_origins %}
+            - "{{ origin }}"
+            {% endfor %}
+          {% endif %}
+          {% if function.functionurl.cors.expose_headers is defined %}
+          ExposeHeaders:
+            {% for header in function.functionurl.cors.expose_headers %}
+            - "{{ header }}"
+            {% endfor %}
+          {% endif %}
+          {% if function.functionurl.cors.max_age is defined %}
+          MaxAge: {{ function.functionurl.cors.max_age }}
+          {% endif %}
+        {% endif %}
+        {% endif %}
+      {% endif %}
+      CodeUri: ../../{{ function.uri }}
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*
+        - SSMParameterReadPolicy:
+            ParameterName: "*"
+        {% for poll in function.polls %}
+        - SQSPollerPolicy:
+            QueueName: !GetAtt {{ lprefix }}{{ poll.name.replace('-', '') }}Queue.QueueName
+        {% endfor %}
+        {% for table in function.tables %}
+        - DynamoDBCrudPolicy:
+            TableName: !Ref {{ prefix }}{{ table }}
+        {% endfor %}
+        {% for bucket in function.buckets %}
+        - S3CrudPolicy:
+            BucketName: !Ref {{ lprefix }}{{ bucket.replace('-', '') }}Bucket
+        {% endfor %}
+        {% for stream in function.streams %}
+        - KinesisCrudPolicy:
+            StreamName: !Ref {{ lprefix }}{{ stream.replace('-', '') }}Stream
+        {% endfor %}
+        {% if tables is defined %}
+        {% for table_name, table in tables.items() %}
+        {% if table.trigger and table.trigger.function == function_name %}
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:DescribeStream
+                - dynamodb:GetRecords
+                - dynamodb:GetShardIterator
+                - dynamodb:ListStreams
+              Resource: !GetAtt {{ prefix }}{{ table_name }}.StreamArn
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% for queue in function.send %}
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt {{ lprefix }}{{ queue.replace('-','') }}Queue.QueueName
+        {% endfor %}
+        {% for service in function.services %}
+        {% if service == 'comprehend' %}
+        - ComprehendBasicAccessPolicy: {}
+        {% endif %}
+        {% if service == 'bedrock' %}
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:InvokeModelWithResponseStream
+              Resource: '*'
+        {% endif %}
+        {% if service == 'mqtt' %}
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - iot:Publish
+                - iot:DescribeEndpoint
+              Resource: '*'
+        {% endif %}
+        {% if service == 'budget' %}
+        - Version: "2012-10-17"
+          Statement:
+            - Sid: CostExplorerRead
+              Effect: Allow
+              Action:
+                - ce:GetCostAndUsage
+                - ce:GetCostForecast
+                - ce:GetAnomalies
+              Resource: "*"
+            - Sid: BudgetsRead
+              Effect: Allow
+              Action:
+                - budgets:ViewBudget
+                - budgets:DescribeBudget
+              Resource: "*"
+        {% endif %}
+        {% endfor %}
+        {% for search_collection in function.searches %}
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - aoss:*
+              Resource:
+                - !GetAtt {{ search_collection.replace('-', '') }}Collection.Arn
+        {% endfor %}
+        {% if function.custompolicies is defined %}
+        {% for custom_policy in function.custompolicies %}
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: {{ custom_policy.effect | default('Allow') | capitalize }}
+              Action: {{ custom_policy.action | tojson }}
+              Resource: {% if custom_policy.resource | default('any') == 'any' %}'*'{% else %}{{ custom_policy.resource | tojson }}{%
+  endif %}
+        {% endfor %}
+        {% endif %}
+      {% if enable_lambda_layer or function.layers %}
+      Layers:
+      {% endif %}
+      {% if enable_lambda_layer %}
+        # Common layer
+        - !Ref PythonLambdaLayer
+      {% endif %}
+      {% if function.layers %}
+        {% for layer_name, layer_arn in function.layers.items() %}
+        # {{ layer_name }}
+        - "{{ layer_arn }}"
+        {% endfor %}
+      {% endif %}
+      Environment:
+        Variables:
+          REGION: !Ref AWS::Region
+          {% if function.envvars is defined %}
+          {% for name, value in function.envvars.items() %}
+          {{ name }}: {{ value }}
+          {% endfor %}
+          {% endif %}
+          {% if function.searches %}
+          {% for search_collection in function.searches %}
+          SEARCH_{{ search_collection.replace('-', '_').upper() }}_COLLECTION_ID: !GetAtt {{ search_collection.replace('-', '')
+  }}Collection.Id
+          {% endfor %}
+          {% endif %}
 
-{% set has_events = namespace(found=false) %}
-{% if function.schedule %}{% set has_events.found = true %}{% endif %}
-{% if function.polls %}{% set has_events.found = true %}{% endif %}
-{% if paths is defined %}
-{% for path_name, path in paths.items() %}
-{% if path.function == function_name %}{% set has_events.found = true %}{% endif %}
-{% endfor %}
-{% endif %}
-{% if has_events.found %}
-Events:
-{% if function.schedule%}
-InvocationLevel:
-Type: Schedule
-Properties:
-Schedule: {{function.schedule}}
-{% endif %}
-{% for poll in function.polls %}
-{{ poll.name.replace('-', '') }}SQSEvent:
-Type: SQS
-Properties:
-Queue: !GetAtt {{ lprefix }}{{ poll.name.replace('-', '') }}Queue.Arn
-{% if poll.batchsize is defined %}
-BatchSize: {{ poll.batchsize }}
-{% endif %}
-{% if poll.batchwindow is defined %}
-MaximumBatchingWindowInSeconds: {{ poll.batchwindow }}
-{% endif %}
-{% endfor %}
-{% if paths is defined %}
-{% for path_name, path in paths.items() %}
-{% if path.function == function_name %}
-{% if path.greedy %}
-{% set normalized_path = path_name.rstrip('/') or '/' %}
-{# Root and Proxy events are both needed for greedy paths to ensure correct permissions and routing #}
-{{ path_name.replace('/', '') }}RootAPI:
-Type: Api
-Properties:
-Method: ANY
-Path: {{ normalized_path }}
-RestApiId: !Ref ApiDeployment
-{% if not path.open and path.authorizer %}
-Auth:
-Authorizer: {{ path.authorizer }}
-{% endif %}
-{{ path_name.replace('/', '') }}ProxyAPI:
-Type: Api
-Properties:
-Method: ANY
-Path: {{ normalized_path.rstrip('/') }}/{proxy+}
-RestApiId: !Ref ApiDeployment
-{% if not path.open and path.authorizer %}
-Auth:
-Authorizer: {{ path.authorizer }}
-{% endif %}
-{% else %}
-{{ path_name.replace('/', '') }}API:
-Type: Api
-Properties:
-Method: ANY
-Path: {{ path_name }}
-RestApiId: !Ref ApiDeployment
-{% if not path.open and path.authorizer %}
-Auth:
-Authorizer: {{ path.authorizer }}
-{% endif %}
-{% endif %}
-{% endif %}
-{% endfor %}
-{% endif %}
-{% endif %}
-{% endfor %}
-{% endif %} # end functions
+      {% set has_events = namespace(found=false) %}
+      {% if function.schedule %}{% set has_events.found = true %}{% endif %}
+      {% if function.polls %}{% set has_events.found = true %}{% endif %}
+      {% if paths is defined %}
+      {% for path_name, path in paths.items() %}
+      {% if path.function == function_name %}{% set has_events.found = true %}{% endif %}
+      {% endfor %}
+      {% endif %}
+      {% if has_events.found %}
+      Events:
+        {% if function.schedule%}
+        InvocationLevel:
+          Type: Schedule
+          Properties:
+            Schedule: {{function.schedule}}
+        {% endif %}
+        {% for poll in function.polls %}
+        {{ poll.name.replace('-', '') }}SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt {{ lprefix }}{{ poll.name.replace('-', '') }}Queue.Arn
+            {% if poll.batchsize is defined %}
+            BatchSize: {{ poll.batchsize }}
+            {% endif %}
+            {% if poll.batchwindow is defined %}
+            MaximumBatchingWindowInSeconds: {{ poll.batchwindow }}
+            {% endif %}
+        {% endfor %}
+        {% if paths is defined %}
+        {% for path_name, path in paths.items() %}
+        {% if path.function == function_name %}
+        {% if path.greedy %}
+        {% set normalized_path = path_name.rstrip('/') or '/' %}
+        {# Root and Proxy events are both needed for greedy paths to ensure correct permissions and routing #}
+        {{ path_name.replace('/', '') }}RootAPI:
+          Type: Api
+          Properties:
+            Method: ANY
+            Path: {{ normalized_path }}
+            RestApiId: !Ref ApiDeployment
+            {% if not path.open and path.authorizer %}
+            Auth:
+              Authorizer: {{ path.authorizer }}
+            {% endif %}
+        {{ path_name.replace('/', '') }}ProxyAPI:
+          Type: Api
+          Properties:
+            Method: ANY
+            Path: {{ normalized_path.rstrip('/') }}/{proxy+}
+            RestApiId: !Ref ApiDeployment
+            {% if not path.open and path.authorizer %}
+            Auth:
+              Authorizer: {{ path.authorizer }}
+            {% endif %}
+        {% else %}
+        {{ path_name.replace('/', '') }}API:
+          Type: Api
+          Properties:
+            Method: ANY
+            Path: {{ path_name }}
+            RestApiId: !Ref ApiDeployment
+            {% if not path.open and path.authorizer %}
+            Auth:
+              Authorizer: {{ path.authorizer }}
+            {% endif %}
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+      {% endif %}
+  {% endfor %}
+  {% endif %} # end functions
 
 {% if functions is defined %} # Permissions for lambda functions
-{% for function_name, function in functions.items() %}
-{% if function.allowinvoke is defined %}
-{{ function_name.replace('-', '') }}FunctionAllowInvoke:
-Type: AWS::Lambda::Permission
-Properties:
-Action: lambda:InvokeFunction
-FunctionName: !GetAtt {{ function_name.replace('-', '') }}Function.Arn
-Principal: {{ function.allowinvoke | tojson }}
-{% endif %}
-{% endfor %}
+  {% for function_name, function in functions.items() %}
+    {% if function.allowinvoke is defined %}
+  {{ function_name.replace('-', '') }}FunctionAllowInvoke:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt {{ function_name.replace('-', '') }}Function.Arn
+      Principal: {{ function.allowinvoke | tojson }}
+    {% endif %}
+  {% endfor %}
 {% endif %} # end permissions for lambda functions
 
 # DynamoDB Stream Event Source Mappings (from table definitions)
 {% if tables is defined %}
-{% for table_name, table in tables.items() %}
-{% if table.trigger %}
-{{ table_name.replace('-', '') }}StreamEventSourceMapping:
-Type: AWS::Lambda::EventSourceMapping
-DependsOn:
-- {{ table.trigger.function.replace('-', '') }}Function
-- {{ prefix }}{{ table_name }}
-Properties:
-EventSourceArn: !GetAtt {{ prefix }}{{ table_name }}.StreamArn
-FunctionName: !GetAtt {{ table.trigger.function.replace('-', '') }}Function.Arn
-StartingPosition: {{ stream_starting_position_map[table.trigger.startingposition] }}
-{% if table.trigger.batchsize is defined %}
-BatchSize: {{ table.trigger.batchsize }}
-{% endif %}
-{% if table.trigger.batchwindow is defined %}
-MaximumBatchingWindowInSeconds: {{ table.trigger.batchwindow }}
-{% endif %}
-{% endif %}
-{% endfor %}
+  {% for table_name, table in tables.items() %}
+    {% if table.trigger %}
+  {{ table_name.replace('-', '') }}StreamEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    DependsOn:
+      - {{ table.trigger.function.replace('-', '') }}Function
+      - {{ prefix }}{{ table_name }}
+    Properties:
+      EventSourceArn: !GetAtt {{ prefix }}{{ table_name }}.StreamArn
+      FunctionName: !GetAtt {{ table.trigger.function.replace('-', '') }}Function.Arn
+      StartingPosition: {{ stream_starting_position_map[table.trigger.startingposition] }}
+      {% if table.trigger.batchsize is defined %}
+      BatchSize: {{ table.trigger.batchsize }}
+      {% endif %}
+      {% if table.trigger.batchwindow is defined %}
+      MaximumBatchingWindowInSeconds: {{ table.trigger.batchwindow }}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
 {% endif %} # end stream event source mappings
 
 # Search
@@ -751,135 +750,135 @@ MaximumBatchingWindowInSeconds: {{ table.trigger.batchwindow }}
 {% for collection_name, collection in search.items() %}
 
 # Encryption is required by the service. Using AWS-owned key.
-{{ collection_name.replace('-', '') }}EP:
-Type: AWS::OpenSearchServerless::SecurityPolicy
-Properties:
-Name: !Sub {{ lprefix }}-{{ collection_name }}-ep-${Stage}
-Type: encryption
-Policy: !Sub |
-{
-"Rules": [
-{
-"ResourceType": "collection",
-"Resource": [
-"collection/{{ lprefix }}-{{ collection_name }}-${Stage}"
-]
-}
-],
-"AWSOwnedKey": true
-}
+  {{ collection_name.replace('-', '') }}EP:
+    Type: AWS::OpenSearchServerless::SecurityPolicy
+    Properties:
+      Name: !Sub {{ lprefix }}-{{ collection_name }}-ep-${Stage}
+      Type: encryption
+      Policy: !Sub |
+        {
+          "Rules": [
+            {
+              "ResourceType": "collection",
+              "Resource": [
+                "collection/{{ lprefix }}-{{ collection_name }}-${Stage}"
+              ]
+            }
+          ],
+          "AWSOwnedKey": true
+        }
 
 # No public access. Restrict to specific VPC endpoints only.
-{{ collection_name.replace('-', '') }}NP:
-Type: AWS::OpenSearchServerless::SecurityPolicy
-Properties:
-Name: !Sub {{ lprefix }}-{{ collection_name }}-np-${Stage}
-Type: network
-Policy: !Sub |
-[
-{
-"Rules": [
-{
-"ResourceType": "collection",
-"Resource": [
-"collection/{{ lprefix }}-{{ collection_name }}-${Stage}"
-]
-}
-],
-"AllowFromPublic": true
-}
-]
+  {{ collection_name.replace('-', '') }}NP:
+    Type: AWS::OpenSearchServerless::SecurityPolicy
+    Properties:
+      Name: !Sub {{ lprefix }}-{{ collection_name }}-np-${Stage}
+      Type: network
+      Policy: !Sub |
+        [
+          {
+            "Rules": [
+              {
+                "ResourceType": "collection",
+                "Resource": [
+                  "collection/{{ lprefix }}-{{ collection_name }}-${Stage}"
+                ]
+              }
+            ],
+            "AllowFromPublic": true
+          }
+        ]
 
 # Allow all IAM roles in the account (covers any Lambda execution role).
-{{ collection_name.replace('-', '') }}AP:
-Type: AWS::OpenSearchServerless::AccessPolicy
-Properties:
-Name: !Sub {{ lprefix }}-{{ collection_name }}-ap-${Stage}
-Type: data
-Policy: !Sub |
-[
-{
-"Description": "Data access for all roles in account",
-"Rules": [
-{
-"ResourceType": "collection",
-"Resource": [
-"collection/{{ lprefix }}-{{ collection_name }}-${Stage}"
-],
-"Permission": ["aoss:*"]
-},
-{
-"ResourceType": "index",
-"Resource": [
-"index/{{ lprefix }}-{{ collection_name }}-${Stage}/*"
-],
-"Permission": ["aoss:*"]
-}
-],
-"Principal": [
-{% set valid_functions = functions | dictsort | selectattr('1.searches', 'defined') | list %}
-{% for function_name, function in valid_functions %}
-"${{ '{' }}{{ function_name.replace('-', '') }}FunctionRole.Arn{{ '}' }}"{% if not loop.last %},{% endif %}
-{% endfor %}
-]
-}
-]
+  {{ collection_name.replace('-', '') }}AP:
+    Type: AWS::OpenSearchServerless::AccessPolicy
+    Properties:
+      Name: !Sub {{ lprefix }}-{{ collection_name }}-ap-${Stage}
+      Type: data
+      Policy: !Sub |
+        [
+          {
+            "Description": "Data access for all roles in account",
+            "Rules": [
+              {
+                "ResourceType": "collection",
+                "Resource": [
+                  "collection/{{ lprefix }}-{{ collection_name }}-${Stage}"
+                ],
+                "Permission": ["aoss:*"]
+              },
+              {
+                "ResourceType": "index",
+                "Resource": [
+                  "index/{{ lprefix }}-{{ collection_name }}-${Stage}/*"
+                ],
+                "Permission": ["aoss:*"]
+              }
+            ],
+            "Principal": [
+              {% set valid_functions = functions | dictsort | selectattr('1.searches', 'defined') | list %}
+              {% for function_name, function in valid_functions %}
+              "${{ '{' }}{{ function_name.replace('-', '') }}FunctionRole.Arn{{ '}' }}"{% if not loop.last %},{% endif %}
+              {% endfor %}
+            ]
+          }
+        ]
 
-{{ collection_name.replace('-', '') }}Collection:
-Type: AWS::OpenSearchServerless::Collection
-Properties:
-Name: !Sub {{ lprefix }}-{{ collection_name }}-${Stage}
-Type: SEARCH
-Description: "Serverless collection {{ collection_name}}"
-DependsOn:
-- {{ collection_name.replace('-', '') }}EP
-- {{ collection_name.replace('-', '') }}NP
+  {{ collection_name.replace('-', '') }}Collection:
+    Type: AWS::OpenSearchServerless::Collection
+    Properties:
+      Name: !Sub {{ lprefix }}-{{ collection_name }}-${Stage}
+      Type: SEARCH
+      Description: "Serverless collection {{ collection_name}}"
+    DependsOn:
+      - {{ collection_name.replace('-', '') }}EP
+      - {{ collection_name.replace('-', '') }}NP
 
 {% endfor %}
 {% endif %} # end search
 
 # MQTT (IoT Core)
 {% if mqtt is defined %}
-{{ lprefix }}MqttAuthorizer:
-Type: AWS::IoT::Authorizer
-Properties:
-AuthorizerName: !Sub "{{ lprefix }}-mqtt-authorizer-${Stage}"
-AuthorizerFunctionArn: !GetAtt {{ mqtt.authorizer.function.replace('-', '') }}Function.Arn
-Status: ACTIVE
-SigningDisabled: true
+  {{ lprefix }}MqttAuthorizer:
+    Type: AWS::IoT::Authorizer
+    Properties:
+      AuthorizerName: !Sub "{{ lprefix }}-mqtt-authorizer-${Stage}"
+      AuthorizerFunctionArn: !GetAtt {{ mqtt.authorizer.function.replace('-', '') }}Function.Arn
+      Status: ACTIVE
+      SigningDisabled: true
 
-{% if mqtt.authorizer is defined %}
-{{ lprefix }}MqttAuthorizerPermission:
-Type: AWS::Lambda::Permission
-Properties:
-FunctionName: !GetAtt {{ mqtt.authorizer.function.replace('-', '') }}Function.Arn
-Action: lambda:InvokeFunction
-Principal: iot.amazonaws.com
-{% endif %}
+  {% if mqtt.authorizer is defined %}
+  {{ lprefix }}MqttAuthorizerPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt {{ mqtt.authorizer.function.replace('-', '') }}Function.Arn
+      Action: lambda:InvokeFunction
+      Principal: iot.amazonaws.com
+  {% endif %}
 
-{% if mqtt.topics %}
-{{ lprefix }}MqttClientPolicy:
-Type: AWS::IoT::Policy
-Properties:
-PolicyName: !Sub "{{ lprefix }}-mqtt-client-${Stage}"
-PolicyDocument:
-Version: "2012-10-17"
-Statement:
-- Effect: Allow
-Action:
-- iot:Connect
-Resource:
-- !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:client/*"
-- Effect: Allow
-Action:
-- iot:Subscribe
-- iot:Receive
-Resource:
-{% for topic in mqtt.topics %}
-- !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:topicfilter/{{ topic }}"
-- !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:topic/{{ topic }}"
-{% endfor %}
-{% endif %}
+  {% if mqtt.topics %}
+  {{ lprefix }}MqttClientPolicy:
+    Type: AWS::IoT::Policy
+    Properties:
+      PolicyName: !Sub "{{ lprefix }}-mqtt-client-${Stage}"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - iot:Connect
+            Resource:
+              - !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:client/*"
+          - Effect: Allow
+            Action:
+              - iot:Subscribe
+              - iot:Receive
+            Resource:
+              {% for topic in mqtt.topics %}
+              - !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:topicfilter/{{ topic }}"
+              - !Sub "arn:aws:iot:${AWS::Region}:${AWS::AccountId}:topic/{{ topic }}"
+              {% endfor %}
+  {% endif %}
 {% endif %} # end mqtt
 
 {% set has_outputs = namespace(found=false) %}
@@ -891,13 +890,13 @@ Resource:
 
 {% if has_outputs.found %}
 Outputs:
-{% if functions is defined %}
-{% for function_name, function in functions.items() %}
-{% if function.functionurl is defined %}
-{{ function_name.replace('-', '' )}}FunctionUrl:
-Description: "Function URL for {{ function_name }}"
-Value: !Ref {{ function_name.replace('-', '' )}}FunctionUrl
-{% endif %}
-{% endfor %}
-{% endif %}
+  {% if functions is defined %}
+    {% for function_name, function in functions.items() %}
+      {% if function.functionurl is defined %}
+  {{ function_name.replace('-', '' )}}FunctionUrl:
+    Description: "Function URL for {{ function_name }}"
+    Value: !Ref {{ function_name.replace('-', '' )}}FunctionUrl
+      {% endif %}
+    {% endfor %}
+  {% endif %}
 {% endif %}

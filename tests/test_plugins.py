@@ -23,12 +23,13 @@ def test_plugins_generation():
     cliparams = {'verbose': True}
     deploy_ctx = {'environment': 'dev', 'target_region': 'us-east-1'}
     
-    resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
+    results, errors = generate(cliparams, example_path, [deploy_ctx])
     
     assert not errors
+    resources_data, _ = results['default']
     
     # Verify plugin output
-    plugin_yaml = example_path / "myplugin.yaml"
+    plugin_yaml = example_path / "build" / "default" / "myplugin.yaml"
     assert plugin_yaml.exists()
     
     with open(plugin_yaml, 'r') as f:

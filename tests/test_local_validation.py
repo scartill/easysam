@@ -13,7 +13,7 @@ def test_local_validation_unexpected_section(tmp_path):
     errors = []
     deploy_ctx = {"environment": "dev", "target_region": "us-east-1"}
     
-    resources_data = resources(tmp_path, [], deploy_ctx, errors)
+    resources_data = resources({}, tmp_path, deploy_ctx, errors)
     
     assert any("Invalid local resources data" in err for err in errors)
     assert any("invalid_section" in err and "Additional properties" in err for err in errors)
@@ -31,7 +31,7 @@ def test_local_validation_missing_lambda_name(tmp_path):
     errors = []
     deploy_ctx = {"environment": "dev", "target_region": "us-east-1"}
     
-    resources_data = resources(tmp_path, [], deploy_ctx, errors)
+    resources_data = resources({}, tmp_path, deploy_ctx, errors)
     
     assert any("Invalid local resources data" in err for err in errors)
     assert any("name" in err and "required" in err for err in errors)
@@ -49,7 +49,7 @@ def test_local_validation_invalid_integration(tmp_path):
     errors = []
     deploy_ctx = {"environment": "dev", "target_region": "us-east-1"}
     
-    resources_data = resources(tmp_path, [], deploy_ctx, errors)
+    resources_data = resources({}, tmp_path, deploy_ctx, errors)
     
     assert any("Invalid local resources data" in err for err in errors)
     assert any("path" in err and "required" in err for err in errors)
@@ -67,7 +67,7 @@ def test_local_validation_memory_valid(tmp_path):
     errors = []
     deploy_ctx = {"environment": "dev", "target_region": "us-east-1"}
     
-    resources_data = resources(tmp_path, [], deploy_ctx, errors)
+    resources_data = resources({}, tmp_path, deploy_ctx, errors)
     
     assert not errors
     assert resources_data['functions']['myfunc']['memory'] == 512
@@ -85,7 +85,7 @@ def test_local_validation_memory_invalid(tmp_path):
     errors = []
     deploy_ctx = {"environment": "dev", "target_region": "us-east-1"}
     
-    resources_data = resources(tmp_path, [], deploy_ctx, errors)
+    resources_data = resources({}, tmp_path, deploy_ctx, errors)
     
     assert any("Invalid local resources data" in err for err in errors)
     assert any("64" in err and "128" in err and "minimum" in err for err in errors)

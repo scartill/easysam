@@ -16,10 +16,11 @@ functions:
 ''')
 
     deploy_ctx = benedict({'environment': 'dev', 'target_region': 'us-east-1'})
-    data, errors = generate({}, tmp_path, [], deploy_ctx)
+    results, errors = generate({}, tmp_path, [deploy_ctx])
     assert not errors
+    resources_data, _ = results['default']
 
-    template = (tmp_path / 'template.yml').read_text()
+    template = (tmp_path / 'build' / 'default' / 'template.yml').read_text()
     assert 'LOCAL_VAR1: val1' in template
     assert 'LOCAL_VAR2: val2' in template
     assert 'REGION: !Ref AWS::Region' in template

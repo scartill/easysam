@@ -20,8 +20,9 @@ paths:
     )
 
     deploy_ctx = benedict({'environment': 'dev', 'target_region': 'us-east-1'})
-    _, errors = generate({}, tmp_path, [], deploy_ctx)
+    results, errors = generate({}, tmp_path, [deploy_ctx])
     assert not errors
+    resources_data, _ = results['default']
 
     def get_att_constructor(loader, node):
         value = loader.construct_scalar(node)
@@ -37,7 +38,8 @@ paths:
     yaml.SafeLoader.add_constructor('!Sub', sub_constructor)
     yaml.SafeLoader.add_constructor('!Ref', ref_constructor)
 
-    with open(tmp_path / 'template.yml', 'r') as f:
+    template_path = tmp_path / 'build' / 'default' / 'template.yml'
+    with open(template_path, 'r') as f:
         template = yaml.safe_load(f)
 
     events = template['Resources']['myfuncFunction']['Properties']['Events']
@@ -46,7 +48,8 @@ paths:
     assert events['itemsRootAPI']['Properties']['Path'] == '/items'
     assert events['itemsProxyAPI']['Properties']['Path'] == '/items/{proxy+}'
 
-    with open(tmp_path / 'build' / 'swagger.yaml', 'r') as f:
+    swagger_path = tmp_path / 'build' / 'default' / 'swagger.yaml'
+    with open(swagger_path, 'r') as f:
         swagger = yaml.safe_load(f)
 
     assert '/items' in swagger['paths']
