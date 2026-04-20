@@ -12,13 +12,15 @@ schemes:
 {% if paths is defined %}
 paths:
   {% for original_path_name, path_params in paths.items() %}
-  {% if path_params.integration is not defined and path_params.greedy is not defined or path_params.greedy%}
-    {% set paths = [original_path_name, original_path_name+'/{proxy+}'] %}
+  {% set normalized_path = original_path_name.rstrip('/') or '/' %}
+  {# Ensure both root and proxy paths are defined for greedy integrations #}
+  {% if (path_params.integration is not defined or path_params.integration == 'lambda') and path_params.get('greedy', True) %}
+    {% set expanded_paths = [normalized_path, normalized_path.rstrip('/') + '/{proxy+}'] %}
   {% else %}
-    {% set paths = [original_path_name] %}
+    {% set expanded_paths = [normalized_path] %}
   {% endif %}
 
-  {% for path_name in paths %}
+  {% for path_name in expanded_paths %}
   {{ path_name }}:
     {% if path_params.definition is defined %}
     {{ path_params.definition }}
@@ -152,7 +154,7 @@ paths:
           description: Bad request
         "500":
           description: Internal server error  
-      {% if not path_name.endswith('/{proxy+}') or 'backoffice' in path_name %}
+      {% if path_params.authorizer %}
       security:
       - {{ path_params.authorizer }}: []
       {% endif %}
