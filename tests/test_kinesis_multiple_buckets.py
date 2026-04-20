@@ -24,11 +24,12 @@ def test_kinesis_multiple_buckets_generation():
     cliparams = {'verbose': True}
     deploy_ctx = {'environment': 'kinesissampledev', 'target_region': 'us-east-1'}
 
-    resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
+    results, errors = generate(cliparams, example_path, [deploy_ctx])
 
     assert not errors
+    resources_data, _ = results['default']
 
-    template_path = example_path / 'template.yml'
+    template_path = example_path / 'build' / 'default' / 'template.yml'
     assert template_path.exists()
 
     with open(template_path, 'r') as f:
@@ -72,7 +73,14 @@ def test_kinesis_multiple_buckets_defaults_and_validation():
     assert stream['buckets']['private']['intervalinseconds'] == 120
 
     # Test that both buckets and bucketname is flagged as error
-    data2 = {'streams': {'mystream2': {'bucketname': 'mybucket', 'buckets': {'private': {'bucketname': 'mybucket'}}}}}
+    data2 = {
+        'streams': {
+            'mystream2': {
+                'bucketname': 'mybucket',
+                'buckets': {'private': {'bucketname': 'mybucket'}}
+            }
+        }
+    }
     errors2 = []
     process_default_streams(data2, errors2)
     assert len(errors2) == 1
@@ -80,7 +88,6 @@ def test_kinesis_multiple_buckets_defaults_and_validation():
 
     # Test default interval
     from easysam.load import STREAM_INTERVAL_SECONDS
-
     data3 = {
         'streams': {
             'mystream3': {

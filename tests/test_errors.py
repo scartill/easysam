@@ -24,8 +24,8 @@ def test_app_with_errors_generation():
     cliparams = {'verbose': True}
     deploy_ctx = {'environment': 'dev', 'target_region': 'us-east-1'}
 
-    resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
+    results, errors = generate(cliparams, example_path, [deploy_ctx])
+    resources_data, _ = results['default']
 
-    # It should have errors
     assert errors
     assert any('Error loading import file' in err for err in errors)

@@ -122,7 +122,7 @@ def _generate_with_context(
             searchpath.append(str(omt.parent))
 
         loader = FileSystemLoader(searchpath=searchpath)
-        jenv = Environment(loader=loader)
+        jenv = Environment(loader=loader, trim_blocks=True, lstrip_blocks=True)
 
         sam_template = jenv.get_template(template_path)
         sam_output = sam_template.render(resources_data)
@@ -141,13 +141,13 @@ def _generate_with_context(
             traceback.print_exc()
 
         errors.append(f'Error generating template: {e}')
-        return None
+        return None, errors
 
     if 'prismarine' in resources_data:
         lg.info('Generating prismarine clients')
         generate_prismarine_clients(resources_dir, resources_data, errors)
 
-    return resources_data
+    return resources_data, errors
 
 
 def invoke_plugin(
@@ -169,15 +169,16 @@ def invoke_plugin(
     lg.info(f'Invoking plugin {plugin} with template {template_j2_path}')
     template_dir = template_j2_path.parent
     loader = FileSystemLoader(searchpath=[str(template_dir.resolve())])
-    jenv = Environment(loader=loader)
+    jenv = Environment(loader=loader, trim_blocks=True, lstrip_blocks=True)
     template = jenv.get_template(template_j2_filename)
     aux_data = dict(plugin.get('aux', {}))
-    output = template.render(resources_data.merge(aux_data))
+    plugin_data = resources_data.clone()
+    plugin_data.merge(aux_data)
+    output = template.render(plugin_data)
     output_yaml_path = Path(build_dir, plugin_name).with_suffix('.yaml')
     write_result(output_yaml_path, output)
 
 
 def write_result(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
-    sane_text = '\n'.join(line for line in text.splitlines() if line and line.strip())
-    Path(path).write_text(sane_text)
+    Path(path).write_text(text)
