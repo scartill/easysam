@@ -1,8 +1,13 @@
-lambda:
+? !Conditional
+  key: lambda
+  environment:
+    - devaoss
+    - prodsam
+    - stagingsam
+:
   name: indexfunc
   resources:
     tables:
       - SearchableItem
     searches:
-      # This is the default search index and can be omitted
       - searchable

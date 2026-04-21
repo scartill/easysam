@@ -1,4 +1,10 @@
-tables:
+? !Conditional
+  key: tables
+  environment:
+    - devaoss
+    - prodsam
+    - stagingsam
+:
   SearchableItem:
     attributes:
     - hash: true
