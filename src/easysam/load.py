@@ -134,13 +134,23 @@ def prismarine_dynamo_tables(
 
 
 def preprocess_prismarine(
-    resources_data: dict, resources_dir: Path, pypath: list[Path], errors: list[str]
+    deploy_ctx: dict[str, str], resources_data: dict, resources_dir: Path, pypath: list[Path], errors: list[str]
 ):
     prefix = resources_data['prefix']
     prisma = resources_data['prismarine']
     prisma_base = prisma.get('default-base')
-    prisma_tables = prisma['tables'] or []
 
+    raw_conditional = prisma.pop('conditional-tables', {})
+    print(f'RAW CONDITIONAL {raw_conditional}')
+    resolved_conditional = resolve_conditionals(raw_conditional, deploy_ctx, errors)
+    print(f'RESOLVED CONDITIONAL {resolved_conditional}')
+    if isinstance(resolved_conditional, dict):
+        for tables in resolved_conditional.values():
+            if isinstance(tables, list):
+                prisma.setdefault('tables', []).extend(tables)
+
+    prisma_tables = prisma['tables'] or []
+    print(f'PRISMA TABLES {prisma_tables}')
     for prisma_integration in prisma_tables:
         base = prisma_integration.get('base') or prisma_base
         package = prisma_integration.get('package')
@@ -260,9 +270,7 @@ def preprocess_file(
         entry_dir = entry_path.parent
         entry_data = yaml.safe_load(entry_path.read_text(encoding='utf-8'))
         entry_data = expand_env_vars(entry_data)
-        print(f'ENTRY DATA {entry_data}')
         raw_entry_data = benedict(entry_data)
-        print(f'RAW ENTRY DATA {raw_entry_data}')
     except Exception as e:
         errors.append(f'Error loading import file {entry_path}: {e}')
         return
@@ -270,7 +278,6 @@ def preprocess_file(
     lg.info('Resolving conditional import file')
     lg.debug(f'Deployment context: {deploy_ctx}')
     resolved_data = resolve_conditionals(raw_entry_data, deploy_ctx, errors)
-    print(f'RESOLVED {resolved_data}')
     lg.debug('Resources data after resolving conditionals:')
     lg.debug(resolved_data.to_yaml())
 
@@ -287,7 +294,7 @@ def preprocess_file(
     if local_import_def := resolved_data.get('import'):
         for import_file in local_import_def:
             import_path = Path(entry_dir, import_file)
-            preprocess_file(resources_data, resources_dir, import_path, errors)
+            preprocess_file(deploy_ctx, resources_data, resources_dir, import_path, errors)
 
 
 def preprocess_imports(deploy_ctx: dict[str, str], resources_data: dict, resources_dir: Path, errors: list[str]):
@@ -396,7 +403,7 @@ def preprocess_resources(
         return dict(sorted(d.items(), key=lambda x: x[0]))
 
     if 'prismarine' in resources_data:
-        preprocess_prismarine(resources_data, resources_dir, pypath, errors)
+        preprocess_prismarine(deploy_ctx, resources_data, resources_dir, pypath, errors)
 
     if 'import' in resources_data:
         preprocess_imports(deploy_ctx, resources_data, resources_dir, errors)

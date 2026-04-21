@@ -409,6 +409,27 @@
             "additionalProperties": false
           }
         },
+        "conditional-tables": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "package": {
+                  "type": "string"
+                },
+                "base": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "package"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
         "modelling": {
           "type": "string",
           "enum": [

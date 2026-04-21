@@ -1,0 +1,18 @@
+prefix: MyAppWithPrismarine
+
+import:
+  - backend
+
+prismarine:
+  default-base: common
+  access-module: common.dynamo_access
+  tables:
+    - package: myobject
+  conditional-tables:
+    ? !Conditional
+      key: tables
+      environment:
+        - devaoss
+        - prodsam
+        - stagingsam
+    : - package: condition
