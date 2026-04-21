@@ -1,3 +1,7 @@
+# 1.11.1
+
+- Fixed a bug with Prismarine Pydantic models by upgrading to Prismarine 1.5.5
+
 # 1.11.0
 
 - Added `budget` service support for Lambda functions.
