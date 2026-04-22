@@ -401,6 +401,12 @@
               },
               "base": {
                 "type": "string"
+              },
+              "trigger": {
+                "anyOf": [
+                  { "$ref": "#/definitions/table_trigger_schema" },
+                  { "type": "object", "maxProperties": 0 }
+                ]
               }
             },
             "required": [

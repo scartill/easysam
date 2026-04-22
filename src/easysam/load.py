@@ -93,6 +93,7 @@ def resources(
     resources_data = resolve_conditionals(raw_resources_data, deploy_ctx, errors)
     lg.debug('Resources data after resolving conditionals:')
     lg.debug(resources_data.to_yaml())
+    print(f'RESOURCES RESOLVED {resources_data}')
 
     lg.info('Applying overrides')
     apply_overrides(resources_data, deploy_ctx)
@@ -141,16 +142,13 @@ def preprocess_prismarine(
     prisma_base = prisma.get('default-base')
 
     raw_conditional = prisma.pop('conditional-tables', {})
-    print(f'RAW CONDITIONAL {raw_conditional}')
     resolved_conditional = resolve_conditionals(raw_conditional, deploy_ctx, errors)
-    print(f'RESOLVED CONDITIONAL {resolved_conditional}')
     if isinstance(resolved_conditional, dict):
         for tables in resolved_conditional.values():
             if isinstance(tables, list):
                 prisma.setdefault('tables', []).extend(tables)
 
     prisma_tables = prisma['tables'] or []
-    print(f'PRISMA TABLES {prisma_tables}')
     for prisma_integration in prisma_tables:
         base = prisma_integration.get('base') or prisma_base
         package = prisma_integration.get('package')
@@ -166,6 +164,16 @@ def preprocess_prismarine(
         tables = prismarine_dynamo_tables(
             prefix, base, package, resources_dir, pypath, errors
         )
+
+        for table_name, table in tables.items():
+            trigger = table.get('trigger')
+
+            if trigger and not prisma_integration.get('trigger'):
+                lg.info(
+                    f'Removing trigger {trigger}'
+                    f'from table {table_name}'
+                )
+                table.pop('trigger', None)
 
         if not tables:
             lg.warning(f'No valid tables found for {package}, continuing')
@@ -249,7 +257,6 @@ def preprocess_tables(
     if 'tables' not in resources_data:
         resources_data['tables'] = {}
 
-    print(f'TABLE DEF {table_def}')
     for table_name, table_data in table_def.items():
         if table_name in resources_data['tables']:
             errors.append(
@@ -483,16 +490,22 @@ def check_condition(
     return (value == context_value) != negate
 
 
-def resolve_conditionals(
-    resources_data: dict, deploy_ctx: dict[str, str], errors: list[str]
-):
+def resolve_conditionals(resources_data, deploy_ctx: dict[str, str], errors: list[str]):
+
+    if isinstance(resources_data, list):
+        print('FINALLY IAM IN LIST')
+        return [
+            resolve_conditionals(item, deploy_ctx, errors)
+            for item in resources_data
+        ]
+
+    if not isinstance(resources_data, dict):
+        return resources_data
+
     resolved = benedict()
 
     for key, value in resources_data.items():
-        if isinstance(value, dict):
-            resolved_value = resolve_conditionals(value, deploy_ctx, errors)
-        else:
-            resolved_value = value
+        resolved_value = resolve_conditionals(value, deploy_ctx, errors)
 
         if isinstance(key, Conditional):
             include = all(
