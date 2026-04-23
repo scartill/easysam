@@ -1,4 +1,4 @@
-prefix: FargatePoll
+prefix: FargatePollerExample
 
 tables:
   RandomStats:

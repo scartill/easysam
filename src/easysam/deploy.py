@@ -2,6 +2,7 @@ import logging as lg
 import json
 import time
 import shutil
+import os
 from pathlib import Path
 import subprocess
 
@@ -15,6 +16,65 @@ import easysam.utils as u
 
 SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
+
+
+def orchestrate_docker(cliparams, resources, deploy_ctx, directory):
+    if 'services' not in resources:
+        return {}
+
+    if cliparams.get('no_docker_build_on_win') and os.name == 'nt':
+        lg.info('Skipping Docker builds on Windows due to --no-docker-build-on-win')
+        return {}
+
+    image_overrides = {}
+    lprefix = resources['prefix'].lower()
+    stage = deploy_ctx['environment']
+    
+    ecr = u.get_aws_client('ecr', cliparams)
+    
+    for service_name, service in resources['services'].items():
+        if not service.get('build'):
+            continue
+            
+        repo_name = f"{lprefix}-{service_name}-{stage}"
+        lg.info(f"Orchestrating Docker for service {service_name} (Repo: {repo_name})")
+        
+        # 1. Ensure ECR Repository exists
+        try:
+            ecr.create_repository(repositoryName=repo_name)
+            lg.info(f"Created ECR repository: {repo_name}")
+        except ecr.exceptions.RepositoryAlreadyExistsException:
+            lg.debug(f"ECR repository {repo_name} already exists")
+            
+        repo_data = ecr.describe_repositories(repositoryNames=[repo_name])['repositories'][0]
+        repo_uri = repo_data['repositoryUri']
+        
+        # 2. ECR Login
+        auth = ecr.get_authorization_token()['authorizationData'][0]
+        token = u.base64.b64decode(auth['authorizationToken']).decode('utf-8').split(':')[1]
+        proxy_endpoint = auth['proxyEndpoint']
+        
+        lg.info(f"Logging into ECR: {proxy_endpoint}")
+        login_cmd = ['docker', 'login', '-u', 'AWS', '-p', token, proxy_endpoint]
+        subprocess.run(login_cmd, check=True, capture_output=True)
+        
+        # 3. Docker Build
+        build_path = Path(directory, service['build']).resolve()
+        image_tag = f"{repo_uri}:latest"
+        lg.info(f"Building Docker image: {image_tag} from {build_path}")
+        
+        build_cmd = ['docker', 'build', '-t', image_tag, str(build_path)]
+        subprocess.run(build_cmd, check=True, cwd=directory)
+        
+        # 4. Docker Push
+        lg.info(f"Pushing Docker image: {image_tag}")
+        push_cmd = ['docker', 'push', image_tag]
+        subprocess.run(push_cmd, check=True)
+        
+        param_name = f"{lprefix}{service_name.replace('-', '')}Image"
+        image_overrides[param_name] = image_tag
+        
+    return image_overrides
 
 
 def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
@@ -46,8 +106,11 @@ def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
     # Building the application from the SAM template
     sam_build(cliparams, directory)
 
+    # Docker Orchestration for Services
+    image_overrides = orchestrate_docker(cliparams, resources, deploy_ctx, directory)
+
     # Deploying the application to AWS
-    sam_deploy(cliparams, directory, deploy_ctx, resources)
+    sam_deploy(cliparams, directory, deploy_ctx, resources, image_overrides)
 
     if not cliparams.get('no_cleanup'):
         remove_common_dependencies(directory)
@@ -141,7 +204,7 @@ def sam_build(cliparams, directory):
         raise UserWarning('Failed to build SAM template') from e
 
 
-def sam_deploy(cliparams, directory, deploy_ctx, resources):
+def sam_deploy(cliparams, directory, deploy_ctx, resources, image_overrides=None):
     lg.info(f'Deploying SAM template from {directory} to\n{json.dumps(deploy_ctx, indent=4)}')
     sam_tool = cliparams['sam_tool']
     sam_params = sam_tool.split(' ')
@@ -151,18 +214,21 @@ def sam_deploy(cliparams, directory, deploy_ctx, resources):
     if not aws_stack:
         raise UserWarning('No AWS stack found in deploy context')
 
+    parameter_overrides = [f'ParameterKey=Stage,ParameterValue={aws_stack}']
+
+    if image_overrides:
+        for key, value in image_overrides.items():
+            parameter_overrides.append(f'ParameterKey={key},ParameterValue={value}')
+
     sam_params.extend([
         'deploy',
-        '--parameter-overrides', f'ParameterKey=Stage,ParameterValue={aws_stack}',
+        '--parameter-overrides', ' '.join(parameter_overrides),
         '--stack-name', aws_stack,
         '--no-fail-on-empty-changeset',
         '--no-confirm-changeset',
         '--resolve-s3',
         '--capabilities', 'CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'
     ])
-
-    if 'services' in resources:
-        sam_params.append('--resolve-image-repos')
 
     region = deploy_ctx.get('target_region')
 

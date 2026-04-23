@@ -1,4 +1,6 @@
 import boto3
+import base64
+import os
 
 
 def get_aws_client(service, cliparams):

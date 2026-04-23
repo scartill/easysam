@@ -55,9 +55,9 @@ services:
     assert task_def['Properties']['ContainerDefinitions'][0]['Image'] == 'myimage:latest'
     assert task_def['Properties']['Cpu'] == 256
     assert task_def['Properties']['Memory'] == 512
-    
-    # Verify Metadata: BuildMethod: docker is present by default
-    assert task_def['Metadata']['BuildMethod'] == 'docker'
+
+    # Metadata should NOT be present
+    assert 'Metadata' not in task_def
 
 def test_service_with_build(tmp_path):
     resources_yaml = tmp_path / "resources.yaml"
@@ -79,12 +79,17 @@ services:
     with open(template_path, 'r') as f:
         template = yaml.safe_load(f)
     
+    # Verify Parameter is present
+    assert 'testmyserviceImage' in template['Parameters']
+    
     resources = template['Resources']
     task_def = resources['testmyserviceTaskDefinition']
     
-    # Verify Metadata: BuildMethod: docker is present
-    assert task_def['Metadata']['BuildMethod'] == 'docker'
-
+    # Verify Image points to Parameter
+    assert task_def['Properties']['ContainerDefinitions'][0]['Image'] == {'Ref': 'testmyserviceImage'}
+    
+    # Metadata should NOT be present
+    assert 'Metadata' not in task_def
 def test_service_with_ports(tmp_path):
     resources_yaml = tmp_path / "resources.yaml"
     resources_yaml.write_text("""
@@ -246,24 +251,49 @@ services:
     assert env_dict.get('ACCOUNT_ID') == {'Ref': 'AWS::AccountId'}
 
 
-def test_deploy_adds_resolve_image_repos(tmp_path):
-    # Test verifying that sam_deploy adds --resolve-image-repos when services are present
-    from easysam.deploy import sam_deploy
-    from unittest.mock import patch
+def test_orchestrate_docker_calls_correct_commands(tmp_path):
+    # Test verifying that orchestrate_docker calls the correct docker and ecr commands
+    from easysam.deploy import orchestrate_docker
+    from unittest.mock import patch, MagicMock
     from benedict import benedict
+    import base64
     
     resources = benedict({
-        "services": {"poller": {"image": "my-image"}},
+        "services": {"poller": {"build": "./poller"}},
         "prefix": "TestPrefix"
     })
-    deploy_ctx = benedict({"environment": "test-stack"})
-    cliparams = {"sam_tool": "sam", "tag": [], "dry_run": False}
+    deploy_ctx = benedict({"environment": "dev"})
+    cliparams = {"aws_profile": "my-profile"}
     
-    with patch("subprocess.run") as mock_run:
-        sam_deploy(cliparams, tmp_path, deploy_ctx, resources)
+    # Mock boto3 client for ECR
+    mock_ecr = MagicMock()
+    mock_ecr.describe_repositories.return_value = {
+        'repositories': [{'repositoryUri': '1234.dkr.ecr.us-east-1.amazonaws.com/testprefix-poller-dev'}]
+    }
+    mock_ecr.get_authorization_token.return_value = {
+        'authorizationData': [{
+            'authorizationToken': base64.b64encode(b'AWS:mypassword').decode('utf-8'),
+            'proxyEndpoint': 'https://1234.dkr.ecr.us-east-1.amazonaws.com'
+        }]
+    }
+    
+    with patch("easysam.utils.get_aws_client", return_value=mock_ecr), \
+         patch("subprocess.run") as mock_run:
+         
+        image_overrides = orchestrate_docker(cliparams, resources, deploy_ctx, tmp_path)
         
-        # Get the arguments passed to subprocess.run
-        args = mock_run.call_args[0][0]
-        assert "deploy" in args
-        assert "--resolve-image-repos" in args
+        # Verify ECR calls
+        mock_ecr.create_repository.assert_called_with(repositoryName="testprefix-poller-dev")
+        
+        # Verify Docker calls
+        calls = [call[0][0] for call in mock_run.call_args_list]
+        
+        # 1. Login
+        assert any("login" in cmd for cmd in calls)
+        # 2. Build
+        assert any("build" in cmd for cmd in calls)
+        # 3. Push
+        assert any("push" in cmd for cmd in calls)
+        
+        assert image_overrides["testprefixpollerImage"] == "1234.dkr.ecr.us-east-1.amazonaws.com/testprefix-poller-dev:latest"
 

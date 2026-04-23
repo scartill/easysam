@@ -25,6 +25,15 @@ Parameters:
   DefaultVpcPublicSubnet2:
     Type: String
     Description: Default VPC Public Subnet 2
+  {% if services is defined %}
+  {% for service_name, service in services.items() %}
+  {% if service.build %}
+  {{ lprefix }}{{ service_name.replace('-', '') }}Image:
+    Type: String
+    Description: Image URI for {{ service_name }}
+  {% endif %}
+  {% endfor %}
+  {% endif %}
 
 Globals:
   Function:
@@ -788,7 +797,11 @@ Resources:
       TaskRoleArn: !GetAtt {{ lprefix }}{{ service_name.replace('-', '') }}TaskRole.Arn
       ContainerDefinitions:
         - Name: {{ service_name }}
+          {% if service.build %}
+          Image: !Ref {{ lprefix }}{{ service_name.replace('-', '') }}Image
+          {% else %}
           Image: {{ service.image }}
+          {% endif %}
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -820,10 +833,6 @@ Resources:
               Value: {{ value }}
             {% endfor %}
             {% endif %}
-    {% if no_docker_build_on_win is not defined or not no_docker_build_on_win %}
-    Metadata:
-      BuildMethod: docker
-    {% endif %}
 
   {{ lprefix }}{{ service_name.replace('-', '') }}LogGroup:
     Type: AWS::Logs::LogGroup
