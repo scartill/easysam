@@ -25,7 +25,8 @@ def test_prismarine_generation():
     
     # We might need to handle prismarine if it's not installed
     try:
-        resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
+        results, errors = generate(cliparams, example_path, [deploy_ctx])
+        resources_data, _ = results['default']
     except Exception as e:
         print(f"Error generating prismarine: {e}")
         # If it fails because of missing prismarine, we might need to skip or mock
@@ -33,7 +34,7 @@ def test_prismarine_generation():
 
     assert not errors
     
-    template_path = example_path / "template.yml"
+    template_path = example_path / "build" / "default" / "template.yml"
     assert template_path.exists()
     
     with open(template_path, 'r') as f:

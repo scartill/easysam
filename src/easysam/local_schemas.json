@@ -29,6 +29,40 @@
         ]
       }
     },
+    "custom_policy_schema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "effect": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny"
+          ],
+          "default": "allow"
+        },
+        "resource": {
+          "type": "string",
+          "default": "any"
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "additionalProperties": false
+    },
     "lambda_functionurl_schema": {
       "oneOf": [
         {
@@ -329,6 +363,15 @@
           "$ref": "#/definitions/lambda_functionurl_schema"
         },
         "schedule": {
+          "type": "string"
+        },
+        "custompolicies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/custom_policy_schema"
+          }
+        },
+        "allowinvoke": {
           "type": "string"
         },
         "integration": {

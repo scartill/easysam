@@ -2,14 +2,14 @@ from pathlib import Path
 import logging as lg
 
 
-UTILS_PY = '''\
+UTILS_PY = """\
 # Common code
 
 def my_common_function():
     return 'Hello, world!'
-'''
+"""
 
-RESOURCES_YAML = '''\
+RESOURCES_YAML = """\
 prefix: MyApp
 
 tags:
@@ -17,9 +17,9 @@ tags:
 
 import:
   - backend
-'''
+"""
 
-LAMBDA_EASY_SAM = '''\
+LAMBDA_EASY_SAM = """\
 lambda:
   name: myfunction
   resources:
@@ -29,9 +29,9 @@ lambda:
     path: /items
     open: true
     greedy: false
-'''
+"""
 
-INDEX_PY = '''\
+INDEX_PY = """\
 # Lambda function code
 
 import json
@@ -51,18 +51,18 @@ def handler(event, context):
         },
         'body': json.dumps({'data': data})
     }
-'''
+"""
 
 
-DATABASE_EASY_SAM = '''\
+DATABASE_EASY_SAM = """\
 tables:
   MyItem:
     attributes:
     - hash: true
       name: ItemID
-'''
+"""
 
-ROOT_GITIGNORE = '''\
+ROOT_GITIGNORE = """\
 build
 template.yml
 template.yaml
@@ -70,24 +70,24 @@ swagger.yaml
 prismarine_client.py
 .aws-sam
 __pycache__/
-'''
+"""
 
-FUNCTION_GITIGNORE = '''\
+FUNCTION_GITIGNORE = """\
 *.py[oc]
 **/common/
 prismarine_client.py
-'''
+"""
 
-REQUIREMENTS_TXT = '''\
+REQUIREMENTS_TXT = """\
 boto3
-'''
+"""
 
-REQUIREMENTS_TXT_PRISMARINE = '''\
+REQUIREMENTS_TXT_PRISMARINE = """\
 boto3
 prismarine
-'''
+"""
 
-RESOURCES_YAML_PRISMARINE = '''\
+RESOURCES_YAML_PRISMARINE = """\
 prefix: MyApp
 
 import:
@@ -98,17 +98,17 @@ prismarine:
   access-module: common.dynamo_access
   tables:
     - package: myobject
-'''
+"""
 
-UTILS_PY_PRISMARINE = '''\
+UTILS_PY_PRISMARINE = """\
 import os
 
 
 def get_env():
     return os.environ.get('ENV', 'dev')
-'''
+"""
 
-DYNAMO_ACCESS_PY = '''\
+DYNAMO_ACCESS_PY = """\
 import boto3
 
 from prismarine.runtime.dynamo_access import DynamoAccess
@@ -129,9 +129,9 @@ dynamoaccess = MyDynamoAccess()
 
 def get_dynamo_access():
     return dynamoaccess
-'''
+"""
 
-MODELS_PY = '''\
+MODELS_PY = """\
 from typing import TypedDict, NotRequired
 from prismarine.runtime import Cluster
 
@@ -144,23 +144,23 @@ class Item(TypedDict):
     Foo: str
     Bar: str
     Baz: NotRequired[str]
-'''
+"""
 
-DB_PY = '''\
+DB_PY = """\
 import prismarine_client as pc
 
 
 class ItemModel(pc.ItemModel):
     pass
-'''
+"""
 
-TRIGGER_LAMBDA_EASY_SAM = '''\
+TRIGGER_LAMBDA_EASY_SAM = """\
 lambda:
   name: itemlogger
   resources:
     tables:
     - Item
-'''
+"""
 
 TRIGGER_INDEX_PY = '''\
 import json
@@ -201,12 +201,16 @@ def handler(event, context):
 '''
 
 
-def init(cliparams, prismarine=False):
+def init(toolparams, prismarine=False):
     app_dir = Path('.')
     pyproject_path = app_dir / 'pyproject.toml'
     if not pyproject_path.exists():
-        raise UserWarning('pyproject.toml not found. Please run "uv init" first to initialize the project.')
-    lg.info(f'Initializing app in current directory {"with Prismarine support" if prismarine else ""}')
+        raise UserWarning(
+            'pyproject.toml not found. Please run "uv init" first to initialize the project.'
+        )
+    lg.info(
+        f'Initializing app in current directory {"with Prismarine support" if prismarine else ""}'
+    )
     lg.debug(f'Creating resources EasySAM file {app_dir / "resources.yaml"}')
     resources_content = RESOURCES_YAML_PRISMARINE if prismarine else RESOURCES_YAML
     app_dir.joinpath('resources.yaml').write_text(resources_content)
@@ -216,7 +220,9 @@ def init(cliparams, prismarine=False):
     if gitignore_path.exists():
         existing_entries = set(gitignore_path.read_text().strip().split('\n'))
         merged_entries = existing_entries | easysam_entries
-        gitignore_path.write_text('\n'.join(sorted(merged_entries, key=str.lower)) + '\n')
+        gitignore_path.write_text(
+            '\n'.join(sorted(merged_entries, key=str.lower)) + '\n'
+        )
     else:
         gitignore_path.write_text(ROOT_GITIGNORE)
 
@@ -274,6 +280,10 @@ def init(cliparams, prismarine=False):
     third_party_dir = app_dir / 'thirdparty'
     lg.debug(f'Creating third party directory {third_party_dir}')
     third_party_dir.mkdir(parents=True, exist_ok=True)
-    lg.debug(f'Creating third party requirements.txt file {third_party_dir / "requirements.txt"}')
-    requirements_content = REQUIREMENTS_TXT_PRISMARINE if prismarine else REQUIREMENTS_TXT
+    lg.debug(
+        f'Creating third party requirements.txt file {third_party_dir / "requirements.txt"}'
+    )
+    requirements_content = (
+        REQUIREMENTS_TXT_PRISMARINE if prismarine else REQUIREMENTS_TXT
+    )
     third_party_dir.joinpath('requirements.txt').write_text(requirements_content)

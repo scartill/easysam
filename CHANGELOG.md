@@ -71,9 +71,10 @@
 # 1.6.0
 
 - Added support for the AWS Bedrock permissions
-- Changed `init` command to work in the current directory (requires `uv init` to be run first)
+- Custom policy support for lambda functions
+- Invoke permission support for lambda functions
+- Changed `init` command to work in the current directory
 - Added `--prismarine` option to `init` command for scaffolding minimal Prismarine applications
-- Removed `app-name` argument from `init` command
 
 # 1.5.1
 

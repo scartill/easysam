@@ -49,10 +49,7 @@ def validate_local(entry_path: Path, entry_data: dict, errors: list[str]):
 
     for error in validation_errors:
         lg.error(f'Validation error in {entry_path}: {error}')
-        errors.append(
-            f'Invalid local resources data in {entry_path}: '
-            f'{error.message} in {list(error.path)}'
-        )
+        errors.append(f'Invalid local resources data in {entry_path}: {error.message} in {list(error.path)}')
 
 
 def load_schema(schema_file: str) -> dict:
@@ -73,6 +70,15 @@ def validate_buckets(resources_data: dict, errors: list[str]):
     for bucket, details in resources_data.get('buckets', {}).items():
         if bucket == 'private' and details['public']:
             errors.append(f"Bucket '{bucket}' cannot be public")
+        if 'custompolicies' in details:
+            validate_custom_policies(details['custompolicies'], f'Bucket {bucket}', errors)
+
+
+def validate_queues(resources_data: dict, errors: list[str]):
+    """Validate queue-specific rules."""
+    for queue_name, queue in resources_data.get('queues', {}).items():
+        if queue is not None and 'custompolicies' in queue:
+            validate_custom_policies(queue['custompolicies'], f'Queue {queue_name}', errors)
 
 
 def validate_tables(resources_data: dict, errors: list[str]):
@@ -82,10 +88,7 @@ def validate_tables(resources_data: dict, errors: list[str]):
             # trigger_config is always an object at this point (processed by load.py)
             trigger_function = trigger_config.get('function')
             if trigger_function not in resources_data.get('functions', {}):
-                errors.append(
-                    f'Table {table_name}: '
-                    f'Trigger function {trigger_function} must be a valid function'
-                )
+                errors.append(f'Table {table_name}: Trigger function {trigger_function} must be a valid function')
 
 
 def validate_streams(resources_data: dict, errors: list[str]):
@@ -93,36 +96,39 @@ def validate_streams(resources_data: dict, errors: list[str]):
     for stream, details in resources_data.get('streams', {}).items():
         for bucket in details.get('buckets', {}).values():
             if 'bucketname' not in bucket and 'extbucketarn' not in bucket:
-                errors.append(
-                    f"Stream '{stream}': 'bucketname' or 'extbucketarn' is required"
-                )
+                errors.append(f"Stream '{stream}': 'bucketname' or 'extbucketarn' is required")
                 continue
 
             if 'bucketname' in bucket and 'extbucketarn' in bucket:
-                errors.append(
-                    f"Stream '{stream}': "
-                    "'bucketname' and 'extbucketarn' cannot be used together"
-                )
+                errors.append(f"Stream '{stream}': 'bucketname' and 'extbucketarn' cannot be used together")
                 continue
 
             if 'bucketname' in bucket:
                 bucketname = bucket['bucketname']
 
                 if resources_data['buckets'].get(bucketname) is None:
-                    errors.append(
-                        f"Stream '{stream}': '{bucketname}' must be a valid bucket"
-                    )
+                    errors.append(f"Stream '{stream}': '{bucketname}' must be a valid bucket")
 
                 continue
 
             if 'extbucketarn' in bucket:
-                if (
-                    not bucket['extbucketarn'].startswith('arn:aws:s3:::')
-                    and bucket['extbucketarn'] != '<overriden>'
-                ):
-                    errors.append(
-                        f"Stream '{stream}': 'extbucketarn' must be a valid ARN"
-                    )
+                if not bucket['extbucketarn'].startswith('arn:aws:s3:::') and bucket['extbucketarn'] != '<overriden>':
+                    errors.append(f"Stream '{stream}': 'extbucketarn' must be a valid ARN")
+
+
+def validate_custom_policies(custompolicies: list, resource_name: str, errors: list[str]):
+    """Validate custom policies structure."""
+    if not isinstance(custompolicies, list):
+        errors.append(f'{resource_name}: custompolicies must be an array')
+        return
+    for idx, policy in enumerate(custompolicies):
+        if not isinstance(policy, dict):
+            errors.append(f'{resource_name}: custompolicies[{idx}] must be an object')
+            continue
+        if 'action' not in policy:
+            errors.append(f'{resource_name}: custompolicies[{idx}] must have an action field')
+        if 'effect' in policy and policy['effect'] not in ['allow', 'deny']:
+            errors.append(f'{resource_name}: custompolicies[{idx}].effect must be "allow" or "deny"')
 
 
 def validate_lambda(resources_data: dict, errors: list[str]):
@@ -134,58 +140,46 @@ def validate_lambda(resources_data: dict, errors: list[str]):
 
         for bucket in details.get('buckets', []):
             if bucket not in resources_data.get('buckets', {}):
-                errors.append(
-                    f'Lambda {lambda_name}: Bucket {bucket} must be a valid bucket'
-                )
+                errors.append(f'Lambda {lambda_name}: Bucket {bucket} must be a valid bucket')
 
                 continue
 
         for table in details.get('tables', []):
             if table not in resources_data.get('tables', {}):
-                errors.append(
-                    f'Lambda {lambda_name}: Table {table} must be a valid table'
-                )
+                errors.append(f'Lambda {lambda_name}: Table {table} must be a valid table')
 
                 continue
 
         for poll in details.get('polls', []):
             if poll['name'] not in resources_data.get('queues', {}):
-                errors.append(
-                    f'Lambda {lambda_name}: Queue {poll["name"]} must be a valid queue'
-                )
+                errors.append(f'Lambda {lambda_name}: Queue {poll["name"]} must be a valid queue')
 
                 continue
 
         for send in details.get('send', []):
             if send not in resources_data.get('queues', {}):
-                errors.append(
-                    f'Lambda {lambda_name}: Send {send} must be a valid queue'
-                )
+                errors.append(f'Lambda {lambda_name}: Send {send} must be a valid queue')
 
                 continue
 
         for stream in details.get('streams', []):
             if stream not in resources_data.get('streams', {}):
-                errors.append(
-                    f'Lambda {lambda_name}: Stream {stream} must be a valid stream'
-                )
+                errors.append(f'Lambda {lambda_name}: Stream {stream} must be a valid stream')
 
                 continue
 
         if 'mqtt' in details.get('services', []):
             if not resources_data.get('mqtt'):
-                errors.append(
-                    f'Lambda {lambda_name}: '
-                    f'Service mqtt requires mqtt to be defined in resources'
-                )
+                errors.append(f'Lambda {lambda_name}: Service mqtt requires mqtt to be defined in resources')
 
         for collection in details.get('searches', []):
             if collection not in resources_data.get('search', {}):
-                errors.append(
-                    f'Lambda {lambda_name}: Search {collection} must be a valid search'
-                )
+                errors.append(f'Lambda {lambda_name}: Search {collection} must be a valid search')
 
                 continue
+
+        if 'custompolicies' in details:
+            validate_custom_policies(details['custompolicies'], f'Lambda {lambda_name}', errors)
 
 
 def validate_paths(resources_dir: Path, resources_data: dict, errors: list[str]):
@@ -200,9 +194,7 @@ def validate_paths(resources_dir: Path, resources_data: dict, errors: list[str])
                 validate_sqs_path(resources_dir, resources_data, path, details, errors)
 
 
-def validate_lambda_path(
-    resources_data: dict, path: str, details: dict, errors: list[str]
-):
+def validate_lambda_path(resources_data: dict, path: str, details: dict, errors: list[str]):
     """Validate lambda path-specific rules."""
     authorizer = details.get('authorizer')
     open_path = details.get('open')
@@ -218,9 +210,7 @@ def validate_lambda_path(
             errors.append(f"Lambda path '{path}' authorizer must be a valid authorizer")
 
 
-def validate_dynamo_path(
-    resources_dir: Path, path: str, details: dict, errors: list[str]
-):
+def validate_dynamo_path(resources_dir: Path, path: str, details: dict, errors: list[str]):
     """Validate dynamo path-specific rules."""
     validate_request_response_templates(resources_dir, path, details, errors)
 
@@ -239,9 +229,7 @@ def validate_sqs_path(
     validate_request_response_templates(resources_dir, path, details, errors)
 
 
-def validate_request_response_templates(
-    resources_dir: Path, path: str, details: dict, errors: list[str]
-):
+def validate_request_response_templates(resources_dir: Path, path: str, details: dict, errors: list[str]):
     """Validate request and response templates."""
     request = False
     response = False
@@ -253,9 +241,7 @@ def validate_request_response_templates(
             errors.append(f"SQS path '{path}' request template must be a valid file")
 
         if 'requestTemplate' in details:
-            errors.append(
-                f"Path '{path}' cannot have both requestTemplate and requestTemplateFile"
-            )
+            errors.append(f"Path '{path}' cannot have both requestTemplate and requestTemplateFile")
 
         request = True
 
@@ -269,9 +255,7 @@ def validate_request_response_templates(
             errors.append(f"SQS path '{path}' response template must be a valid file")
 
         if 'responseTemplate' in details:
-            errors.append(
-                f"Path '{path}' cannot have both responseTemplate and responseTemplateFile"
-            )
+            errors.append(f"Path '{path}' cannot have both responseTemplate and responseTemplateFile")
 
         response = True
 
@@ -306,9 +290,7 @@ def validate_prismarine(resources_dir: Path, resources_data: dict, errors: list[
     default_base_dir = Path(resources_dir, default_base).resolve()
 
     if not default_base_dir.exists():
-        errors.append(
-            f"Prismarine default-base '{default_base}' must be a valid directory"
-        )
+        errors.append(f"Prismarine default-base '{default_base}' must be a valid directory")
         return
 
     for table in prismarine.get('tables', []):
@@ -316,9 +298,7 @@ def validate_prismarine(resources_dir: Path, resources_data: dict, errors: list[
         table_base_dir = Path(resources_dir, table_base).resolve()
 
         if not table_base_dir.exists():
-            errors.append(
-                f"Prismarine table package '{table_base}' must have a valid base directory"
-            )
+            errors.append(f"Prismarine table package '{table_base}' must have a valid base directory")
 
 
 def validate_authorizers(resources_data: dict, errors: list[str]):
@@ -330,9 +310,7 @@ def validate_authorizers(resources_data: dict, errors: list[str]):
             errors.append(f"Authorizer '{authorizer}' cannot have multiple types")
 
         if details['function'] not in resources_data.get('functions', {}):
-            errors.append(
-                f"Authorizer '{authorizer}' function must be a valid function"
-            )
+            errors.append(f"Authorizer '{authorizer}' function must be a valid function")
 
 
 def validate_mqtt(resources_data: dict, errors: list[str]):
@@ -343,9 +321,6 @@ def validate_mqtt(resources_data: dict, errors: list[str]):
         return
 
     auth_function = mqtt.get('authorizer', {}).get('function')
+
     if auth_function and auth_function not in resources_data.get('functions', {}):
-        errors.append(
-            f"MQTT authorizer function '{auth_function}' must be a valid function"
-        )
-
-
+        errors.append(f"MQTT authorizer function '{auth_function}' must be a valid function")

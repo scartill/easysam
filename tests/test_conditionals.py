@@ -19,10 +19,11 @@ def get_resources(example_path, deploy_ctx):
     yaml.SafeLoader.add_constructor('!Ref', ref_constructor)
 
     cliparams = {'verbose': True}
-    resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
+    results, errors = generate(cliparams, example_path, [deploy_ctx])
     assert not errors
+    resources_data, errors = results['default']
     
-    template_path = example_path / "template.yml"
+    template_path = example_path / "build" / deploy_ctx.get('name', 'default') / "template.yml"
     with open(template_path, 'r') as f:
         template = yaml.safe_load(f)
     return template['Resources']

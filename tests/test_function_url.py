@@ -25,11 +25,12 @@ def test_functionurl_generation():
     deploy_ctx = {'environment': 'dev', 'target_region': 'us-east-1'}
 
     # Ensure build dir exists or generate handles it
-    resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
+    results, errors = generate(cliparams, example_path, [deploy_ctx])
 
     assert not errors
+    resources_data, _ = results['default']
 
-    template_path = example_path / 'template.yml'
+    template_path = example_path / 'build' / 'default' / 'template.yml'
     assert template_path.exists()
 
     with open(template_path, 'r') as f:
@@ -78,7 +79,7 @@ def test_functionurl_validation_error():
     from easysam.load import resources as load_resources
 
     errors = []
-    resources_data = load_resources(example_path, [], deploy_ctx, errors)
+    resources_data = load_resources({}, example_path, deploy_ctx, errors)
 
     # Modify for error
     resources_data['functions']['hello-world']['functionurl'] = {'auth_type': 'INVALID'}

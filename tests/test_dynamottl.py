@@ -23,11 +23,12 @@ def test_dynamottl_generation():
     cliparams = {'verbose': True}
     deploy_ctx = {'environment': 'dev', 'target_region': 'us-east-1'}
     
-    resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
+    results, errors = generate(cliparams, example_path, [deploy_ctx])
+    resources_data, _ = results['default']
     
     assert not errors
     
-    template_path = example_path / "template.yml"
+    template_path = example_path / "build" / "default" / "template.yml"
     assert template_path.exists()
     
     with open(template_path, 'r') as f:

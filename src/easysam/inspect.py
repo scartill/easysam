@@ -19,12 +19,12 @@ def inspect(obj):
 
 @inspect.command(name='common-deps', help='Inspect a lambda function')
 @click.option(
-    '--common-dir', type=str, default='common',
-    help='The directory containing the common dependencies'
+    '--common-dir',
+    type=str,
+    default='common',
+    help='The directory containing the common dependencies',
 )
-@click.argument(
-    'lambda-dir', type=click.Path(exists=True)
-)
+@click.argument('lambda-dir', type=click.Path(exists=True))
 def common_deps(common_dir, lambda_dir):
     common_dir = Path(common_dir)
     lambda_dir = Path(lambda_dir)
@@ -38,24 +38,26 @@ def common_deps(common_dir, lambda_dir):
 
 @inspect.command(help='Validate the resources.yaml file')
 @click.pass_obj
+@click.option('--path', multiple=True, help='Add a path to the Python path')
 @click.option(
-    '--path', multiple=True, help='Add a path to the Python path'
-)
-@click.option(
-    '--select', type=str,
+    '--select',
+    type=str,
     help='Select a specific resource to render after the schema is validated. '
-         'Uses the keystring syntax to select the resource'
+    'Uses the keystring syntax to select the resource',
 )
 @click.argument('directory', type=click.Path(exists=True))
 def schema(obj, directory, path, select):
     errors = []
     directory = Path(directory)
-    pypath = [Path(p) for p in path]
+    obj['pypath'] = [Path(p) for p in path]
     deploy_ctx = obj.get('deploy_ctx', {})
 
     try:
         resources_data = load_resources(
-            directory, pypath, deploy_ctx, errors
+            toolparams=obj,
+            resources_dir=directory,
+            deploy_ctx=deploy_ctx,
+            errors=errors,
         )
 
     except FatalError as e:
@@ -82,7 +84,7 @@ def schema(obj, directory, path, select):
 @click.argument('directory', type=click.Path(exists=True))
 def cloud(obj, directory, path):
     directory = Path(directory)
-    pypath = [Path(p) for p in path]
+    obj['pypath'] = [Path(p) for p in path]
     errors = []
     deploy_ctx = obj.get('deploy_ctx', {})
 
@@ -92,9 +94,7 @@ def cloud(obj, directory, path):
     environment = deploy_ctx['environment']
 
     try:
-        resources_data = load_resources(
-            directory, pypath, deploy_ctx, errors
-        )
+        resources_data = load_resources(directory, deploy_ctx, errors)
 
         if errors:
             rich.print(

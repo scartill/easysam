@@ -54,8 +54,8 @@ def expand_env_vars(data: Any) -> Any:
 
 
 def resources(
+    toolparams: dict,
     resources_dir: Path,
-    pypath: list[Path],
     deploy_ctx: dict[str, str],
     errors: list[str],
 ) -> benedict:
@@ -64,7 +64,6 @@ def resources(
 
     Args:
         resources_dir: The directory containing the resources.yaml file.
-        pypath: The additional Python path to use.
         deploy_ctx: The deployment context dictionary.
         errors: The list of errors.
 
@@ -98,7 +97,7 @@ def resources(
     apply_overrides(resources_data, deploy_ctx)
 
     lg.info('Processing resources')
-    pypath = [resources_dir] + list(pypath)
+    pypath = [resources_dir] + list(toolparams.get('pypath', []))
     preprocess_resources(resources_data, resources_dir, pypath, errors)
 
     lg.info('Validating resources')
@@ -133,9 +132,7 @@ def prismarine_dynamo_tables(
         return None
 
 
-def preprocess_prismarine(
-    resources_data: dict, resources_dir: Path, pypath: list[Path], errors: list[str]
-):
+def preprocess_prismarine(resources_data: dict, resources_dir: Path, pypath: list[Path], errors: list[str]):
     prefix = resources_data['prefix']
     prisma = resources_data['prismarine']
     prisma_base = prisma.get('default-base')
@@ -153,9 +150,7 @@ def preprocess_prismarine(
             errors.append(f'No package found for {base}')
             continue
 
-        tables = prismarine_dynamo_tables(
-            prefix, base, package, resources_dir, pypath, errors
-        )
+        tables = prismarine_dynamo_tables(prefix, base, package, resources_dir, pypath, errors)
 
         if not tables:
             lg.warning(f'No valid tables found for {package}, continuing')
@@ -185,9 +180,7 @@ def preprocess_lambda(
         return
 
     if lambda_name in resources_data['functions']:
-        errors.append(
-            f'Import file {entry_path} contains duplicate lambda name {lambda_name}'
-        )
+        errors.append(f'Import file {entry_path} contains duplicate lambda name {lambda_name}')
         return
 
     lambda_resources = lambda_def.get('resources', {})
@@ -210,6 +203,13 @@ def preprocess_lambda(
 
     lg.debug(f'Adding lambda {lambda_name} to resources')
     resources_data['functions'][lambda_name] = lambda_resources
+
+    if custompolicies := lambda_def.get('custompolicies', []):
+        lambda_resources['custompolicies'] = custompolicies
+
+    if allow_invoke := lambda_def.get('allowinvoke'):
+        lambda_resources['allowinvoke'] = allow_invoke
+
     integration = lambda_def.get('integration', {})
 
     if integration:
@@ -233,26 +233,20 @@ def preprocess_lambda(
         resources_data['paths'][path] = integration
 
 
-def preprocess_tables(
-    resources_data: dict, table_def: dict, entry_path: Path, errors: list[str]
-):
+def preprocess_tables(resources_data: dict, table_def: dict, entry_path: Path, errors: list[str]):
     if 'tables' not in resources_data:
         resources_data['tables'] = {}
 
     for table_name, table_data in table_def.items():
         if table_name in resources_data['tables']:
-            errors.append(
-                f'Import file {entry_path} contains duplicate table {table_name}'
-            )
+            errors.append(f'Import file {entry_path} contains duplicate table {table_name}')
             continue
 
         lg.debug(f'Adding table {table_name} to resources')
         resources_data['tables'][table_name] = table_data
 
 
-def preprocess_file(
-    resources_data: dict, resources_dir: Path, entry_path: Path, errors: list[str]
-):
+def preprocess_file(resources_data: dict, resources_dir: Path, entry_path: Path, errors: list[str]):
     lg.info(f'Processing import file {entry_path}')
     try:
         entry_dir = entry_path.parent
@@ -265,9 +259,7 @@ def preprocess_file(
     validate_local_schema(entry_path, entry_data, errors)
 
     if lambda_def := entry_data.get('lambda'):
-        preprocess_lambda(
-            resources_data, resources_dir, lambda_def, entry_path, entry_dir, errors
-        )
+        preprocess_lambda(resources_data, resources_dir, lambda_def, entry_path, entry_dir, errors)
 
     if tables_def := entry_data.get('tables'):
         preprocess_tables(resources_data, tables_def, entry_path, errors)
@@ -377,9 +369,7 @@ def preprocess_defaults(resources_data: dict, errors: list[str]):
     process_default_paths(resources_data, errors)
 
 
-def preprocess_resources(
-    resources_data: dict, resources_dir: Path, pypath: list[Path], errors: list[str]
-):
+def preprocess_resources(resources_data: dict, resources_dir: Path, pypath: list[Path], errors: list[str]):
     def sort_dict(d):
         return dict(sorted(d.items(), key=lambda x: x[0]))
 
@@ -431,9 +421,7 @@ def conditional_constructor(loader, node):
     return Conditional(**mapping)
 
 
-def check_condition(
-    condition: str, value: str, deploy_ctx: dict[str, str], errors: list[str]
-):
+def check_condition(condition: str, value: str, deploy_ctx: dict[str, str], errors: list[str]):
     if value == 'any':
         return True
 
@@ -450,17 +438,12 @@ def check_condition(
     negate = value.startswith('~')
     value = value.lstrip('~')
 
-    lg.info(
-        f'Checking condition "{condition}" '
-        f'{value} (condition) == {context_value} (context) (negate={negate})'
-    )
+    lg.info(f'Checking condition "{condition}" {value} (condition) == {context_value} (context) (negate={negate})')
 
     return (value == context_value) != negate
 
 
-def resolve_conditionals(
-    resources_data: dict, deploy_ctx: dict[str, str], errors: list[str]
-):
+def resolve_conditionals(resources_data: dict, deploy_ctx: dict[str, str], errors: list[str]):
     resolved = benedict()
 
     for key, value in resources_data.items():

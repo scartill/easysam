@@ -21,14 +21,15 @@ def get_resources(example_path, deploy_ctx):
     cliparams = {'verbose': True}
     
     try:
-        resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
+        results, errors = generate(cliparams, example_path, [deploy_ctx])
+        resources_data, _ = results[deploy_ctx.get('name', 'default')]
     except Exception as e:
         print(f"Error generating {example_path}: {e}")
         return None
     
     assert not errors
     
-    template_path = example_path / "template.yml"
+    template_path = example_path / "build" / deploy_ctx.get('name', 'default') / "template.yml"
     with open(template_path, 'r') as f:
         template = yaml.safe_load(f)
     return template['Resources']

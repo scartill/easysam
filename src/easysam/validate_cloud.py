@@ -3,20 +3,25 @@ import logging as lg
 from easysam.utils import get_aws_client
 
 
-def validate(cliparams: dict, resources_data: dict, environment: str, errors: list[str]):
-    '''
+def validate(
+    toolparams: dict,
+    resources_data: dict,
+    environment: str,
+    errors: list[str],
+):
+    """
     Validate required external cloud resources.
 
     Args:
-        cliparams (dict): The CLI parameters (used: aws_profile)
+        toolparams (dict): The CLI parameters (used: aws_profile)
         resources_data (dict): The resources data.
         environment (str): The environment name.
         errors (list[str]): The list of errors.
-    '''
+    """
 
-    iam = get_aws_client('iam', cliparams)
-    ssm = get_aws_client('ssm', cliparams)
-    lambdas = get_aws_client('lambda', cliparams)
+    iam = get_aws_client('iam', toolparams)
+    ssm = get_aws_client('ssm', toolparams)
+    lambdas = get_aws_client('lambda', toolparams)
 
     validate_bucket_policy(iam, resources_data, environment, errors)
     validate_custom_layers(ssm, lambdas, resources_data, errors)
@@ -26,7 +31,7 @@ def validate_bucket_policy(iam, resources_data, environment, errors):
     for bucket, details in resources_data.get('buckets', {}).items():
         if policy_name := details.get('extaccesspolicy'):
             full_policy_name = f'{policy_name}-{environment}'
-            lg.info(f"Validating bucket policy: {full_policy_name}")
+            lg.info(f'Validating bucket policy: {full_policy_name}')
 
             try:
                 paginator = iam.get_paginator('list_policies')
@@ -36,20 +41,20 @@ def validate_bucket_policy(iam, resources_data, environment, errors):
                     policies = page['Policies']
 
                     for item in policies:
-                        lg.info(f"Found policy: {item['PolicyName']}")
+                        lg.info(f'Found policy: {item["PolicyName"]}')
 
                         if item['PolicyName'] == full_policy_name:
                             policy = item
                             break
 
             except Exception as e:
-                lg.error(f"Error listing policy {policy_name}: {e}")
+                lg.error(f'Error listing policy {policy_name}: {e}')
                 policy = None
 
             if not policy:
                 errors.append(
                     f"Bucket '{bucket}' has an invalid extaccesspolicy: {policy_name}. "
-                    f"Please create a policy with the name {full_policy_name}."
+                    f'Please create a policy with the name {full_policy_name}.'
                 )
 
 
@@ -72,7 +77,9 @@ def validate_custom_layers(ssm, lambdas, resources_data, errors):
                 lg.info(f'Validating SSM layer name: {ssm_param}')
 
                 try:
-                    layer_handle = ssm.get_parameter(Name=ssm_param)['Parameter']['Value']
+                    layer_handle = ssm.get_parameter(Name=ssm_param)['Parameter'][
+                        'Value'
+                    ]
                     lg.info(f'Successfully resolved SSM layer name: {ssm_param}')
                     lg.info(f'Layer ARN received: {layer_handle}')
 
@@ -93,4 +100,6 @@ def validate_custom_layers(ssm, lambdas, resources_data, errors):
                     errors.append(f'Layer ARN {layer_handle} not found')
                     continue
 
-            errors.append(f"Custom layer {layer} in function {function} is not supported")
+            errors.append(
+                f'Custom layer {layer} in function {function} is not supported'
+            )

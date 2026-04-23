@@ -1,6 +1,72 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
+    "custom_policy_schema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "effect": {
+          "type": "string",
+          "enum": ["allow", "deny"],
+          "default": "allow"
+        },
+        "resource": {
+          "type": "string",
+          "default": "any"
+        }
+      },
+      "required": ["action"],
+      "additionalProperties": false
+    },
+    "bucket_custom_policy_schema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "effect": {
+          "type": "string",
+          "enum": ["allow", "deny"],
+          "default": "allow"
+        },
+        "principal": {
+          "type": "string",
+          "default": "*"
+        }
+      },
+      "required": ["action"],
+      "additionalProperties": false
+    },
+    "queue_custom_policy_schema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "effect": {
+          "type": "string",
+          "enum": ["allow", "deny"],
+          "default": "allow"
+        },
+        "principal": {
+          "type": "string",
+          "default": "*"
+        }
+      },
+      "required": ["action"],
+      "additionalProperties": false
+    },
     "buckets_schema": {
       "type": "object",
       "properties": {
@@ -9,16 +75,23 @@
         },
         "extaccesspolicy": {
           "type": "string"
+        },
+        "custompolicies": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/bucket_custom_policy_schema" }
         }
       },
-      "required": [
-        "public"
-      ],
+      "required": ["public"],
       "additionalProperties": false
     },
     "queues_schema": {
       "type": "object",
-      "properties": {},
+      "properties": {
+        "custompolicies": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/queue_custom_policy_schema" }
+        }
+      },
       "additionalProperties": false
     },
     "stream_bucket_schema": {
@@ -39,9 +112,7 @@
           "maximum": 900
         }
       },
-      "required": [
-        "bucketprefix"
-      ],
+      "required": ["bucketprefix"],
       "additionalProperties": false
     },
     "streams_schema": {
@@ -72,9 +143,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "additionalProperties": false
       }
     },
@@ -88,17 +157,11 @@
           "properties": {
             "auth_type": {
               "type": "string",
-              "enum": [
-                "NONE",
-                "AWS_IAM"
-              ]
+              "enum": ["NONE", "AWS_IAM"]
             },
             "invoke_mode": {
               "type": "string",
-              "enum": [
-                "BUFFERED",
-                "RESPONSE_STREAM"
-              ]
+              "enum": ["BUFFERED", "RESPONSE_STREAM"]
             },
             "cors": {
               "type": "object",
@@ -197,12 +260,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": [
-              "comprehend",
-              "bedrock",
-              "mqtt",
-              "budget"
-            ]
+            "enum": ["comprehend", "bedrock", "mqtt", "budget"]
           }
         },
         "searches": {
@@ -234,11 +292,14 @@
             }
           },
           "additionalProperties": false
-        }
+        },
+        "custompolicies": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/custom_policy_schema" }
+        },
+        "allowinvoke": { "type": "string" }
       },
-      "required": [
-        "uri"
-      ],
+      "required": ["uri"],
       "additionalProperties": false
     },
     "lambda_path_schema": {
@@ -246,9 +307,7 @@
       "properties": {
         "integration": {
           "type": "string",
-          "enum": [
-            "lambda"
-          ]
+          "enum": ["lambda"]
         },
         "function": {
           "type": "string"
@@ -263,11 +322,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "integration",
-        "function",
-        "greedy"
-      ],
+      "required": ["integration", "function", "greedy"],
       "additionalProperties": false
     },
     "dynamo_path_schema": {
@@ -275,15 +330,11 @@
       "properties": {
         "integration": {
           "type": "string",
-          "enum": [
-            "dynamo"
-          ]
+          "enum": ["dynamo"]
         },
         "method": {
           "type": "string",
-          "enum": [
-            "get"
-          ]
+          "enum": ["get"]
         },
         "parameters": {
           "type": "array",
@@ -293,9 +344,7 @@
         },
         "action": {
           "type": "string",
-          "enum": [
-            "GetItem"
-          ]
+          "enum": ["GetItem"]
         },
         "role": {
           "type": "string"
@@ -323,15 +372,11 @@
       "properties": {
         "integration": {
           "type": "string",
-          "enum": [
-            "sqs"
-          ]
+          "enum": ["sqs"]
         },
         "method": {
           "type": "string",
-          "enum": [
-            "post"
-          ]
+          "enum": ["post"]
         },
         "role": {
           "type": "string"
@@ -355,12 +400,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "integration",
-        "method",
-        "role",
-        "queue"
-      ],
+      "required": ["integration", "method", "role", "queue"],
       "additionalProperties": false
     },
     "path_schema": {
@@ -403,23 +443,16 @@
                 "type": "string"
               }
             },
-            "required": [
-              "package"
-            ],
+            "required": ["package"],
             "additionalProperties": false
           }
         },
         "modelling": {
           "type": "string",
-          "enum": [
-            "typed-dict",
-            "pydantic"
-          ]
+          "enum": ["typed-dict", "pydantic"]
         }
       },
-      "required": [
-        "tables"
-      ],
+      "required": ["tables"],
       "additionalProperties": false
     },
     "table_attribute_schema": {
@@ -435,9 +468,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "name"
-      ],
+      "required": ["name"],
       "additionalProperties": false
     },
     "table_trigger_schema": {
@@ -453,12 +484,7 @@
             },
             "viewtype": {
               "type": "string",
-              "enum": [
-                "keys-only",
-                "new",
-                "old",
-                "new-and-old"
-              ]
+              "enum": ["keys-only", "new", "old", "new-and-old"]
             },
             "batchsize": {
               "type": "integer"
@@ -468,15 +494,10 @@
             },
             "startingposition": {
               "type": "string",
-              "enum": [
-                "trim-horizon",
-                "latest"
-              ]
+              "enum": ["trim-horizon", "latest"]
             }
           },
-          "required": [
-            "function"
-          ],
+          "required": ["function"],
           "additionalProperties": false
         }
       ]
@@ -505,10 +526,7 @@
                 }
               }
             },
-            "required": [
-              "name",
-              "attributes"
-            ],
+            "required": ["name", "attributes"],
             "additionalProperties": false
           }
         },
@@ -519,9 +537,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "attributes"
-      ],
+      "required": ["attributes"],
       "additionalProperties": false
     },
     "mqtt_authorizer_schema": {
@@ -531,9 +547,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "function"
-      ],
+      "required": ["function"],
       "additionalProperties": false
     },
     "mqtt_schema": {
@@ -549,9 +563,7 @@
           }
         }
       },
-      "required": [
-        "authorizer"
-      ],
+      "required": ["authorizer"],
       "additionalProperties": false
     },
     "authorizer_schema": {
@@ -578,9 +590,7 @@
           "maximum": 3600
         }
       },
-      "required": [
-        "function"
-      ],
+      "required": ["function"],
       "additionalProperties": false
     }
   },
@@ -620,7 +630,10 @@
       "type": "object",
       "patternProperties": {
         "^[a-z0-9-]+$": {
-          "type": "null"
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/queues_schema" }
+          ]
         }
       },
       "additionalProperties": false
@@ -731,15 +744,9 @@
     },
     "python": {
       "type": "string",
-      "enum": [
-        "3.12",
-        "3.13",
-        "3.14"
-      ]
+      "enum": ["3.12", "3.13", "3.14"]
     }
   },
-  "required": [
-    "prefix"
-  ],
+  "required": ["prefix"],
   "additionalProperties": false
 }

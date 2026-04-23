@@ -54,17 +54,27 @@ pipx install easysam
 
 Use as:
 
-```bash
-easysam --help
+```yaml
+buckets:
+  my-bucket:
+    public: Boolean Optional (e.g., true), means Public read policy
+    extaccesspolicy: Optional String referencing an external managed policy prefix
 ```
 
-### Option C: global/local with pip
+Bucket custom policies are no longer supported. For external access requirements, attach policies via `extaccesspolicy` or create the policy outside of `easysam`.
 
-```bash
-pip install easysam
+### Queue Definitions
+
+```yaml
+queues:
+  my-queue: null  # Simple queue definition
+  # OR
+  my-queue: {}    # Explicit empty queue configuration
 ```
 
-## Quick start (5 minutes)
+Queue custom policies are no longer supported. Use IAM roles or separate CloudFormation stacks if you require additional resource policies.
+
+### Stream Definitions
 
 1. Create a Python project and initialize EasySAM:
 
@@ -78,11 +88,30 @@ uv run easysam init
 
 For a Prismarine scaffold:
 
-```bash
-uv run easysam init --prismarine
+```yaml
+functions:
+  my-lambda:
+    uri: String (i.e., local path to the source)
+    tables:
+      - String (e.g., Items)
+    polls:
+      - String (e.g., my-stream) - incoming stream's name
+    buckets:
+      - String (e.g., my-bucket)
+    send:
+      - String (e.g., my-queue) - outgoing queue's name
+    services:
+      - comprehend  # Grants ComprehendBasicAccessPolicy
+      - bedrock     # Grants bedrock:InvokeModel permission
+    custompolicies: Optional Array of custom IAM policies
+      - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
+        effect: String Optional (e.g., "allow" or "deny", default: "allow")
+        resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for "*", default: "any")
 ```
 
-2. Validate your resources:
+Custom policies are added to the Lambda function's IAM execution role as inline policy statements. The `resource` value of "any" translates to "*" (any resource). Note that IAM role policies do not include a `Principal` field (they are identity-based policies attached to the role).
+
+### API Gateway Definition
 
 ```bash
 uv run easysam --environment dev inspect schema .
@@ -130,14 +159,26 @@ lambda:
   name: myfunction
   resources:
     tables:
-      - MyItem
+      - <table>
+    buckets:
+      - <bucket>
+    send:
+      - <queue>
+    polls:
+      - <stream>
+    custompolicies: Optional Array of custom IAM policies
+      - action: String or Array (e.g., "s3:GetObject" or ["s3:GetObject", "s3:PutObject"])
+        effect: String Optional (e.g., "allow" or "deny", default: "allow")
+        resource: String Optional (e.g., "arn:aws:s3:::my-bucket/*" or "any" for "*", default: "any")
   integration:
     path: /items
     open: true
     greedy: false
 ```
 
-You can also define tables locally:
+Locally-defined lambda URI is set to the path of the `easysam.yaml` file. Custom policies work the same way as in the main `resources.yaml` file.
+
+#### Local Import
 
 ```yaml
 tables:
@@ -219,8 +260,18 @@ overrides:
   buckets/my-bucket/public: true
 ```
 
-Then pass it with:
+Use the `--with-context` option to specify the deploy context file.
 
+```pwsh
+easysam deploy <app-directory> --environment <aws-environment-name> --with-context deploy-context.yaml
+```
+The deploy context file is a YAML file that contains the overrides.
+
+## Development
+
+### Setting up the development environment
+
+1. Clone the repository:
 ```bash
 uv run easysam --environment dev --context-file deploy-context.yaml deploy .
 ```
