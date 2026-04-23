@@ -801,6 +801,25 @@ Resources:
             - ContainerPort: {{ port }}
             {% endfor %}
           {% endif %}
+          Environment:
+            - Name: REGION
+              Value: !Ref AWS::Region
+            - Name: ENV
+              Value: !Ref Stage
+            - Name: ACCOUNT_ID
+              Value: !Ref AWS::AccountId
+            {% if envvars is defined %}
+            {% for name, value in envvars.items() %}
+            - Name: {{ name }}
+              Value: {{ value }}
+            {% endfor %}
+            {% endif %}
+            {% if service.envvars is defined %}
+            {% for name, value in service.envvars.items() %}
+            - Name: {{ name }}
+              Value: {{ value }}
+            {% endfor %}
+            {% endif %}
     {% if no_docker_build_on_win is not defined or not no_docker_build_on_win %}
     Metadata:
       BuildMethod: docker
