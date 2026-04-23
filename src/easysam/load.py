@@ -31,6 +31,7 @@ SUPPORTED_SECTIONS = [
     'lambda',
     'search',
     'mqtt',
+    'services',
 ]
 
 
@@ -272,6 +273,11 @@ def preprocess_file(
     if tables_def := entry_data.get('tables'):
         preprocess_tables(resources_data, tables_def, entry_path, errors)
 
+    if services_def := entry_data.get('services'):
+        if 'services' not in resources_data:
+            resources_data['services'] = {}
+        resources_data['services'].update(services_def)
+
     if local_import_def := entry_data.get('import'):
         for import_file in local_import_def:
             import_path = Path(entry_dir, import_file)
@@ -369,12 +375,21 @@ def process_default_tables(resources_data: dict, errors: list[str]):
                 trigger_config['startingposition'] = 'latest'
 
 
+def process_default_services(resources_data: dict, errors: list[str]):
+    if 'services' in resources_data:
+        for name, service in resources_data['services'].items():
+            service.setdefault('cpu', 256)
+            service.setdefault('memory', 512)
+            service.setdefault('count', 1)
+
+
 def preprocess_defaults(resources_data: dict, errors: list[str]):
     process_default_searches(resources_data, errors)
     process_default_functions(resources_data, errors)
     process_default_streams(resources_data, errors)
     process_default_tables(resources_data, errors)
     process_default_paths(resources_data, errors)
+    process_default_services(resources_data, errors)
 
 
 def preprocess_resources(
