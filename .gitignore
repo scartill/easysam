@@ -16,3 +16,4 @@ wheels/
 # uv
 .python-version
 .aider*
+.crush
