@@ -582,6 +582,85 @@
         "function"
       ],
       "additionalProperties": false
+    },
+    "services_schema": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string"
+        },
+        "build": {
+          "type": "string"
+        },
+        "cpu": {
+          "type": "integer",
+          "enum": [
+            256,
+            512,
+            1024,
+            2048,
+            4096
+          ]
+        },
+        "memory": {
+          "type": "integer"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ports": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "envvars": {
+          "type": "object",
+          "patternProperties": {
+            "^[A-Za-z0-9_]+$": {
+              "type": "string"
+            }
+          }
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "buckets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "queues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "streams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "image"
+          ]
+        },
+        {
+          "required": [
+            "build"
+          ]
+        }
+      ],
+      "additionalProperties": false
     }
   },
   "type": "object",
@@ -639,6 +718,15 @@
       "patternProperties": {
         "^[a-z0-9-]+$": {
           "$ref": "#/definitions/lambda_schema"
+        }
+      },
+      "additionalProperties": false
+    },
+    "services": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9-]+$": {
+          "$ref": "#/definitions/services_schema"
         }
       },
       "additionalProperties": false
