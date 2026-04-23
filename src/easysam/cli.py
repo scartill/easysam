@@ -60,8 +60,10 @@ def easysam(ctx, verbose, aws_profile, context_file, target_region, environment)
 @click.option(
     '--path', multiple=True, help='A additional Python path to use for generation'
 )
+@click.option('--no-docker-build-on-win', is_flag=True, help='Skip Docker build metadata on Windows')
 @click.argument('directory', type=click.Path(exists=True))
-def generate_cmd(obj, directory, path):
+def generate_cmd(obj, directory, path, no_docker_build_on_win):
+    obj['no_docker_build_on_win'] = no_docker_build_on_win
     directory = Path(directory)
     pypath = [Path(p) for p in path]
     deploy_ctx = obj.get('deploy_ctx')
@@ -97,6 +99,9 @@ def generate_cmd(obj, directory, path):
 )
 @click.option(
     '--no-cleanup', is_flag=True, help='Do not clean the directory before deploying'
+)
+@click.option(
+    '--no-docker-build-on-win', is_flag=True, help='Skip Docker build metadata on Windows'
 )
 @click.option(
     '--override-main-template',
