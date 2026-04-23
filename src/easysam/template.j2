@@ -19,6 +19,12 @@ Parameters:
   Stage:
     Type: String
     Default: dev
+  DefaultVpcPublicSubnet1:
+    Type: String
+    Description: Default VPC Public Subnet 1
+  DefaultVpcPublicSubnet2:
+    Type: String
+    Description: Default VPC Public Subnet 2
 
 Globals:
   Function:
@@ -121,6 +127,13 @@ Resources:
         LogGroupName: !Sub "apigw-${AWS::StackName}-${Stage}"
         RetentionInDays: 7
   {% endif %}  # end paths
+
+  {% if services is defined %}
+  {{ lprefix }}Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "{{ lprefix }}-cluster-${Stage}"
+  {% endif %}
 
   # Streams
   {% if streams is defined %}
@@ -694,6 +707,130 @@ Resources:
       {% endif %}
   {% endfor %}
   {% endif %}  # end functions
+
+  # Services
+  {% if services is defined %}
+  {{ lprefix }}ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ecs-tasks.amazonaws.com]
+            Action: [sts:AssumeRole]
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  {% for service_name, service in services.items() %}
+  {{ lprefix }}{{ service_name.replace('-', '') }}TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ecs-tasks.amazonaws.com]
+            Action: [sts:AssumeRole]
+      Policies:
+        - PolicyName: !Sub "${AWS::StackName}-{{ service_name }}-TaskRolePolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:GetParametersByPath
+                Resource: "*"
+              {% if service.tables %}
+              {% for table in service.tables %}
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:BatchWriteItem
+                  - dynamodb:BatchGetItem
+                Resource: !GetAtt {{ prefix }}{{ table }}.Arn
+              {% endfor %}
+              {% endif %}
+              {% if service.buckets %}
+              {% for bucket in service.buckets %}
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource: 
+                  - !GetAtt {{ lprefix }}{{ bucket.replace('-', '') }}Bucket.Arn
+                  - !Sub "arn:aws:s3:::${{ "{" }}{{ lprefix }}{{ bucket.replace('-', '') }}Bucket}/*"
+              {% endfor %}
+              {% endif %}
+
+  {{ lprefix }}{{ service_name.replace('-', '') }}TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "{{ lprefix }}-{{ service_name }}-${Stage}"
+      Cpu: {{ service.cpu }}
+      Memory: {{ service.memory }}
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt {{ lprefix }}ExecutionRole.Arn
+      TaskRoleArn: !GetAtt {{ lprefix }}{{ service_name.replace('-', '') }}TaskRole.Arn
+      ContainerDefinitions:
+        - Name: {{ service_name }}
+          Image: {{ service.image }}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref {{ lprefix }}{{ service_name.replace('-', '') }}LogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+          {% if service.ports is defined %}
+          PortMappings:
+            {% for port in service.ports %}
+            - ContainerPort: {{ port }}
+            {% endfor %}
+          {% endif %}
+    {% if no_docker_build_on_win is not defined or not no_docker_build_on_win %}
+    Metadata:
+      BuildMethod: docker
+    {% endif %}
+
+  {{ lprefix }}{{ service_name.replace('-', '') }}LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/ecs/{{ lprefix }}-{{ service_name }}-${Stage}"
+      RetentionInDays: 7
+
+  {{ lprefix }}{{ service_name.replace('-', '') }}Service:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub "{{ lprefix }}-{{ service_name }}-${Stage}"
+      Cluster: !Ref {{ lprefix }}Cluster
+      LaunchType: FARGATE
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DesiredCount: {{ service.count }}
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !Ref DefaultVpcPublicSubnet1
+            - !Ref DefaultVpcPublicSubnet2
+      TaskDefinition: !Ref {{ lprefix }}{{ service_name.replace('-', '') }}TaskDefinition
+  {% endfor %}
+  {% endif %}
 
   # DynamoDB Stream Event Source Mappings (from table definitions)
   {% if tables is defined %}
