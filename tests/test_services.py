@@ -244,3 +244,26 @@ services:
     assert env_dict.get('REGION') == {'Ref': 'AWS::Region'}
     assert env_dict.get('ENV') == {'Ref': 'Stage'}
     assert env_dict.get('ACCOUNT_ID') == {'Ref': 'AWS::AccountId'}
+
+
+def test_deploy_adds_resolve_image_repos(tmp_path):
+    # Test verifying that sam_deploy adds --resolve-image-repos when services are present
+    from easysam.deploy import sam_deploy
+    from unittest.mock import patch
+    from benedict import benedict
+    
+    resources = benedict({
+        "services": {"poller": {"image": "my-image"}},
+        "prefix": "TestPrefix"
+    })
+    deploy_ctx = benedict({"environment": "test-stack"})
+    cliparams = {"sam_tool": "sam", "tag": [], "dry_run": False}
+    
+    with patch("subprocess.run") as mock_run:
+        sam_deploy(cliparams, tmp_path, deploy_ctx, resources)
+        
+        # Get the arguments passed to subprocess.run
+        args = mock_run.call_args[0][0]
+        assert "deploy" in args
+        assert "--resolve-image-repos" in args
+

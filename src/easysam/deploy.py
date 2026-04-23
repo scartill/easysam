@@ -161,6 +161,9 @@ def sam_deploy(cliparams, directory, deploy_ctx, resources):
         '--capabilities', 'CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'
     ])
 
+    if 'services' in resources:
+        sam_params.append('--resolve-image-repos')
+
     region = deploy_ctx.get('target_region')
 
     if region:
