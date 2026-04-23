@@ -6,7 +6,9 @@ This example demonstrates model-driven table generation with Prismarine and auto
 
 - Prismarine `TypedDict` model definitions
 - Trigger configuration in model decorator (`trigger='itemlogger'`)
-- Automatic stream + event source mapping generation
+- Conditional table inclusion via !Conditional
+- Conditional trigger attachment to tables
+- Conditional table inclusion
 
 ## Source configuration
 
@@ -15,6 +17,16 @@ This example demonstrates model-driven table generation with Prismarine and auto
 ```python
 @c.model(PK='Foo', SK='Bar', trigger='itemlogger')
 class Item(TypedDict):
+    Foo: str
+    Bar: str
+    Baz: NotRequired[str]
+```
+
+`common/condition/models.py`
+
+```python
+@c.model(PK='Foo', SK='Bar', trigger='itemlogger')
+class Condition(TypedDict):
     Foo: str
     Bar: str
     Baz: NotRequired[str]
@@ -38,38 +50,60 @@ prismarine:
   access-module: common.dynamo_access
   tables:
     - package: myobject
+      trigger:
+        ? !Conditional
+          key: function
+          environment:
+            - prodsam
+            - stagingsam
+        : itemlogger
+  conditional-tables:
+    ? !Conditional
+      key: tables
+      environment:
+        - prodsam
+        - stagingsam
+    : - package: condition
 ```
 
 ## Generate and inspect
 
 ```bash
-easysam --environment dev inspect schema example/prismarine
-easysam --environment dev generate example/prismarine
+easysam --environment dev inspect schema example/prismarineconditional
+easysam --environment dev generate example/prismarineconditional
 ```
 
 Generated resources include:
 
 - `MyAppWithPrismarineItem` DynamoDB table
-- `itemlogger` Lambda function
+- `itemlogger` Lambda function is applied only if environment is allowed
 - DynamoDB `StreamSpecification`
 - `AWS::Lambda::EventSourceMapping` to connect table stream to lambda
+- `MyAppWithPrismarineItem` DynamoDB table created in allowed environments
 
 ## Deploy
 
 ```bash
-easysam --environment dev --aws-profile my-profile deploy example/prismarine
+easysam --environment dev --aws-profile my-profile deploy example/prismarineconditional
 ```
 
 ## Verify behavior
 
-After inserting/updating/deleting table items, check CloudWatch logs for:
+Behavior depends on the environment:
 
-- function: `itemlogger-dev`
-- event names: `INSERT`, `MODIFY`, `REMOVE`
+- **Base table (`myobject`)**
+  - Always created
+  - If trigger is enabled:
+    - Writes (`INSERT`, `MODIFY`, `REMOVE`) appear in CloudWatch logs
+    - Lambda: `itemlogger-<environment>`
+  - If trigger is NOT enabled:
+    - Table works normally (read/write)
+    - No stream, no Lambda, no logs
 
-## Extra reference
-
-See `common/myobject/advanced_example.py` for additional trigger patterns.
+- **Conditional table (`condition`)**
+  - Created only in allowed environments (`devaoss`, `prodsam`, `stagingsam`)
+  - In other environments:
+    - Table is not created at all
 
 ## Cleanup
 

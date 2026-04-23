@@ -8,11 +8,17 @@ prismarine:
   access-module: common.dynamo_access
   tables:
     - package: myobject
+      trigger:
+        ? !Conditional
+          key: function
+          environment:
+            - prodsam
+            - stagingsam
+        : itemlogger
   conditional-tables:
     ? !Conditional
       key: tables
       environment:
-        - devaoss
         - prodsam
         - stagingsam
     : - package: condition

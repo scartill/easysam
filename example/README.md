@@ -104,6 +104,14 @@ easysam --environment prod --target-region eu-west-2 --context-file example/cond
 - Uses `prismarine.modelling: pydantic`.
 - Includes integration test `tests/test_item_crud.py` (real AWS interaction).
 
+### `prismarineconditionals`
+
+- Demonstrates `!Conditional` in Prismarine configuration with environment and region matching.
+
+```bash
+easysam --environment prod --target-region eu-west-2 inspect schema example/prismarineconditionals
+```
+
 ### `functionurl`
 
 - Demonstrates simple (`functionurl: true`) and advanced CORS configuration.

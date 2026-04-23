@@ -93,7 +93,6 @@ def resources(
     resources_data = resolve_conditionals(raw_resources_data, deploy_ctx, errors)
     lg.debug('Resources data after resolving conditionals:')
     lg.debug(resources_data.to_yaml())
-    print(f'RESOURCES RESOLVED {resources_data}')
 
     lg.info('Applying overrides')
     apply_overrides(resources_data, deploy_ctx)
@@ -493,7 +492,6 @@ def check_condition(
 def resolve_conditionals(resources_data, deploy_ctx: dict[str, str], errors: list[str]):
 
     if isinstance(resources_data, list):
-        print('FINALLY IAM IN LIST')
         return [
             resolve_conditionals(item, deploy_ctx, errors)
             for item in resources_data
