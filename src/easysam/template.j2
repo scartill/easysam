@@ -19,13 +19,13 @@ Parameters:
   Stage:
     Type: String
     Default: dev
+  {% if services is defined %}
   DefaultVpcPublicSubnet1:
     Type: String
     Description: Default VPC Public Subnet 1
   DefaultVpcPublicSubnet2:
     Type: String
     Description: Default VPC Public Subnet 2
-  {% if services is defined %}
   {% for service_name, service in services.items() %}
   {% if service.build %}
   {{ lprefix }}{{ service_name.replace('-', '') }}Image:

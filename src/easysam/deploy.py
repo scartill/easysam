@@ -236,6 +236,25 @@ def sam_build(cliparams, directory):
         raise UserWarning('Failed to build SAM template') from e
 
 
+def get_default_vpc_subnets(cliparams):
+    lg.info("Discovering default VPC subnets for Fargate services")
+    ec2 = u.get_aws_client('ec2', cliparams)
+    vpcs = ec2.describe_vpcs(Filters=[{'Name': 'isDefault', 'Values': ['true']}])['Vpcs']
+    if not vpcs:
+        raise UserWarning("No default VPC found in the account/region. Fargate services require a VPC.")
+
+    vpc_id = vpcs[0]['VpcId']
+    subnets = ec2.describe_subnets(Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}])['Subnets']
+
+    # Sort subnets by availability zone to be deterministic
+    subnets.sort(key=lambda x: x['AvailabilityZone'])
+
+    if len(subnets) < 2:
+        raise UserWarning(f"Default VPC {vpc_id} has fewer than 2 subnets. Fargate services require at least 2 subnets for high availability.")
+
+    return subnets[0]['SubnetId'], subnets[1]['SubnetId']
+
+
 def sam_deploy(cliparams, directory, deploy_ctx, resources, image_overrides=None):
     lg.info(f'Deploying SAM template from {directory} to\n{json.dumps(deploy_ctx, indent=4)}')
     sam_tool = cliparams['sam_tool']
@@ -247,6 +266,11 @@ def sam_deploy(cliparams, directory, deploy_ctx, resources, image_overrides=None
         raise UserWarning('No AWS stack found in deploy context')
 
     parameter_overrides = [f'ParameterKey=Stage,ParameterValue={aws_stack}']
+
+    if 'services' in resources:
+        subnet1, subnet2 = get_default_vpc_subnets(cliparams)
+        parameter_overrides.append(f'ParameterKey=DefaultVpcPublicSubnet1,ParameterValue={subnet1}')
+        parameter_overrides.append(f'ParameterKey=DefaultVpcPublicSubnet2,ParameterValue={subnet2}')
 
     if image_overrides:
         for key, value in image_overrides.items():
