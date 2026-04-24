@@ -164,22 +164,21 @@ def preprocess_prismarine(
             prefix, base, package, resources_dir, pypath, errors
         )
 
-        for table_name, table in tables.items():
-            trigger = table.get('trigger')
-
-            if trigger and not prisma_integration.get('trigger'):
-                lg.info(
-                    f'Removing trigger {trigger}'
-                    f'from table {table_name}'
-                )
-                table.pop('trigger', None)
-
         if not tables:
             lg.warning(f'No valid tables found for {package}, continuing')
             continue
 
         if 'tables' not in resources_data:
             resources_data['tables'] = {}
+
+        for table_name, table in tables.items():
+            trigger = table.get('trigger')
+
+            if trigger and not prisma_integration.get('trigger'):
+                lg.info(
+                    f'Removing trigger {trigger} from table {table_name}'
+                )
+                table.pop('trigger', None)
 
         resources_data['tables'].update(tables)
 

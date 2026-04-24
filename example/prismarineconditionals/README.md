@@ -69,8 +69,8 @@ prismarine:
 ## Generate and inspect
 
 ```bash
-easysam --environment dev inspect schema example/prismarineconditional
-easysam --environment dev generate example/prismarineconditional
+easysam --environment dev inspect schema example/prismarineconditionals
+easysam --environment dev generate example/prismarineconditionals
 ```
 
 Generated resources include:
@@ -84,7 +84,7 @@ Generated resources include:
 ## Deploy
 
 ```bash
-easysam --environment dev --aws-profile my-profile deploy example/prismarineconditional
+easysam --environment dev --aws-profile my-profile deploy example/prismarineconditionals
 ```
 
 ## Verify behavior
@@ -101,7 +101,7 @@ Behavior depends on the environment:
     - No stream, no Lambda, no logs
 
 - **Conditional table (`condition`)**
-  - Created only in allowed environments (`devaoss`, `prodsam`, `stagingsam`)
+  - Created only in allowed environments (`prodsam`, `stagingsam`)
   - In other environments:
     - Table is not created at all
 

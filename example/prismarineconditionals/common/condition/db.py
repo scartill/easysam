@@ -1,5 +1,5 @@
-import common.myobject.prismarine_client as pc
+import common.condition.prismarine_client as pc
 
 
-class ConditionModel(pc.ItemModel):
+class ConditionModel(pc.ConditionModel):
     pass
