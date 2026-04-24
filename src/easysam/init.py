@@ -72,7 +72,7 @@ prismarine_client.py
 __pycache__/
 '''
 
-FUNCTION_GITIGNORE = '''\
+BACKEND_GITIGNORE = '''\
 *.py[oc]
 **/common/
 prismarine_client.py
@@ -240,6 +240,8 @@ def init(cliparams, prismarine=False):
     backend_dir = app_dir / 'backend'
     lg.debug(f'Creating backend directory {backend_dir}')
     backend_dir.mkdir(parents=True, exist_ok=True)
+    lg.debug(f'Creating backend .gitignore file {backend_dir / ".gitignore"}')
+    backend_dir.joinpath('.gitignore').write_text(BACKEND_GITIGNORE)
 
     if not prismarine:
         lg.debug(f'Creating database directory {backend_dir}')
@@ -251,8 +253,6 @@ def init(cliparams, prismarine=False):
     function_dir = backend_dir / 'function'
     lg.debug(f'Creating function directory {function_dir}')
     function_dir.mkdir(parents=True, exist_ok=True)
-    lg.debug(f'Creating function .gitignore file {function_dir / ".gitignore"}')
-    function_dir.joinpath('.gitignore').write_text(FUNCTION_GITIGNORE)
 
     if prismarine:
         lambda_dir = function_dir / 'itemlogger'
