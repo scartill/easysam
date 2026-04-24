@@ -36,6 +36,9 @@ def generate(
         errors = []
         resources_data = load_resources(resources_dir, pypath, deploy_ctx, errors)
 
+        if cliparams.get('no_docker_build_on_win'):
+            resources_data['no_docker_build_on_win'] = True
+
         lg.debug('Resources processed:\n' + yaml.dump(resources_data, indent=4))
 
         try:

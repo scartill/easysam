@@ -2,6 +2,8 @@ import logging as lg
 import json
 import time
 import shutil
+import os
+import hashlib
 from pathlib import Path
 import subprocess
 
@@ -15,6 +17,96 @@ import easysam.utils as u
 
 SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
+
+
+def get_dir_hash(directory: Path) -> str:
+    '''Calculate a deterministic hash of a directory content'''
+    sha256 = hashlib.sha256()
+    
+    # Sort files to ensure deterministic hashing
+    for path in sorted(directory.rglob('*')):
+        if path.is_file():
+            # Hash path (relative) and content
+            sha256.update(str(path.relative_to(directory)).encode())
+            with open(path, 'rb') as f:
+                while chunk := f.read(8192):
+                    sha256.update(chunk)
+                    
+    return sha256.hexdigest()
+
+
+def orchestrate_docker(cliparams, resources, deploy_ctx, directory):
+    if 'services' not in resources:
+        return {}
+
+    if cliparams.get('no_docker_build_on_win') and os.name == 'nt':
+        lg.info('Skipping Docker builds on Windows due to --no-docker-build-on-win')
+        return {}
+
+    image_overrides = {}
+    lprefix = resources['prefix'].lower()
+    stage = deploy_ctx['environment']
+    
+    ecr = u.get_aws_client('ecr', cliparams)
+    
+    for service_name, service in resources['services'].items():
+        if not service.get('build'):
+            continue
+            
+        repo_name = f"{lprefix}-{service_name}-{stage}"
+        build_path = Path(directory, service['build']).resolve()
+        
+        # 1. Calculate Content Hash
+        content_hash = get_dir_hash(build_path)
+        hash_tag = f"sha256-{content_hash}"
+        
+        lg.info(f"Orchestrating Docker for service {service_name} (Hash: {content_hash[:8]})")
+        
+        # 2. Ensure ECR Repository exists
+        try:
+            ecr.create_repository(repositoryName=repo_name)
+            lg.info(f"Created ECR repository: {repo_name}")
+        except ecr.exceptions.RepositoryAlreadyExistsException:
+            lg.debug(f"ECR repository {repo_name} already exists")
+            
+        repo_data = ecr.describe_repositories(repositoryNames=[repo_name])['repositories'][0]
+        repo_uri = repo_data['repositoryUri']
+        image_tag = f"{repo_uri}:{hash_tag}"
+        
+        # 3. Check if image with this hash already exists
+        try:
+            images = ecr.list_images(repositoryName=repo_name, filter={'tagStatus': 'TAGGED'})['imageIds']
+            if any(img.get('imageTag') == hash_tag for img in images):
+                lg.info(f"Image {hash_tag} already exists in ECR. Skipping build and push.")
+                param_name = f"{lprefix}{service_name.replace('-', '')}Image"
+                image_overrides[param_name] = image_tag
+                continue
+        except Exception as e:
+            lg.warning(f"Could not check for existing image: {e}. Proceeding with build.")
+        
+        # 4. ECR Login
+        auth = ecr.get_authorization_token()['authorizationData'][0]
+        token = u.base64.b64decode(auth['authorizationToken']).decode('utf-8').split(':')[1]
+        proxy_endpoint = auth['proxyEndpoint']
+        
+        lg.info(f"Logging into ECR: {proxy_endpoint}")
+        login_cmd = ['docker', 'login', '-u', 'AWS', '-p', token, proxy_endpoint]
+        subprocess.run(login_cmd, check=True, capture_output=True)
+        
+        # 5. Docker Build
+        lg.info(f"Building Docker image: {image_tag} from {build_path}")
+        build_cmd = ['docker', 'build', '-t', image_tag, '-t', f"{repo_uri}:latest", str(build_path)]
+        subprocess.run(build_cmd, check=True, cwd=directory)
+        
+        # 6. Docker Push
+        lg.info(f"Pushing Docker image: {image_tag}")
+        subprocess.run(['docker', 'push', image_tag], check=True)
+        subprocess.run(['docker', 'push', f"{repo_uri}:latest"], check=True)
+        
+        param_name = f"{lprefix}{service_name.replace('-', '')}Image"
+        image_overrides[param_name] = image_tag
+        
+    return image_overrides
 
 
 def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
@@ -46,8 +138,11 @@ def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
     # Building the application from the SAM template
     sam_build(cliparams, directory)
 
+    # Docker Orchestration for Services
+    image_overrides = orchestrate_docker(cliparams, resources, deploy_ctx, directory)
+
     # Deploying the application to AWS
-    sam_deploy(cliparams, directory, deploy_ctx, resources)
+    sam_deploy(cliparams, directory, deploy_ctx, resources, image_overrides)
 
     if not cliparams.get('no_cleanup'):
         remove_common_dependencies(directory)
@@ -141,7 +236,26 @@ def sam_build(cliparams, directory):
         raise UserWarning('Failed to build SAM template') from e
 
 
-def sam_deploy(cliparams, directory, deploy_ctx, resources):
+def get_default_vpc_subnets(cliparams):
+    lg.info("Discovering default VPC subnets for Fargate services")
+    ec2 = u.get_aws_client('ec2', cliparams)
+    vpcs = ec2.describe_vpcs(Filters=[{'Name': 'isDefault', 'Values': ['true']}])['Vpcs']
+    if not vpcs:
+        raise UserWarning("No default VPC found in the account/region. Fargate services require a VPC.")
+
+    vpc_id = vpcs[0]['VpcId']
+    subnets = ec2.describe_subnets(Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}])['Subnets']
+
+    # Sort subnets by availability zone to be deterministic
+    subnets.sort(key=lambda x: x['AvailabilityZone'])
+
+    if len(subnets) < 2:
+        raise UserWarning(f"Default VPC {vpc_id} has fewer than 2 subnets. Fargate services require at least 2 subnets for high availability.")
+
+    return subnets[0]['SubnetId'], subnets[1]['SubnetId']
+
+
+def sam_deploy(cliparams, directory, deploy_ctx, resources, image_overrides=None):
     lg.info(f'Deploying SAM template from {directory} to\n{json.dumps(deploy_ctx, indent=4)}')
     sam_tool = cliparams['sam_tool']
     sam_params = sam_tool.split(' ')
@@ -151,9 +265,20 @@ def sam_deploy(cliparams, directory, deploy_ctx, resources):
     if not aws_stack:
         raise UserWarning('No AWS stack found in deploy context')
 
+    parameter_overrides = [f'ParameterKey=Stage,ParameterValue={aws_stack}']
+
+    if 'services' in resources:
+        subnet1, subnet2 = get_default_vpc_subnets(cliparams)
+        parameter_overrides.append(f'ParameterKey=DefaultVpcPublicSubnet1,ParameterValue={subnet1}')
+        parameter_overrides.append(f'ParameterKey=DefaultVpcPublicSubnet2,ParameterValue={subnet2}')
+
+    if image_overrides:
+        for key, value in image_overrides.items():
+            parameter_overrides.append(f'ParameterKey={key},ParameterValue={value}')
+
     sam_params.extend([
         'deploy',
-        '--parameter-overrides', f'ParameterKey=Stage,ParameterValue={aws_stack}',
+        '--parameter-overrides', ' '.join(parameter_overrides),
         '--stack-name', aws_stack,
         '--no-fail-on-empty-changeset',
         '--no-confirm-changeset',

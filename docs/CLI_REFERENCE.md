@@ -57,6 +57,7 @@ easysam --environment dev generate . --path ../shared-lib
 Options:
 
 - `--path PATH` (repeatable): additional Python import path(s)
+- `--no-docker-build-on-win`: Skip adding Docker build metadata to the template on Windows.
 
 Outputs:
 
@@ -78,6 +79,7 @@ Options:
 - `--sam-tool TEXT`: custom SAM invocation command (default: `uv run sam`)
 - `--no-cleanup`: keep copied `common` dependencies after deploy
 - `--override-main-template PATH`: use custom Jinja main template
+- `--no-docker-build-on-win`: Skip adding Docker build metadata to the template on Windows.
 
 ### `delete`
 

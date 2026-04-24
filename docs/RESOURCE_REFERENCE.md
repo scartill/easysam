@@ -32,6 +32,7 @@ import:
 | `streams` | map | no | Kinesis streams + Firehose destinations |
 | `tables` | map | no | DynamoDB table definitions |
 | `functions` | map | no | Lambda function definitions |
+| `services` | map | no | ECS Fargate service definitions |
 | `paths` | map | no | API Gateway integrations |
 | `authorizers` | map | no | API authorizer Lambda configuration |
 | `import` | list<string> | no | Import directories scanned for `easysam.yaml` |
@@ -229,6 +230,49 @@ Fields:
     - `expose_headers` (list of strings)
     - `allow_credentials` (boolean)
     - `max_age` (integer)
+
+## Services (ECS Fargate)
+
+EasySAM supports long-running components using AWS ECS Fargate. These are ideal for background workers, polling loops, or containerized web services.
+
+```yaml
+services:
+  poller:
+    # Source (exactly one required)
+    image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-repo:latest
+    build: ./poller # path to Dockerfile directory
+
+    # Compute
+    cpu: 256    # Default: 256 (0.25 vCPU)
+    memory: 512 # Default: 512 MB
+    count: 1    # Default: 1 (Number of instances)
+
+    # Networking
+    ports:
+      - 8080
+
+    # Permissions & Environment (Consistent with 'functions')
+    envvars:
+      POLL_INTERVAL: "19"
+    tables:
+      - MyTable
+    buckets:
+      - raw-data
+    queues:
+      - jobs
+    streams:
+      - my-stream
+```
+
+Fields:
+
+- `image`: The ECR or public Docker image URI.
+- `build`: Path to a directory containing a `Dockerfile`. Relative to the YAML file.
+- `cpu`: CPU units (256, 512, 1024, etc.).
+- `memory`: Memory in MiB.
+- `count`: The desired number of running tasks.
+- `ports`: List of container ports to open (no Load Balancer is created automatically; tasks use public IPs by default).
+- `envvars`, `tables`, `buckets`, `queues`, `streams`: Standard permission and environment configuration (same as `functions`).
 
 ## Paths (API Gateway)
 

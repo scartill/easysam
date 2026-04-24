@@ -1,0 +1,21 @@
+prefix: FargatePollerExample
+
+tables:
+  RandomStats:
+    attributes:
+      - name: id
+        hash: true
+      - name: timestamp
+        range: true
+
+services:
+  poller:
+    build: ./poller
+    cpu: 256
+    memory: 512
+    count: 1
+    tables:
+      - RandomStats
+    envvars:
+      TABLE_NAME: FargatePollerExampleRandomStats-dev
+      REGION: us-east-1
