@@ -3,6 +3,7 @@ import json
 import time
 import shutil
 import os
+import hashlib
 from pathlib import Path
 import subprocess
 
@@ -16,6 +17,22 @@ import easysam.utils as u
 
 SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
+
+
+def get_dir_hash(directory: Path) -> str:
+    '''Calculate a deterministic hash of a directory content'''
+    sha256 = hashlib.sha256()
+    
+    # Sort files to ensure deterministic hashing
+    for path in sorted(directory.rglob('*')):
+        if path.is_file():
+            # Hash path (relative) and content
+            sha256.update(str(path.relative_to(directory)).encode())
+            with open(path, 'rb') as f:
+                while chunk := f.read(8192):
+                    sha256.update(chunk)
+                    
+    return sha256.hexdigest()
 
 
 def orchestrate_docker(cliparams, resources, deploy_ctx, directory):
@@ -37,9 +54,15 @@ def orchestrate_docker(cliparams, resources, deploy_ctx, directory):
             continue
             
         repo_name = f"{lprefix}-{service_name}-{stage}"
-        lg.info(f"Orchestrating Docker for service {service_name} (Repo: {repo_name})")
+        build_path = Path(directory, service['build']).resolve()
         
-        # 1. Ensure ECR Repository exists
+        # 1. Calculate Content Hash
+        content_hash = get_dir_hash(build_path)
+        hash_tag = f"sha256-{content_hash}"
+        
+        lg.info(f"Orchestrating Docker for service {service_name} (Hash: {content_hash[:8]})")
+        
+        # 2. Ensure ECR Repository exists
         try:
             ecr.create_repository(repositoryName=repo_name)
             lg.info(f"Created ECR repository: {repo_name}")
@@ -48,8 +71,20 @@ def orchestrate_docker(cliparams, resources, deploy_ctx, directory):
             
         repo_data = ecr.describe_repositories(repositoryNames=[repo_name])['repositories'][0]
         repo_uri = repo_data['repositoryUri']
+        image_tag = f"{repo_uri}:{hash_tag}"
         
-        # 2. ECR Login
+        # 3. Check if image with this hash already exists
+        try:
+            images = ecr.list_images(repositoryName=repo_name, filter={'tagStatus': 'TAGGED'})['imageIds']
+            if any(img.get('imageTag') == hash_tag for img in images):
+                lg.info(f"Image {hash_tag} already exists in ECR. Skipping build and push.")
+                param_name = f"{lprefix}{service_name.replace('-', '')}Image"
+                image_overrides[param_name] = image_tag
+                continue
+        except Exception as e:
+            lg.warning(f"Could not check for existing image: {e}. Proceeding with build.")
+        
+        # 4. ECR Login
         auth = ecr.get_authorization_token()['authorizationData'][0]
         token = u.base64.b64decode(auth['authorizationToken']).decode('utf-8').split(':')[1]
         proxy_endpoint = auth['proxyEndpoint']
@@ -58,18 +93,15 @@ def orchestrate_docker(cliparams, resources, deploy_ctx, directory):
         login_cmd = ['docker', 'login', '-u', 'AWS', '-p', token, proxy_endpoint]
         subprocess.run(login_cmd, check=True, capture_output=True)
         
-        # 3. Docker Build
-        build_path = Path(directory, service['build']).resolve()
-        image_tag = f"{repo_uri}:latest"
+        # 5. Docker Build
         lg.info(f"Building Docker image: {image_tag} from {build_path}")
-        
-        build_cmd = ['docker', 'build', '-t', image_tag, str(build_path)]
+        build_cmd = ['docker', 'build', '-t', image_tag, '-t', f"{repo_uri}:latest", str(build_path)]
         subprocess.run(build_cmd, check=True, cwd=directory)
         
-        # 4. Docker Push
+        # 6. Docker Push
         lg.info(f"Pushing Docker image: {image_tag}")
-        push_cmd = ['docker', 'push', image_tag]
-        subprocess.run(push_cmd, check=True)
+        subprocess.run(['docker', 'push', image_tag], check=True)
+        subprocess.run(['docker', 'push', f"{repo_uri}:latest"], check=True)
         
         param_name = f"{lprefix}{service_name.replace('-', '')}Image"
         image_overrides[param_name] = image_tag

@@ -295,5 +295,47 @@ def test_orchestrate_docker_calls_correct_commands(tmp_path):
         # 3. Push
         assert any("push" in cmd for cmd in calls)
         
-        assert image_overrides["testprefixpollerImage"] == "1234.dkr.ecr.us-east-1.amazonaws.com/testprefix-poller-dev:latest"
+        assert "testprefixpollerImage" in image_overrides
+        assert "sha256-" in image_overrides["testprefixpollerImage"]
+
+def test_orchestrate_docker_skips_if_hash_exists(tmp_path):
+    # Test verifying that orchestrate_docker skips build if hash tag exists in ECR
+    from easysam.deploy import orchestrate_docker
+    from unittest.mock import patch, MagicMock
+    from benedict import benedict
+    
+    # Create dummy poller dir
+    poller_dir = tmp_path / "poller"
+    poller_dir.mkdir()
+    (poller_dir / "Dockerfile").write_text("FROM alpine")
+    
+    resources = benedict({
+        "services": {"poller": {"build": "./poller"}},
+        "prefix": "TestPrefix"
+    })
+    deploy_ctx = benedict({"environment": "dev"})
+    cliparams = {}
+    
+    # Mock boto3 client for ECR
+    mock_ecr = MagicMock()
+    mock_ecr.describe_repositories.return_value = {
+        'repositories': [{'repositoryUri': '1234.dkr.ecr.us-east-1.amazonaws.com/testprefix-poller-dev'}]
+    }
+    # Pretend the hash tag already exists
+    mock_ecr.list_images.return_value = {
+        'imageIds': [{'imageTag': 'sha256-4299b827e8a933220c39f0d11be5527a920231922f51f981248039d933333333'}] # Dummy hash
+    }
+    
+    with patch("easysam.utils.get_aws_client", return_value=mock_ecr), \
+         patch("subprocess.run") as mock_run, \
+         patch("easysam.deploy.get_dir_hash", return_value="4299b827e8a933220c39f0d11be5527a920231922f51f981248039d933333333"):
+         
+        image_overrides = orchestrate_docker(cliparams, resources, deploy_ctx, tmp_path)
+        
+        # Verify Docker build was NEVER called
+        for call in mock_run.call_args_list:
+            assert "build" not in call[0][0]
+            
+        assert "testprefixpollerImage" in image_overrides
+        assert "sha256-4299b827" in image_overrides["testprefixpollerImage"]
 
