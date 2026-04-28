@@ -1,4 +1,10 @@
-lambda:
+? !Conditional
+  key: lambda
+  environment:
+    - devaoss
+    - prodsam
+    - stagingsam
+:
   name: searchfunc
   resources:
     tables:

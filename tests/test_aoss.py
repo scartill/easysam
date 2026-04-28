@@ -22,23 +22,27 @@ def test_aoss_generation():
 
     cliparams = {'verbose': True}
     deploy_ctx = {'environment': 'dev', 'target_region': 'us-east-1'}
-    
+
     resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
-    
+
+    assert errors
+
+    deploy_ctx = {'environment': 'devaoss', 'target_region': 'us-east-1'}
+    resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
     assert not errors
-    
+
     template_path = example_path / "template.yml"
     assert template_path.exists()
-    
+
     with open(template_path, 'r') as f:
         template = yaml.safe_load(f)
-        
+
     resources = template['Resources']
-    
+
     # Verify searchableCollection
     assert 'searchableCollection' in resources
     assert resources['searchableCollection']['Type'] == 'AWS::OpenSearchServerless::Collection'
-    
+
     # Verify security policies
     assert 'searchableEP' in resources
     assert 'searchableNP' in resources
