@@ -8,7 +8,7 @@ def handler(event, context):
         'headers': {
             'Access-Control-Allow-Headers': '*',
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': '*'
+            'Access-Control-Allow-Methods': '*',
         },
-        'body': json.dumps({'envvar': os.getenv('MY_ENV_VAR')})
+        'body': json.dumps({'envvar': os.getenv('MY_ENV_VAR')}),
     }

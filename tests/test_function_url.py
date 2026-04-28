@@ -42,15 +42,13 @@ def test_functionurl_generation():
     hello_world = resources['helloworldFunction']
     assert hello_world['Type'] == 'AWS::Serverless::Function'
     assert hello_world['Properties']['FunctionUrlConfig']['AuthType'] == 'NONE'
-    assert 'Events' not in hello_world['Properties'], "Events property should not be present if no events are defined"
+    assert 'Events' not in hello_world['Properties'], 'Events property should not be present if no events are defined'
 
     # Verify hellocustomFunction
     hello_custom = resources['hellocustomFunction']
     assert hello_custom['Type'] == 'AWS::Serverless::Function'
     assert hello_custom['Properties']['FunctionUrlConfig']['AuthType'] == 'NONE'
-    assert hello_custom['Properties']['FunctionUrlConfig']['Cors']['AllowOrigins'] == [
-        '*'
-    ]
+    assert hello_custom['Properties']['FunctionUrlConfig']['Cors']['AllowOrigins'] == ['*']
     assert hello_custom['Properties']['FunctionUrlConfig']['Cors']['AllowMethods'] == [
         'GET',
         'POST',
@@ -60,13 +58,9 @@ def test_functionurl_generation():
     assert 'helloworldFunctionUrl' in outputs
     assert outputs['helloworldFunctionUrl']['Value'] == {'Ref': 'helloworldFunctionUrl'}
     assert 'hellocustomFunctionUrl' in outputs
-    assert outputs['hellocustomFunctionUrl']['Value'] == {
-        'Ref': 'hellocustomFunctionUrl'
-    }
+    assert outputs['hellocustomFunctionUrl']['Value'] == {'Ref': 'hellocustomFunctionUrl'}
     assert 'locallambdaFunctionUrl' in outputs
-    assert outputs['locallambdaFunctionUrl']['Value'] == {
-        'Ref': 'locallambdaFunctionUrl'
-    }
+    assert outputs['locallambdaFunctionUrl']['Value'] == {'Ref': 'locallambdaFunctionUrl'}
 
 
 def test_functionurl_validation_error():
@@ -91,7 +85,4 @@ def test_functionurl_validation_error():
     validation_errors = []
     validate_schema(example_path, resources_data, validation_errors)
 
-    assert any(
-        'is not valid under any of the given schemas' in err
-        for err in validation_errors
-    )
+    assert any('is not valid under any of the given schemas' in err for err in validation_errors)

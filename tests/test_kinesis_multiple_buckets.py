@@ -2,9 +2,10 @@ import yaml
 from pathlib import Path
 from easysam.generate import generate
 
+
 def test_kinesis_multiple_buckets_generation():
-    example_path = Path("example/kinesismutltiplebuckets")
-    
+    example_path = Path('example/kinesismutltiplebuckets')
+
     # Custom constructors for SAM tags
     def get_att_constructor(loader, node):
         value = loader.construct_scalar(node)
@@ -22,28 +23,29 @@ def test_kinesis_multiple_buckets_generation():
 
     cliparams = {'verbose': True}
     deploy_ctx = {'environment': 'kinesissampledev', 'target_region': 'us-east-1'}
-    
+
     resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
-    
+
     assert not errors
-    
-    template_path = example_path / "template.yml"
+
+    template_path = example_path / 'template.yml'
     assert template_path.exists()
-    
+
     with open(template_path, 'r') as f:
         template = yaml.safe_load(f)
-        
+
     resources = template['Resources']
     lprefix = 'kinesismultiplebucketsapp'
-    
+
     # Verify stream resources
     assert f'{lprefix}simpleStream' in resources
     assert f'{lprefix}complexStream' in resources
-    
+
     # Verify delivery streams
     assert f'{lprefix}simpleprivateDelivery' in resources
     assert f'{lprefix}complexprivateDelivery' in resources
     assert f'{lprefix}complexexternalDelivery' in resources
+
 
 def test_kinesis_multiple_buckets_defaults_and_validation():
     # Test our changes to process_default_streams
@@ -70,14 +72,7 @@ def test_kinesis_multiple_buckets_defaults_and_validation():
     assert stream['buckets']['private']['intervalinseconds'] == 120
 
     # Test that both buckets and bucketname is flagged as error
-    data2 = {
-        'streams': {
-            'mystream2': {
-                'bucketname': 'mybucket',
-                'buckets': {'private': {'bucketname': 'mybucket'}}
-            }
-        }
-    }
+    data2 = {'streams': {'mystream2': {'bucketname': 'mybucket', 'buckets': {'private': {'bucketname': 'mybucket'}}}}}
     errors2 = []
     process_default_streams(data2, errors2)
     assert len(errors2) == 1
@@ -85,6 +80,7 @@ def test_kinesis_multiple_buckets_defaults_and_validation():
 
     # Test default interval
     from easysam.load import STREAM_INTERVAL_SECONDS
+
     data3 = {
         'streams': {
             'mystream3': {

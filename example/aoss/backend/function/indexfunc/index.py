@@ -9,11 +9,7 @@ logger.setLevel(logging.INFO)
 def handler(event, context):
     try:
         # Check if this is a DynamoDB Stream event
-        if (
-            'Records' in event
-            and event['Records']
-            and event['Records'][0].get('eventSource') == 'aws:dynamodb'
-        ):
+        if 'Records' in event and event['Records'] and event['Records'][0].get('eventSource') == 'aws:dynamodb':
             return process_dynamodb_stream(event)
 
     except Exception as e:

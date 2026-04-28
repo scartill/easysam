@@ -47,9 +47,7 @@ def generate(
                 lg.info('The template has plugins, executing them')
 
                 for plugin_name, plugin in cast(dict, plugins).items():
-                    invoke_plugin(
-                        resources_dir, resources_data, plugin_name, plugin, errors
-                    )
+                    invoke_plugin(resources_dir, resources_data, plugin_name, plugin, errors)
 
             searchpath = [
                 str(Path(__file__).parent.resolve()),

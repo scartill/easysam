@@ -1,9 +1,7 @@
 import os
 
 import boto3
-from opensearchpy import (
-    OpenSearch, RequestsHttpConnection, AWSV4SignerAuth
-)
+from opensearchpy import OpenSearch, RequestsHttpConnection, AWSV4SignerAuth
 
 INDEX_NAME = 'searchable-documents'
 
@@ -21,5 +19,5 @@ def create_client():
         use_ssl=True,
         verify_certs=True,
         connection_class=RequestsHttpConnection,
-        pool_maxsize=20
+        pool_maxsize=20,
     )

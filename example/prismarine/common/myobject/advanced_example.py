@@ -1,9 +1,10 @@
-'''
+"""
 Advanced Prismarine Model Examples with Trigger Configurations
 
 This file demonstrates various ways to configure DynamoDB triggers
 using the Prismarine model decorator.
-'''
+"""
+
 from typing import TypedDict, NotRequired
 from prismarine.runtime import Cluster
 
@@ -26,11 +27,11 @@ class UserActivity(TypedDict):
     PK='OrderID',
     trigger={
         'function': 'orderprocessor',
-        'viewtype': 'new-and-old',    # Include both old and new images
-        'batchsize': 50,               # Process up to 50 records per invocation
-        'batchwindow': 10,             # Wait up to 10 seconds to fill batch
-        'startingposition': 'trim-horizon'  # Process all existing records
-    }
+        'viewtype': 'new-and-old',  # Include both old and new images
+        'batchsize': 50,  # Process up to 50 records per invocation
+        'batchwindow': 10,  # Wait up to 10 seconds to fill batch
+        'startingposition': 'trim-horizon',  # Process all existing records
+    },
 )
 class Order(TypedDict):
     OrderID: str
@@ -46,9 +47,9 @@ class Order(TypedDict):
     SK='Version',
     trigger={
         'function': 'eventcounter',
-        'viewtype': 'keys-only',      # Only keys, no attribute values
-        'startingposition': 'latest'
-    }
+        'viewtype': 'keys-only',  # Only keys, no attribute values
+        'startingposition': 'latest',
+    },
 )
 class Event(TypedDict):
     EventID: str
@@ -72,10 +73,10 @@ class Configuration(TypedDict):
     SK='ReadingTime',
     trigger={
         'function': 'sensoranalyzer',
-        'viewtype': 'new',            # Only new images (after change)
+        'viewtype': 'new',  # Only new images (after change)
         'batchsize': 100,
-        'startingposition': 'latest'
-    }
+        'startingposition': 'latest',
+    },
 )
 class SensorReading(TypedDict):
     SensorID: str

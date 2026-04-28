@@ -160,9 +160,7 @@ def preprocess_prismarine(
             errors.append(f'No package found for {base}')
             continue
 
-        tables = prismarine_dynamo_tables(
-            prefix, base, package, resources_dir, pypath, errors
-        )
+        tables = prismarine_dynamo_tables(prefix, base, package, resources_dir, pypath, errors)
 
         if not tables:
             lg.warning(f'No valid tables found for {package}, continuing')
@@ -175,9 +173,7 @@ def preprocess_prismarine(
             trigger = table.get('trigger')
 
             if trigger and not prisma_integration.get('trigger'):
-                lg.info(
-                    f'Removing trigger {trigger} from table {table_name}'
-                )
+                lg.info(f'Removing trigger {trigger} from table {table_name}')
                 table.pop('trigger', None)
 
         resources_data['tables'].update(tables)
@@ -201,9 +197,7 @@ def preprocess_lambda(
         return
 
     if lambda_name in resources_data['functions']:
-        errors.append(
-            f'Import file {entry_path} contains duplicate lambda name {lambda_name}'
-        )
+        errors.append(f'Import file {entry_path} contains duplicate lambda name {lambda_name}')
         return
 
     lambda_resources = lambda_def.get('resources', {})
@@ -249,17 +243,13 @@ def preprocess_lambda(
         resources_data['paths'][path] = integration
 
 
-def preprocess_tables(
-    resources_data: dict, table_def: dict, entry_path: Path, errors: list[str]
-):
+def preprocess_tables(resources_data: dict, table_def: dict, entry_path: Path, errors: list[str]):
     if 'tables' not in resources_data:
         resources_data['tables'] = {}
 
     for table_name, table_data in table_def.items():
         if table_name in resources_data['tables']:
-            errors.append(
-                f'Import file {entry_path} contains duplicate table {table_name}'
-            )
+            errors.append(f'Import file {entry_path} contains duplicate table {table_name}')
             continue
 
         lg.debug(f'Adding table {table_name} to resources')
@@ -289,9 +279,7 @@ def preprocess_file(
     validate_local_schema(entry_path, resolved_data, errors)
 
     if lambda_def := resolved_data.get('lambda'):
-        preprocess_lambda(
-            resources_data, resources_dir, lambda_def, entry_path, entry_dir, errors
-        )
+        preprocess_lambda(resources_data, resources_dir, lambda_def, entry_path, entry_dir, errors)
 
     if tables_def := resolved_data.get('tables'):
         preprocess_tables(resources_data, tables_def, entry_path, errors)
@@ -455,17 +443,12 @@ def conditional_constructor(loader, node):
     return Conditional(**mapping)
 
 
-def check_condition(
-    condition: str, value: list | str, deploy_ctx: dict[str, str], errors: list[str]
-):
+def check_condition(condition: str, value: list | str, deploy_ctx: dict[str, str], errors: list[str]):
     if value == 'any':
         return True
 
     if isinstance(value, list):
-        return any(
-            check_condition(condition, v, deploy_ctx, errors)
-            for v in value
-        )
+        return any(check_condition(condition, v, deploy_ctx, errors) for v in value)
 
     context_value = deploy_ctx.get(condition)
 
@@ -480,10 +463,7 @@ def check_condition(
     negate = value.startswith('~')
     value = value.lstrip('~')
 
-    lg.info(
-        f'Checking condition "{condition}" '
-        f'{value} (condition) == {context_value} (context) (negate={negate})'
-    )
+    lg.info(f'Checking condition "{condition}" {value} (condition) == {context_value} (context) (negate={negate})')
 
     return (value == context_value) != negate
 
@@ -491,10 +471,7 @@ def check_condition(
 def resolve_conditionals(resources_data, deploy_ctx: dict[str, str], errors: list[str]):
 
     if isinstance(resources_data, list):
-        return [
-            resolve_conditionals(item, deploy_ctx, errors)
-            for item in resources_data
-        ]
+        return [resolve_conditionals(item, deploy_ctx, errors) for item in resources_data]
 
     if not isinstance(resources_data, dict):
         return resources_data

@@ -2,9 +2,10 @@ import yaml
 from pathlib import Path
 from easysam.generate import generate
 
+
 def test_aoss_generation():
-    example_path = Path("example/aoss")
-    
+    example_path = Path('example/aoss')
+
     # Custom constructors for SAM tags
     def get_att_constructor(loader, node):
         value = loader.construct_scalar(node)
@@ -31,7 +32,7 @@ def test_aoss_generation():
     resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
     assert not errors
 
-    template_path = example_path / "template.yml"
+    template_path = example_path / 'template.yml'
     assert template_path.exists()
 
     with open(template_path, 'r') as f:

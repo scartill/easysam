@@ -2,9 +2,10 @@ import yaml
 from pathlib import Path
 from easysam.generate import generate
 
+
 def test_myapp_generation():
-    example_path = Path("example/myapp")
-    
+    example_path = Path('example/myapp')
+
     # Custom constructors for SAM tags
     def get_att_constructor(loader, node):
         value = loader.construct_scalar(node)
@@ -22,22 +23,22 @@ def test_myapp_generation():
 
     cliparams = {'verbose': True}
     deploy_ctx = {'environment': 'dev', 'target_region': 'us-east-1'}
-    
+
     resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
-    
+
     assert not errors
-    
-    template_path = example_path / "template.yml"
+
+    template_path = example_path / 'template.yml'
     assert template_path.exists()
-    
+
     with open(template_path, 'r') as f:
         template = yaml.safe_load(f)
-        
+
     resources = template['Resources']
-    
+
     # Verify myfunctionFunction
     assert 'myfunctionFunction' in resources
     myfunction = resources['myfunctionFunction']
     assert myfunction['Type'] == 'AWS::Serverless::Function'
-    assert 'Events' in myfunction['Properties'], "Events property should be present if events are defined"
+    assert 'Events' in myfunction['Properties'], 'Events property should be present if events are defined'
     assert 'itemsAPI' in myfunction['Properties']['Events']

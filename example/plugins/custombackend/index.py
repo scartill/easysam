@@ -7,7 +7,7 @@ def handler(event, context):
         'headers': {
             'Access-Control-Allow-Headers': '*',
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': '*'
+            'Access-Control-Allow-Methods': '*',
         },
-        'body': json.dumps({'data': 'Hello, World!'})
+        'body': json.dumps({'data': 'Hello, World!'}),
     }

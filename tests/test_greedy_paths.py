@@ -7,7 +7,7 @@ from easysam.generate import generate
 def test_greedy_lambda_paths_generate_normalized_root_and_proxy_routes(tmp_path):
     resources_yaml = tmp_path / 'resources.yaml'
     resources_yaml.write_text(
-        '''
+        """
 prefix: "test-prefix"
 functions:
   myfunc:
@@ -16,7 +16,7 @@ paths:
   /items/:
     function: myfunc
     open: true
-'''
+"""
     )
 
     deploy_ctx = benedict({'environment': 'dev', 'target_region': 'us-east-1'})

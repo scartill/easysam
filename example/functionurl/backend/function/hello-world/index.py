@@ -1,5 +1,2 @@
 def handler(event, context):
-    return {
-        "statusCode": 200,
-        "body": "Hello from Simple Function URL!"
-    }
+    return {'statusCode': 200, 'body': 'Hello from Simple Function URL!'}

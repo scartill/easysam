@@ -2,9 +2,10 @@ import yaml
 from pathlib import Path
 from easysam.generate import generate
 
+
 def test_app_with_errors_generation():
-    example_path = Path("example/appwitherrors")
-    
+    example_path = Path('example/appwitherrors')
+
     # Custom constructors for SAM tags
     def get_att_constructor(loader, node):
         value = loader.construct_scalar(node)
@@ -22,9 +23,9 @@ def test_app_with_errors_generation():
 
     cliparams = {'verbose': True}
     deploy_ctx = {'environment': 'dev', 'target_region': 'us-east-1'}
-    
+
     resources_data, errors = generate(cliparams, example_path, [], deploy_ctx)
-    
+
     # It should have errors
     assert errors
-    assert any("Error loading import file" in err for err in errors)
+    assert any('Error loading import file' in err for err in errors)
