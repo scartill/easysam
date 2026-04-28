@@ -1,3 +1,10 @@
+# 1.12.0
+
+- Added `!Conditional` tag support in local import files (`easysam.yaml`) for conditional resource definitions.
+- Added conditional resource support in Prismarine processing, including conditional table triggers.
+- Added `prismarineconditionals` example demonstrating conditional Prismarine resources.
+- Added example generation test script for all example configurations.
+
 # 1.11.1
 
 - Fixed a bug with Prismarine Pydantic models by upgrading to Prismarine 1.5.5
