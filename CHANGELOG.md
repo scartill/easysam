@@ -1,3 +1,7 @@
+# 1.12.1 (2026-05-12)
+
+- Added `GatewayResponse` CORS headers for API Gateway 401/403 pre-Lambda responses.
+
 # 1.12.0
 
 - Added `!Conditional` tag support in local import files (`easysam.yaml`) for conditional resource definitions.
