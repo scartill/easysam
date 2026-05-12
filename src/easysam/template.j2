@@ -120,6 +120,25 @@ Resources:
     Properties:
         LogGroupName: !Sub "apigw-${AWS::StackName}-${Stage}"
         RetentionInDays: 7
+
+  ####### CORS headers for API Gateway error responses (4xx/5xx before Lambda) ########
+  {% set gateway_response_types = [
+    ('ApiGatewayDefault4xxGatewayResponse', 'DEFAULT_4XX'),
+    ('ApiGatewayDefault5xxGatewayResponse', 'DEFAULT_5XX'),
+    ('ApiGatewayUnauthorizedGatewayResponse', 'UNAUTHORIZED'),
+    ('ApiGatewayAccessDeniedGatewayResponse', 'ACCESS_DENIED'),
+  ] %}
+  {% for resource_name, response_type in gateway_response_types %}
+  {{ resource_name }}:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      RestApiId: !Ref ApiDeployment
+      ResponseType: {{ response_type }}
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'*'"
+  {% endfor %}
   {% endif %}  # end paths
 
   # Streams
