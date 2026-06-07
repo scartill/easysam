@@ -6,7 +6,6 @@ import rich
 from benedict import benedict
 
 from easysam.commondep import commondep
-from easysam.definitions import FatalError
 from easysam.load import resources as load_resources
 from easysam.validate_cloud import validate as validate_cloud
 
@@ -50,9 +49,8 @@ def schema(obj, directory, path, select):
     try:
         resources_data = load_resources(directory, pypath, deploy_ctx, errors)
 
-    except FatalError as e:
+    except RuntimeError:
         lg.error('There were fatal errors. Interrupting schema validation.')
-        errors = e.errors
 
     if errors:
         rich.print(f'[red]There were {len(errors)} validation errors.[/red]')
@@ -94,9 +92,8 @@ def cloud(obj, directory, path):
         lg.info(f"Validating cloud resources for '{environment}'")
         validate_cloud(obj, resources_data, environment, errors)
 
-    except FatalError as e:
+    except RuntimeError:
         lg.error('There were fatal errors. Interrupting inspection.')
-        errors = e.errors
 
     if errors:
         for error in errors:

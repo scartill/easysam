@@ -15,7 +15,6 @@ from easysam.validate_schema import (
     validate as validate_schema,
     validate_local as validate_local_schema,
 )
-from easysam.definitions import FatalError
 
 
 IMPORT_FILE = 'easysam.yaml'
@@ -458,7 +457,7 @@ def check_condition(condition: str, value: list | str, deploy_ctx: dict[str, str
             f'Unable to resolve conditional resources. Consider adding "--{condition}"'
         )
 
-        raise FatalError(errors)
+        raise RuntimeError("Fatal error during resource loading")
 
     negate = value.startswith('~')
     value = value.lstrip('~')
