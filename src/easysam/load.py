@@ -15,6 +15,7 @@ from easysam.validate_schema import (
     validate as validate_schema,
     validate_local as validate_local_schema,
 )
+from easysam.definitions import FatalError
 
 
 IMPORT_FILE = 'easysam.yaml'
@@ -409,8 +410,6 @@ def preprocess_resources(
             elif isinstance(resources_data[section], list):
                 resources_data[section] = sorted(resources_data[section])
 
-    resources_data = sort_dict(resources_data)
-
 
 def check_lambda_layer(resources_dir: Path, resources_data: dict):
     thirdparty_dir = Path(resources_dir, 'thirdparty')
@@ -457,7 +456,7 @@ def check_condition(condition: str, value: list | str, deploy_ctx: dict[str, str
             f'Unable to resolve conditional resources. Consider adding "--{condition}"'
         )
 
-        raise RuntimeError()
+        raise FatalError(errors)
 
     negate = value.startswith('~')
     value = value.lstrip('~')

@@ -9,7 +9,7 @@ import yaml
 from mergedeep import merge
 
 from easysam.prismarine import generate as generate_prismarine_clients
-from easysam.definitions import ProcessingResult
+from easysam.definitions import FatalError, ProcessingResult
 from easysam.load import resources as load_resources
 
 
@@ -90,8 +90,8 @@ def generate(
 
         return resources_data, errors
 
-    except RuntimeError:
-        return benedict(), errors
+    except FatalError as e:
+        return benedict(), e.errors
 
 
 def invoke_plugin(
