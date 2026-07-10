@@ -1,3 +1,3 @@
-- The project uses custom `FatalError` exceptions which might be redundant.
+- The project uses custom `FatalError` exceptions; this pattern is preferred by the team for interrupting execution while preserving the error list.
 - `Conditional` inheriting from `yaml.YAMLObject` is cargo-culting because it uses a custom constructor anyway.
 - `expand_env_vars` is a custom recursive function that might be over-engineered.
