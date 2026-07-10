@@ -410,6 +410,8 @@ def preprocess_resources(
             elif isinstance(resources_data[section], list):
                 resources_data[section] = sorted(resources_data[section])
 
+    resources_data = sort_dict(resources_data)
+
 
 def check_lambda_layer(resources_dir: Path, resources_data: dict):
     thirdparty_dir = Path(resources_dir, 'thirdparty')
