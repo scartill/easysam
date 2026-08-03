@@ -147,6 +147,7 @@ From `docs/PRODUCTION_HARDENING.md`:
 
 From `CHANGELOG.md` and git history:
 
+- **OpenWiki automation** — Added GitHub Actions workflow (`.github/workflows/openwiki-update.yml`) for scheduled wiki updates (commit 55213b6)
 - **v1.12.1** — Added `GatewayResponse` CORS headers for API Gateway 401/403 responses (commit 7476b73)
 - **v1.12.0** — `!Conditional` support in local `easysam.yaml` files and Prismarine conditional tables (commits 08f51f8, 3a0b35d, 2bf1d55)
 - **v1.11.0** — Environment variable expansion, `.env` support, `budget` service

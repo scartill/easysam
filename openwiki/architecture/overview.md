@@ -11,22 +11,21 @@ EasySAM follows a linear pipeline: **YAML input → recursive import → conditi
 
 ## Pipeline flowchart
 
-<!-- openwiki: mermaid parse failed and this diagram was converted to a text fence so it does not break rendering. Fix the diagram source and restore the mermaid fence. Parser error: Heuristic: an unescaped angle bracket inside a label breaks rendering; rephrase the label. -->
-```text
+```mermaid
 flowchart TD
-    CLI["cli.py<br/>Click command group"] --> LOAD["load.py<br/>Load resources.yaml + .env"]
-    LOAD --> COND["resolve_conditionals<br/>!Conditional tag + deploy context"]
-    COND --> OVER["apply_overrides<br/>Context-file patches"]
-    OVER --> IMPORT["preprocess_imports<br/>Recursive easysam.yaml merge"]
-    IMPORT --> DEFAULTS["preprocess_defaults<br/>Set defaults for tables, paths, streams, functions"]
-    DEFAULTS --> PRISM["preprocess_prismarine<br/>Model-driven DynamoDB tables"]
-    PRISM --> VALID["validate_schema.py<br/>JSON Schema + custom rules"]
-    VALID --> LAYER["check_lambda_layer<br/>Detect thirdparty/ dir"]
-    LAYER --> GEN["generate.py<br/>Jinja template render"]
-    GEN --> J2["template.j2 → template.yml"]
-    GEN --> SWAG["swagger.j2 → build/swagger.yaml"]
-    GEN --> PRISMGEN["prismarine.py<br/>Generate DynamoDB clients"]
-    GEN --> DEPLOY["deploy.py<br/>SAM build + deploy"]
+    CLI["cli.py\nClick command group"] --> LOAD["load.py\nLoad resources.yaml + .env"]
+    LOAD --> COND["resolve_conditionals\n!Conditional tag + deploy context"]
+    COND --> OVER["apply_overrides\nContext-file patches"]
+    OVER --> IMPORT["preprocess_imports\nRecursive easysam.yaml merge"]
+    IMPORT --> DEFAULTS["preprocess_defaults\nSet defaults for tables, paths, streams, functions"]
+    DEFAULTS --> PRISM["preprocess_prismarine\nModel-driven DynamoDB tables"]
+    PRISM --> VALID["validate_schema.py\nJSON Schema + custom rules"]
+    VALID --> LAYER["check_lambda_layer\nDetect thirdparty/ dir"]
+    LAYER --> GEN["generate.py\nJinja template render"]
+    GEN --> J2["template.j2 to template.yml"]
+    GEN --> SWAG["swagger.j2 to build/swagger.yaml"]
+    GEN --> PRISMGEN["prismarine.py\nGenerate DynamoDB clients"]
+    GEN --> DEPLOY["deploy.py\nSAM build + deploy"]
     DEPLOY --> SAM["AWS SAM CLI"]
 ```
 

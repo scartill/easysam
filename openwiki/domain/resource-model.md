@@ -11,18 +11,17 @@ EasySAM uses a two-tier YAML model: a root `resources.yaml` defines global resou
 
 ## Two-tier model
 
-<!-- openwiki: mermaid parse failed and this diagram was converted to a text fence so it does not break rendering. Fix the diagram source and restore the mermaid fence. Parser error: Heuristic: an unescaped angle bracket inside a label breaks rendering; rephrase the label. -->
-```text
+```mermaid
 flowchart TD
-    ROOT["resources.yaml<br/>(root)"] --> IMPORT["import: list of dirs"]
+    ROOT["resources.yaml\n(root)"] --> IMPORT["import: list of dirs"]
     IMPORT --> SCAN["Recursive scan for easysam.yaml"]
-    SCAN --> LOCAL1["easysam.yaml<br/>lambda + tables"]
-    SCAN --> LOCAL2["easysam.yaml<br/>lambda + nested import"]
+    SCAN --> LOCAL1["easysam.yaml\nlambda + tables"]
+    SCAN --> LOCAL2["easysam.yaml\nlambda + nested import"]
     LOCAL2 --> NESTED["Nested easysam.yaml"]
     ROOT --> COND["!Conditional tags"]
-    COND --> RESOLVE["resolve_conditionals<br/>against deploy context"]
-    ROOT --> ENV["expand_env_vars<br/>${VAR} expansion"]
-    ROOT --> OVER["apply_overrides<br/>from context file"]
+    COND --> RESOLVE["resolve_conditionals\nagainst deploy context"]
+    ROOT --> ENV["expand_env_vars\n${VAR} expansion"]
+    ROOT --> OVER["apply_overrides\nfrom context file"]
     RESOLVE --> MERGE["Merged resources_data"]
     LOCAL1 --> MERGE
     ENV --> MERGE

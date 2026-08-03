@@ -59,6 +59,7 @@ For a Prismarine scaffold: `uv run easysam init --prismarine`
 - [Production Hardening](../docs/PRODUCTION_HARDENING.md) — pre-production checklist
 - [Examples Catalog](../example/README.md) — 15+ focused example projects
 - [Changelog](../CHANGELOG.md) — version history
+- [OpenWiki Update Workflow](../.github/workflows/openwiki-update.yml) — scheduled GitHub Actions workflow for wiki updates
 
 ## Backlog
 

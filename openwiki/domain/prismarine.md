@@ -13,16 +13,15 @@ Prismarine is an external Python library (`prismarine>=1.6.0` on PyPI) that Easy
 
 Prismarine interacts with EasySAM at two stages of the pipeline:
 
-<!-- openwiki: mermaid parse failed and this diagram was converted to a text fence so it does not break rendering. Fix the diagram source and restore the mermaid fence. Parser error: Heuristic: an unescaped angle bracket inside a label breaks rendering; rephrase the label. -->
-```text
+```mermaid
 flowchart TD
-    MODELS["common/myobject/models.py<br/>Prismarine Cluster + model classes"] --> PREPROC["preprocess_prismarine<br/>(load.py)"]
-    PREPROC --> DTABLES["prisma_easysam.build_dynamo_tables<br/>Generates table definitions"]
-    DTABLES --> MERGE["Merge into resources_data['tables']"]
+    MODELS["common/myobject/models.py\nPrismarine Cluster + model classes"] --> PREPROC["preprocess_prismarine\n(load.py)"]
+    PREPROC --> DTABLES["prisma_easysam.build_dynamo_tables\nGenerates table definitions"]
+    DTABLES --> MERGE["Merge into resources_data.tables"]
     MERGE --> VALID["Schema validation"]
     VALID --> TEMPL["template.j2 render"]
-    TEMPL --> CLIENT["prismarine.py:generate<br/>After template"]
-    CLIENT --> PCODE["prismarine_client.py<br/>Written to common/ dir"]
+    TEMPL --> CLIENT["prismarine.py:generate\nAfter template"]
+    CLIENT --> PCODE["prismarine_client.py\nWritten to common/ dir"]
 ```
 
 *Prismarine runs twice: once during loading to inject table definitions, and once after template generation to produce client code.*
