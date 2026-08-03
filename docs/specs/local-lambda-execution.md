@@ -75,7 +75,7 @@ graph TD
 
     E --> F[Incoming HTTP Request]
     F --> G[Route Match]
-    G --> H[Build v2 Event]
+    G --> H[Build Synthesized Event v1/v2]
     H --> I[Isolated Handler Import]
     I --> J[handler invocation]
     J --> K[Response Translation]
@@ -103,11 +103,12 @@ from contextlib import contextmanager
 def isolated_import_context(project_root: Path, lambda_dir: Path):
     """Temporarily set sys.path for isolated handler import.
     
-    Only purges modules originating from project_root or lambda_dir,
-    preserving third-party package caches (boto3, pydantic, etc.).
+    Purges ALL modules originating from project_root or lambda_dir on exit,
+    regardless of whether they existed before this context. This ensures
+    local code changes (common/, handler files) take effect on every request
+    while preserving third-party package caches (boto3, pydantic, etc.).
     """
     original_path = sys.path[:]
-    original_modules = set(sys.modules.keys())
 
     sys.path = [str(lambda_dir), str(project_root)] + sys.path
 
@@ -115,17 +116,18 @@ def isolated_import_context(project_root: Path, lambda_dir: Path):
         yield
     finally:
         sys.path = original_path
-        # Selectively remove only local project modules
-        new_modules = set(sys.modules.keys()) - original_modules
+        # Purge ALL modules whose __file__ is under project_root or lambda_dir
         project_root_str = str(project_root)
         lambda_dir_str = str(lambda_dir)
-        for mod_name in new_modules:
-            mod = sys.modules.get(mod_name)
+        to_remove = []
+        for mod_name, mod in sys.modules.items():
             if mod is None:
                 continue
             mod_file = getattr(mod, '__file__', None) or ''
             if mod_file.startswith(project_root_str) or mod_file.startswith(lambda_dir_str):
-                del sys.modules[mod_name]
+                to_remove.append(mod_name)
+        for mod_name in to_remove:
+            del sys.modules[mod_name]
 
 
 async def load_and_invoke(project_root: Path, lambda_dir: Path, event: dict, context) -> dict:
@@ -251,7 +253,7 @@ This ensures single-writer semantics for `os.environ` even under concurrent Fast
 
 - **Objective:** Build functions that construct both API Gateway v1 (REST API) and v2 (HTTP API) event dicts from a Starlette/FastAPI Request, with auth context injection
 - **Implementation:**
-  - `build_rest_api_event(request, path_params, resource_path, auth_context) -> dict` — v1 format with `httpMethod`, `resource`, `multiValueHeaders`, `multiValueQueryStringParameters`, `requestContext.identity`, and `requestContext.authorizer` (from `auth_context` dict)
+  - `build_rest_api_event(request, path_params, resource_path, auth_context) -> dict` — v1 format with `httpMethod`, `resource`, `multiValueHeaders`, `multiValueQueryStringParameters` (using `request.query_params.multi_items()` to preserve repeated keys), `requestContext.identity`, and `requestContext.authorizer` (from `auth_context` dict)
   - `build_http_api_event(request, path_params, route_key, auth_context) -> dict` — v2 format with `version: "2.0"`, `routeKey`, `rawPath`, `rawQueryString`, flat headers/query params, and `requestContext.authorizer.lambda` (from `auth_context` dict)
   - `build_event(request, path_params, route_path, event_format: str, auth_context: dict) -> dict` — dispatcher that calls v1 or v2 builder based on format string
   - Handles: method, path, query string, headers, body (with base64 for binary), requestContext with timestamps
@@ -280,12 +282,13 @@ This ensures single-writer semantics for `os.environ` even under concurrent Fast
   - CORS middleware: allow all
   - Create a module-level `asyncio.Lock()` (`_invocation_lock`) for serializing handler invocations with envvar mutations
   - For each `RouteInfo` (sorted: exact first, greedy last), register an async route handler that:
-    1. Acquires `_invocation_lock`
-    2. Sets per-function envvars in `os.environ`
-    3. Builds v2 event from request
-    4. Calls `await load_and_invoke()` with isolation
-    5. Restores envvars and releases lock
-    6. Translates handler response to HTTP response
+    1. `async with _invocation_lock:`
+    2. Inside a `try...finally` block:
+       - Set per-function envvars in `os.environ`
+       - Build event from request (dispatching v1/v2 based on `event_format`)
+       - Call `await load_and_invoke()` with isolation
+    3. In `finally`: restore envvars (guaranteed even if handler raises)
+    4. Translate handler response to HTTP response
   - **Response normalization (API GW v2 parity):**
     - If handler returns a dict without `statusCode` → default to `200`, JSON-encode the dict as body
     - If handler returns a string/primitive → wrap as `{"statusCode": 200, "body": value}`
@@ -318,7 +321,7 @@ This ensures single-writer semantics for `os.environ` even under concurrent Fast
     - A file path (if path exists, read JSON from file)
     - An inline JSON string (e.g., `'{"key":"value"}'`)
     - If omitted, defaults to empty dict `{}`
-  - Logic: load resources → resolve function uri → load handler in isolation → call with event → print response JSON to stdout
+  - Logic: load resources → resolve function uri → load handler in isolation → call with event → print response via `json.dumps(result, indent=2, default=str)` to stdout (handles non-serializable types like Decimal, datetime gracefully)
   - Error if function name not found in resources
 - **Test:** Invoke a handler with a mock DynamoDB stream event JSON (both from file and inline); verify stdout contains expected response. Also test default empty event.
 - **Demo:** `uv run easysam --environment dev local invoke myfunction --event tests/fixtures/stream-event.json`
