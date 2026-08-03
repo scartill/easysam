@@ -128,44 +128,44 @@ uv run easysam --environment dev local invoke myfunction --event event.json
 
 API Gateway v1 (REST API) or v2 (HTTP API)?
 
-**Answer:** _TBD_
+**Answer:** HTTP API
 
 ### 2. Should handler invocation be in-process or subprocess-isolated?
 
 In-process is faster but shares memory/global state. Subprocess is safer but slower.
 
-**Answer:** _TBD_
+**Answer:** In-process is enough in terms of safety. However, I'm not sure the python dependencies and module resolution process can handle multiple lambdas properly.
 
 ### 3. How should `common/` code and layers be resolved on the local path?
 
 Need to match the packaging layout that EasySAM creates for deployment.
 
-**Answer:** _TBD_
+**Answer:** Python's `path` shall be amended, so the lambda code sees it as if deployed.
 
 ### 4. Should hot reload be included in v1 or deferred?
 
 watchfiles adds a dependency but massively improves DX.
 
-**Answer:** _TBD_
+**Answer:** defer
 
 ### 5. How to handle greedy routes (`{proxy+}`)?
 
 Need a route-matching strategy that supports path parameters and catch-all patterns.
 
-**Answer:** _TBD_
+**Answer:** all lambda integrations have a boolean `greedy` parameter.
 
 ### 6. What env var resolution strategy for real cloud resources?
 
 Options: read from deployed stack outputs, derive from naming conventions, require manual `.env` entries.
 
-**Answer:** _TBD_
+**Answer:** `resources.yaml` and `easysam.yaml` files have `envvars` clauses. Use these. Not vars are set in the cloud manually.
 
 ### 7. Should non-HTTP trigger invocation (`local invoke`) be part of the same command or separate?
 
-**Answer:** _TBD_
+**Answer:** Separate
 
 ### 8. What HTTP server library to use?
 
 Options: uvicorn + raw ASGI, FastAPI (adds dependency), Flask, http.server (stdlib).
 
-**Answer:** _TBD_
+**Answer:** FastAPI
