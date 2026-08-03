@@ -7,19 +7,19 @@ EasySAM needs a local HTTP server command (`easysam local .`) that mocks API Gat
 ## Requirements
 
 1. FastAPI-based local HTTP server started via `uv run easysam --environment dev local . --port 3000`
-2. API Gateway HTTP API (v2) event format for synthesized events
+2. Support both API Gateway REST API (v1) and HTTP API (v2) event formats, selectable via `--event-format v1|v2` CLI option (default: `v1` to match current EasySAM template generation)
 3. Per-request isolated handler imports using `importlib.util.spec_from_file_location` to handle conflicting local module names across lambdas
 4. `sys.path` set per-invocation to `[lambda_uri_dir, project_root]` so `common/` resolves directly from source (no deploy-time copy)
 5. Greedy routes resolved using the existing `greedy` boolean from integration definitions
 6. Environment variables loaded from `.env` + `envvars` clauses (global and per-function) in resource definitions
 7. CORS wide-open by default (all origins, methods, headers)
-8. Authorizers bypassed in local mode
+8. Authorization stub injection: authorizer Lambdas are not executed locally; instead, a `--auth-context` option (JSON file or inline string) provides a fixed `requestContext.authorizer` payload injected into every request's event. Defaults to `{}` if not provided. This is global (all routes get the same context).
 9. Separate `local invoke <function> --event file.json` command for non-HTTP triggers (SQS/Kinesis/DynamoDB stream)
 10. No hot reload in v1 (deferred)
 11. Function URLs exposed as additional routes at `/__fn/<function_name>`
 12. Async Lambda handlers (`async def handler`) must be detected and awaited correctly
 13. Per-request environment variable mutation must be synchronized via `asyncio.Lock()` to prevent concurrent `os.environ` race conditions
-14. API Gateway v2 response normalization: handle simple dict returns (default `statusCode: 200`), base64 decoding for `isBase64Encoded: True`, and 500 with formatted tracebacks on uncaught exceptions
+14. API Gateway response normalization: for v1, handler must return `{"statusCode", "body", "headers"}`; for v2, also handle simple dict returns (default `statusCode: 200`). Both formats support base64 decoding for `isBase64Encoded: True`, and 500 with formatted tracebacks on uncaught exceptions
 15. Selective module cleanup: invalidate only modules originating from local paths (`project_root` and `lambda_dir`) without purging third-party dependencies from `sys.modules`
 16. Routes must be sorted by specificity (exact paths before greedy catch-alls) to prevent FastAPI route shadowing
 17. `local invoke` accepts inline JSON string, file path, or defaults to `{}` if `--event` is omitted
@@ -148,13 +148,43 @@ async def load_and_invoke(project_root: Path, lambda_dir: Path, event: dict, con
             return handler(event, context)
 ```
 
-### Event Format (HTTP API v2)
+### Event Format
+
+Selectable via `--event-format v1|v2` (default: `v1`).
+
+#### API Gateway REST API (v1) — default
+
+```python
+{
+    "resource": "/items/{id}",
+    "path": "/items/123",
+    "httpMethod": "GET",
+    "headers": {"Content-Type": "application/json", ...},
+    "multiValueHeaders": {"Content-Type": ["application/json"], ...},
+    "queryStringParameters": {"page": "1"},
+    "multiValueQueryStringParameters": {"page": ["1"]},
+    "pathParameters": {"id": "123"},
+    "body": None,
+    "isBase64Encoded": False,
+    "requestContext": {
+        "resourcePath": "/items/{id}",
+        "httpMethod": "GET",
+        "path": "/items/123",
+        "stage": "local",
+        "requestId": "<uuid>",
+        "identity": {"sourceIp": "127.0.0.1"},
+        "authorizer": {"principalId": "debug_principal", ...}  # ← from --auth-context
+    }
+}
+```
+
+#### API Gateway HTTP API (v2)
 
 ```python
 {
     "version": "2.0",
-    "routeKey": "GET /items",
-    "rawPath": "/items",
+    "routeKey": "GET /items/{id}",
+    "rawPath": "/items/123",
     "rawQueryString": "page=1&limit=10",
     "headers": {"content-type": "application/json", ...},
     "queryStringParameters": {"page": "1", "limit": "10"},
@@ -164,9 +194,10 @@ async def load_and_invoke(project_root: Path, lambda_dir: Path, event: dict, con
     "requestContext": {
         "http": {
             "method": "GET",
-            "path": "/items",
+            "path": "/items/123",
             "sourceIp": "127.0.0.1"
         },
+        "authorizer": {"lambda": {"principalId": "debug_principal", ...}},  # ← from --auth-context
         "time": "03/Aug/2026:17:00:00 +0000",
         "timeEpoch": 1785934800000
     }
@@ -216,14 +247,16 @@ This ensures single-writer semantics for `os.environ` even under concurrent Fast
 - **Test:** Create two temp lambdas, each with a `helpers.py` defining different values. Invoke both in sequence. Verify each returns its own value (no cross-contamination via `sys.modules`). Also test an `async def handler` returns correctly.
 - **Demo:** `pytest tests/test_local_handler.py -v`
 
-### Task 3: API Gateway v2 event builder — `src/easysam/local_event.py`
+### Task 3: API Gateway event builder — `src/easysam/local_event.py`
 
-- **Objective:** Build a function that constructs an HTTP API v2 event dict from a Starlette/FastAPI Request
+- **Objective:** Build functions that construct both API Gateway v1 (REST API) and v2 (HTTP API) event dicts from a Starlette/FastAPI Request, with auth context injection
 - **Implementation:**
-  - `build_http_api_event(request, path_params, route_key) -> dict`
-  - Handles: method, path, query string, headers (lowercase), body (with base64 for binary), requestContext with timestamps
+  - `build_rest_api_event(request, path_params, resource_path, auth_context) -> dict` — v1 format with `httpMethod`, `resource`, `multiValueHeaders`, `multiValueQueryStringParameters`, `requestContext.identity`, and `requestContext.authorizer` (from `auth_context` dict)
+  - `build_http_api_event(request, path_params, route_key, auth_context) -> dict` — v2 format with `version: "2.0"`, `routeKey`, `rawPath`, `rawQueryString`, flat headers/query params, and `requestContext.authorizer.lambda` (from `auth_context` dict)
+  - `build_event(request, path_params, route_path, event_format: str, auth_context: dict) -> dict` — dispatcher that calls v1 or v2 builder based on format string
+  - Handles: method, path, query string, headers, body (with base64 for binary), requestContext with timestamps
   - `create_mock_context(function_name) -> MockLambdaContext`
-- **Test:** Unit test building events from mock requests; verify structure matches AWS v2 format for GET with query params, POST with JSON body, and request with path parameters.
+- **Test:** Unit test building events from mock requests for both v1 and v2 formats; verify `requestContext.authorizer` is populated from provided auth_context dict (e.g., `{"principalId": "debug_principal"}`). Also test empty auth_context produces empty authorizer object.
 - **Demo:** `pytest tests/test_local_event.py -v`
 
 ### Task 4: Route builder — `src/easysam/local_routes.py`
@@ -268,11 +301,12 @@ This ensures single-writer semantics for `os.environ` even under concurrent Fast
 - **Implementation:**
   - New Click group `local` in `src/easysam/local_cli.py`
   - Default subcommand (or group invoke): start server
-  - Options: `--port` (default 3000), `--host` (default 127.0.0.1)
-  - Logic: load resources → set global envvars → create app → `uvicorn.run(app, host, port)`
+  - Options: `--port` (default 3000), `--host` (default 127.0.0.1), `--event-format` (choices: `v1`, `v2`, default: `v1`), `--auth-context` (optional, JSON file path or inline JSON string; defaults to `{}`)
+  - `--auth-context` parsing: if the value is a path to an existing file, read JSON from it; otherwise parse as inline JSON string
+  - Logic: load resources → set global envvars → parse auth-context → create app (passing event_format + auth_context) → `uvicorn.run(app, host, port)`
   - Register in `cli.py`: `easysam.add_command(local)` alongside `inspect`
-- **Test:** Invoke `easysam local --help` and verify it shows options without error.
-- **Demo:** `uv run easysam --environment dev local . --port 3000`
+- **Test:** Invoke `easysam local --help` and verify it shows options (including `--event-format` and `--auth-context`) without error.
+- **Demo:** `uv run easysam --environment dev local . --port 3000 --auth-context '{"principalId": "debug_principal"}'`
 
 ### Task 7: CLI `local invoke` command
 
