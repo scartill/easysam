@@ -169,3 +169,26 @@ Options: read from deployed stack outputs, derive from naming conventions, requi
 Options: uvicorn + raw ASGI, FastAPI (adds dependency), Flask, http.server (stdlib).
 
 **Answer:** FastAPI
+
+### 9. Do any real projects have lambdas with conflicting local module names?
+
+  E.g., two lambdas each with their own `helpers.py` that import as `import helpers`.
+
+  **Answer:** Yes, there are multiple such cases
+
+  ### 10. Import strategy: once at startup or per-request?
+
+  "Import all handlers once at startup" is fast and needs no isolation per-request.
+  "Per-request fresh imports" is slower but guarantees no leaked global state between
+  invocations.
+
+  **Answer:** Slower is OK
+
+  ### 11. How should `common/` resolve locally?
+
+  Option A: Add the project root to `sys.path` so `import common.utils` works naturally from
+  source.
+  Option B: Mimic the deploy-time copy behavior (AST-analyze deps, copy subset into each
+  lambda dir).
+
+  **Answer:** A
