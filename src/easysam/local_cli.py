@@ -16,7 +16,7 @@ import click
 
 from easysam.load import resources as load_resources
 from easysam.local_handler import MockLambdaContext, load_and_invoke
-from easysam.local_server import create_app
+from easysam.local_server import local as local_facade
 
 
 def _parse_json_option(value: str | None, param_name: str) -> dict:
@@ -90,27 +90,9 @@ def local(ctx, directory, port, host, event_format, auth_context):
     # Parse auth context
     auth_ctx = _parse_json_option(auth_context, '--auth-context')
 
-    # Load resources
+    # Load resources and start server via facade
     deploy_ctx = ctx.obj.get('deploy_ctx', {'environment': 'dev', 'target_region': 'us-east-1'})
-    errors = []
-    resources_data = load_resources(directory, [], deploy_ctx, errors)
-
-    if errors:
-        for e in errors:
-            lg.error(e)
-        sys.exit(1)
-
-    # Set global envvars
-    for key, value in resources_data.get('envvars', {}).items():
-        os.environ[key] = str(value)
-
-    # Create app and run
-    app = create_app(resources_data, directory, event_format, auth_ctx)
-
-    import uvicorn
-
-    lg.info(f'Starting local server on {host}:{port} (event format: {event_format})')
-    uvicorn.run(app, host=host, port=port)
+    local_facade(directory, deploy_ctx, port=port, host=host, event_format=event_format, auth_context=auth_ctx)
 
 
 @local.command(name='invoke', help='Invoke a Lambda function locally with a custom event')

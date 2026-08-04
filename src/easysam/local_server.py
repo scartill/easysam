@@ -23,6 +23,55 @@ from easysam.local_handler import MockLambdaContext, load_and_invoke
 from easysam.local_routes import RouteInfo, build_routes
 
 
+def local(
+    directory: Path,
+    deploy_ctx: dict,
+    port: int = 3000,
+    host: str = '127.0.0.1',
+    event_format: str = 'v1',
+    auth_context: dict | None = None,
+) -> None:
+    """Start the local Lambda execution server.
+
+    Facade function for programmatic use — starts a local HTTP server
+    that mocks API Gateway routing and invokes Lambda handlers directly.
+
+    Args:
+        directory: Project root directory containing resources.yaml.
+        deploy_ctx: Deployment context dict (must include 'environment').
+        port: Port to listen on (default: 3000).
+        host: Host to bind to (default: '127.0.0.1').
+        event_format: API Gateway event format, 'v1' (REST) or 'v2' (HTTP API).
+        auth_context: Authorization context dict injected into requestContext.authorizer.
+
+    Raises:
+        UserWarning: If resource loading produces errors.
+    """
+    import uvicorn
+
+    from easysam.load import resources as load_resources
+
+    if auth_context is None:
+        auth_context = {}
+
+    errors = []
+    resources_data = load_resources(directory, [], deploy_ctx, errors)
+
+    if errors:
+        for e in errors:
+            lg.error(e)
+        raise UserWarning(f'There were {len(errors)} error(s) loading resources')
+
+    # Set global envvars
+    for key, value in resources_data.get('envvars', {}).items():
+        os.environ[key] = str(value)
+
+    app = create_app(resources_data, directory, event_format, auth_context)
+
+    lg.info(f'Starting local server on {host}:{port} (event format: {event_format})')
+    uvicorn.run(app, host=host, port=port)
+
+
 # Module-level lock for serializing handler invocations with envvar mutations
 _invocation_lock = asyncio.Lock()
 
