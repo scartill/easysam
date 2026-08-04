@@ -138,10 +138,57 @@ easysam inspect common-deps backend/function/myfunction
 easysam inspect common-deps backend/function/myfunction --common-dir common
 ```
 
+### `local`
+
+Start a local HTTP server that mocks API Gateway routing, calling Lambda handlers directly without deployment.
+
+```bash
+easysam --environment dev local -d .
+easysam --environment dev local -d . --port 8080 --event-format v2
+easysam --environment dev local -d . --auth-context '{"principalId": "dev-user"}'
+```
+
+Options:
+
+- `-d, --directory PATH`: project directory (default: `.`)
+- `--port INTEGER`: port to listen on (default: `3000`)
+- `--host TEXT`: host to bind to (default: `127.0.0.1`)
+- `--event-format [v1|v2]`: API Gateway event format — `v1` for REST API, `v2` for HTTP API (default: `v1`)
+- `--auth-context TEXT`: authorization context as JSON file path or inline JSON string; injected into `requestContext.authorizer` on every request (default: `{}`)
+
+Behavior:
+
+- Loads `resources.yaml` and imports, builds a route table from `paths`
+- Sets environment variables from `.env` and `envvars` clauses
+- Starts a FastAPI/uvicorn server on the specified host:port
+- All routes accept any HTTP method
+- CORS is wide-open (all origins, methods, headers)
+- Authorizer Lambdas are **not** executed; use `--auth-context` to inject static auth data
+- Lambda handlers are imported fresh on every request for isolation
+- Greedy routes (with `greedy: true`) match both exact and sub-paths
+- Function URLs are exposed at `/__fn/<function-name>`
+
+#### `local invoke FUNCTION_NAME`
+
+Invoke a single Lambda function with a custom event (for non-HTTP triggers).
+
+```bash
+easysam --environment dev local -d . invoke myfunction --event event.json
+easysam --environment dev local -d . invoke myfunction --event '{"Records": [...]}'
+easysam --environment dev local -d . invoke myfunction
+```
+
+Options:
+
+- `--event TEXT`: event payload as JSON file path or inline JSON string (default: `{}`)
+
+Output: handler response printed as formatted JSON to stdout.
+
 ## Typical workflow
 
 ```bash
 easysam --environment dev inspect schema .
 easysam --environment dev generate .
+easysam --environment dev local -d .                    # test locally before deploying
 easysam --environment dev --aws-profile my-profile deploy . --tag project=myapp
 ```
