@@ -4,8 +4,6 @@ Creates a FastAPI app that routes HTTP requests to Lambda handlers
 with thread-safe environment variable handling and response normalization.
 """
 
-from __future__ import annotations
-
 import asyncio
 import base64
 import json

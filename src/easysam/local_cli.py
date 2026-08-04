@@ -5,8 +5,6 @@ Provides:
 - `easysam local invoke <function>` — invoke a single function with a custom event
 """
 
-from __future__ import annotations
-
 import asyncio
 import json
 import logging as lg

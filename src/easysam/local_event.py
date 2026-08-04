@@ -3,8 +3,6 @@
 Supports both REST API (v1) and HTTP API (v2) event formats.
 """
 
-from __future__ import annotations
-
 import base64
 import time
 import uuid
