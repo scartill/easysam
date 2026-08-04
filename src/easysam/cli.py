@@ -14,6 +14,7 @@ from easysam.deploy import remove_common_dependencies
 from easysam.init import init
 
 from easysam.inspect import inspect
+from easysam.local_cli import local
 
 
 @click.group(help='EasySAM is a tool for generating SAM templates from simple YAML files')
@@ -118,6 +119,7 @@ def init_cmd(obj, prismarine):
 def main():
     try:
         easysam.add_command(inspect)
+        easysam.add_command(local)
         easysam()
 
     except UserWarning as e:
