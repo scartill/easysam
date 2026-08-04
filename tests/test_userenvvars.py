@@ -34,7 +34,7 @@ def test_userenvvars_generation():
     with open(template_path, 'r') as f:
         template = yaml.safe_load(f)
 
-    resources = template['Resources']
+    resources = template['Resources']  # noqa: F841
 
     # Verify Globals
     assert 'Globals' in template

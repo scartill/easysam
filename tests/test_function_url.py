@@ -65,7 +65,7 @@ def test_functionurl_generation():
 
 def test_functionurl_validation_error():
     example_path = Path('example/functionurl')
-    cliparams = {'verbose': True}
+    cliparams = {'verbose': True}  # noqa: F841
     deploy_ctx = {'environment': 'dev', 'target_region': 'us-east-1'}
 
     # Create invalid resources data
