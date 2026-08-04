@@ -52,11 +52,13 @@ def isolated_import_context(project_root: Path, lambda_dir: Path):
                 del sys.modules[name]
                 continue
             mod_file = getattr(mod, '__file__', None)
-            if mod_file and mod_file.startswith(project_root_abs):
-                del sys.modules[name]
-            elif mod_file and not mod_file.startswith(project_root_abs):
-                # Stale common module from a different project — remove it
-                del sys.modules[name]
+            if mod_file:
+                mod_file_resolved = str(Path(mod_file).resolve())
+                if mod_file_resolved.startswith(project_root_abs):
+                    del sys.modules[name]
+                else:
+                    # Stale common module from a different project — remove it
+                    del sys.modules[name]
 
     original_path = sys.path.copy()
     sys.path = [lambda_dir_abs, project_root_abs] + sys.path
@@ -70,7 +72,8 @@ def isolated_import_context(project_root: Path, lambda_dir: Path):
             module_file = getattr(module, "__file__", None)
             if module_file is None:
                 continue
-            if module_file.startswith(project_root_abs) or module_file.startswith(
+            module_file_resolved = str(Path(module_file).resolve())
+            if module_file_resolved.startswith(project_root_abs) or module_file_resolved.startswith(
                 lambda_dir_abs
             ):
                 del sys.modules[name]

@@ -1,7 +1,6 @@
 """Tests for the FastAPI app factory (local_server)."""
 
 import json
-from pathlib import Path
 
 from fastapi.testclient import TestClient
 

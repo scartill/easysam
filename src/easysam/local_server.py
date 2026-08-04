@@ -131,8 +131,14 @@ def _register_route(
         try:
             # Extract path params from the request's path_params
             path_params = dict(request.path_params)
-            if 'path' in path_params:
+            if route.is_greedy and 'path' in path_params:
                 path_params['proxy'] = path_params.pop('path')
+
+            # Build event OUTSIDE the lock (reads request body without blocking others)
+            event = await build_event(
+                request, path_params, route.resource_path, event_format, auth_context
+            )
+            context = MockLambdaContext(function_name=route.function_name)
 
             async with _invocation_lock:
                 saved_env: dict[str, str | None] = {}
@@ -141,12 +147,6 @@ def _register_route(
                     for key, value in func_envvars.items():
                         saved_env[key] = os.environ.get(key)
                         os.environ[key] = str(value)
-
-                    # Build event
-                    event = await build_event(
-                        request, path_params, route.resource_path, event_format, auth_context
-                    )
-                    context = MockLambdaContext(function_name=route.function_name)
 
                     # Invoke handler
                     result = await load_and_invoke(project_root, route.lambda_dir, event, context)
@@ -174,7 +174,8 @@ def _register_route(
         return response
 
     # Give each handler a unique name to avoid FastAPI route conflicts
-    route_handler.__name__ = f'handle_{route.function_name}_{route.path.replace("/", "_").replace("{", "").replace("}", "")}'
+    sanitized_path = route.path.replace('/', '_').replace('{', '').replace('}', '')
+    route_handler.__name__ = f'handle_{route.function_name}_{sanitized_path}'
 
     app.api_route(
         route.path,

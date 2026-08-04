@@ -4,7 +4,6 @@ Tests the full flow against example/myapp:
 resource loading → route registration → handler invocation → response.
 """
 
-import json
 from pathlib import Path
 
 from fastapi.testclient import TestClient

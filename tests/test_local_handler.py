@@ -3,7 +3,6 @@
 import asyncio
 from pathlib import Path
 
-import pytest
 
 from easysam.local_handler import MockLambdaContext, load_and_invoke
 

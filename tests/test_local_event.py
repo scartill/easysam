@@ -3,7 +3,6 @@
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 
 from easysam.local_event import (
     build_event,

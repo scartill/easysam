@@ -27,13 +27,16 @@ def _parse_json_option(value: str | None, param_name: str) -> dict:
     if value is None:
         return {}
 
-    # Try as file path first
-    path = Path(value)
-    if path.exists() and path.is_file():
-        try:
-            return json.loads(path.read_text(encoding='utf-8'))
-        except json.JSONDecodeError as e:
-            raise click.BadParameter(f'Invalid JSON in file {value}: {e}', param_hint=param_name)
+    # Try as file path first (may raise OSError on Windows for JSON-like strings)
+    try:
+        path = Path(value)
+        if path.exists() and path.is_file():
+            try:
+                return json.loads(path.read_text(encoding='utf-8'))
+            except json.JSONDecodeError as e:
+                raise click.BadParameter(f'Invalid JSON in file {value}: {e}', param_hint=param_name)
+    except (OSError, ValueError):
+        pass
 
     # Try as inline JSON
     try:

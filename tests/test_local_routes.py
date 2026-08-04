@@ -1,5 +1,5 @@
 from pathlib import Path
-from easysam.local_routes import build_routes, RouteInfo
+from easysam.local_routes import build_routes
 
 def test_build_routes_basic():
     resources_data = {
@@ -14,16 +14,16 @@ def test_build_routes_basic():
     }
     project_root = Path('/project')
     routes = build_routes(resources_data, project_root)
-    
+
     # Should have 3 routes: /items, /proxy (exact), /proxy/{path:path} (greedy)
     assert len(routes) == 3
-    
+
     # Non-greedy routes come first
     non_greedy = [r for r in routes if not r.is_greedy]
     greedy = [r for r in routes if r.is_greedy]
     assert len(non_greedy) == 2
     assert len(greedy) == 1
-    
+
     # Verify greedy route comes last
     assert routes[-1].is_greedy
     assert routes[-1].path == '/proxy/{path:path}'
@@ -38,7 +38,7 @@ def test_build_routes_function_url():
     }
     project_root = Path('/project')
     routes = build_routes(resources_data, project_root)
-    
+
     assert len(routes) == 1
     assert routes[0].path == '/__fn/hello'
     assert routes[0].is_function_url
@@ -64,7 +64,7 @@ def test_build_routes_sorting_order():
         }
     }
     routes = build_routes(resources_data, Path('/project'))
-    
+
     # All non-greedy should come before all greedy
     greedy_seen = False
     for r in routes:

@@ -4,7 +4,6 @@ Supports both REST API (v1) and HTTP API (v2) event formats.
 """
 
 import base64
-import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any
