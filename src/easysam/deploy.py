@@ -4,6 +4,8 @@ import time
 import shutil
 from pathlib import Path
 import subprocess
+import re
+from packaging.version import Version
 
 from benedict import benedict
 from rich.live import Live
@@ -95,9 +97,9 @@ def check_pip_version(cliparams):
 
     try:
         lg.debug(f'Running command: {" ".join(["pip", "--version"])}')
-        pip_version = subprocess.check_output(['pip', '--version']).decode('utf-8')
-
-        if pip_version < PIP_VERSION:
+        pip_out = subprocess.check_output(['pip', '--version']).decode('utf-8')
+        match = re.search(r'pip\s+([\d.]+)', pip_out)
+        if not match or Version(match.group(1)) < Version(PIP_VERSION):
             raise UserWarning(f'pip version must be {PIP_VERSION} or higher')
 
     except Exception as e:
@@ -112,10 +114,10 @@ def check_sam_cli_version(cliparams):
 
     try:
         lg.debug(f'Running command: {" ".join(sam_params)}')
-        sam_version = subprocess.check_output(sam_params).decode('utf-8')
-        lg.debug(f'SAM CLI version: {sam_version}')
-
-        if sam_version < SAM_CLI_VERSION:
+        sam_out = subprocess.check_output(sam_params).decode('utf-8')
+        lg.debug(f'SAM CLI version: {sam_out}')
+        match = re.search(r'version\s+([\d.]+)', sam_out)
+        if not match or Version(match.group(1)) < Version(SAM_CLI_VERSION):
             raise UserWarning(f'SAM CLI version must be {SAM_CLI_VERSION} or higher')
 
     except Exception as e:
