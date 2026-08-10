@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 
 from benedict import benedict
 import click
+from dotenv import load_dotenv
 
 from easysam.generate import generate
 from easysam.deploy import deploy, delete
@@ -15,6 +16,9 @@ from easysam.init import init
 
 from easysam.inspect import inspect
 from easysam.local_cli import local
+
+# Load .env early so EASYSAM_* env vars are available for Click's envvar defaults
+load_dotenv()
 
 
 @click.group(help='EasySAM is a tool for generating SAM templates from simple YAML files')

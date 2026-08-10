@@ -68,13 +68,18 @@ def local(
         os.environ[key] = str(value)
 
     # Inject target region as AWS_DEFAULT_REGION if not already set
-    target_region = deploy_ctx.get('target_region')
-    if target_region and 'AWS_DEFAULT_REGION' not in os.environ:
-        os.environ['AWS_DEFAULT_REGION'] = target_region
+    target_region = deploy_ctx.get('target_region') or os.environ.get('EASYSAM_TARGET_REGION')
+    if target_region:
+        os.environ.setdefault('AWS_DEFAULT_REGION', target_region)
+        os.environ.setdefault('AWS_REGION', target_region)
+        lg.info(f'AWS region: {target_region}')
 
     # Inject AWS profile if not already set
-    if aws_profile and 'AWS_PROFILE' not in os.environ:
-        os.environ['AWS_PROFILE'] = aws_profile
+    if not aws_profile:
+        aws_profile = os.environ.get('EASYSAM_AWS_PROFILE')
+    if aws_profile:
+        os.environ.setdefault('AWS_PROFILE', aws_profile)
+        lg.info(f'AWS profile: {aws_profile}')
 
     app = create_app(resources_data, directory, event_format, auth_context)
 
