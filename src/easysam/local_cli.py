@@ -66,11 +66,10 @@ def _parse_json_option(value: str | None, param_name: str) -> dict:
     default=None,
     help='Auth context: JSON file path or inline JSON string (injected into requestContext.authorizer)',
 )
-@click.option(
-    '--directory', '-d',
+@click.argument(
+    'directory',
     type=click.Path(exists=True, path_type=Path),
     default='.',
-    help='Project directory (default: current directory)',
 )
 def local(ctx, directory, port, host, event_format, auth_context):
     """Start a local HTTP server that mocks API Gateway routing."""
