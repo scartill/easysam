@@ -1,5 +1,6 @@
 """Local Lambda handler loading with module isolation."""
 
+import asyncio
 import importlib.util
 import inspect
 import sys
@@ -96,6 +97,16 @@ async def load_and_invoke(
         if inspect.iscoroutinefunction(handler):
             result = await handler(event, context)
         else:
-            result = handler(event, context)
+            def _invoke_sync():
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    return handler(event, context)
+                finally:
+                    loop.close()
+
+            result = await asyncio.get_event_loop().run_in_executor(
+                None, _invoke_sync
+            )
 
     return result
