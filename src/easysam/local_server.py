@@ -30,6 +30,7 @@ def local(
     host: str = '127.0.0.1',
     event_format: str = 'v1',
     auth_context: dict | None = None,
+    aws_profile: str | None = None,
 ) -> None:
     """Start the local Lambda execution server.
 
@@ -65,6 +66,15 @@ def local(
     # Set global envvars
     for key, value in resources_data.get('envvars', {}).items():
         os.environ[key] = str(value)
+
+    # Inject target region as AWS_DEFAULT_REGION if not already set
+    target_region = deploy_ctx.get('target_region')
+    if target_region and 'AWS_DEFAULT_REGION' not in os.environ:
+        os.environ['AWS_DEFAULT_REGION'] = target_region
+
+    # Inject AWS profile if not already set
+    if aws_profile and 'AWS_PROFILE' not in os.environ:
+        os.environ['AWS_PROFILE'] = aws_profile
 
     app = create_app(resources_data, directory, event_format, auth_context)
 

@@ -91,7 +91,8 @@ def local(ctx, directory, port, host, event_format, auth_context):
 
     # Load resources and start server via facade
     deploy_ctx = ctx.obj.get('deploy_ctx', {'environment': 'dev', 'target_region': 'us-east-1'})
-    local_facade(directory, deploy_ctx, port=port, host=host, event_format=event_format, auth_context=auth_ctx)
+    aws_profile = ctx.obj.get('aws_profile')
+    local_facade(directory, deploy_ctx, port=port, host=host, event_format=event_format, auth_context=auth_ctx, aws_profile=aws_profile)
 
 
 @local.command(name='invoke', help='Invoke a Lambda function locally with a custom event')
@@ -134,6 +135,16 @@ def invoke_cmd(ctx, function_name, event):
     # Set global envvars
     for key, value in resources_data.get('envvars', {}).items():
         os.environ[key] = str(value)
+
+    # Inject target region as AWS_DEFAULT_REGION if not already set
+    target_region = deploy_ctx.get('target_region')
+    if target_region and 'AWS_DEFAULT_REGION' not in os.environ:
+        os.environ['AWS_DEFAULT_REGION'] = target_region
+
+    # Inject AWS profile if not already set
+    aws_profile = ctx.obj.get('aws_profile')
+    if aws_profile and 'AWS_PROFILE' not in os.environ:
+        os.environ['AWS_PROFILE'] = aws_profile
 
     # Set per-function envvars
     for key, value in func_config.get('envvars', {}).items():
