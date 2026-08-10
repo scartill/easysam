@@ -20,14 +20,16 @@ If you installed EasySAM with `uv add --dev easysam`, use `uv run easysam ...`.
 
 ## Global options
 
-| Option | Description | Default |
-| --- | --- | --- |
-| `--aws-profile TEXT` | AWS named profile for API calls and SAM deploy | none |
-| `--context-file PATH` | YAML deploy context (for conditionals/overrides) | none |
-| `--target-region TEXT` | AWS region used in deploy context | none |
-| `--environment TEXT` | Stack/environment name | `dev` |
-| `--verbose` | Enable debug logs | `false` |
-| `--version` | Print installed version | n/a |
+| Option | Description | Default | Environment variable |
+| --- | --- | --- | --- |
+| `--aws-profile TEXT` | AWS named profile for API calls and SAM deploy | none | `EASYSAM_AWS_PROFILE` |
+| `--context-file PATH` | YAML deploy context (for conditionals/overrides) | none | — |
+| `--target-region TEXT` | AWS region used in deploy context | none | `EASYSAM_TARGET_REGION` |
+| `--environment TEXT` | Stack/environment name | `dev` | `EASYSAM_ENVIRONMENT` |
+| `--verbose` | Enable debug logs | `false` | — |
+| `--version` | Print installed version | n/a | — |
+
+Environment variables provide defaults; explicit CLI flags always take precedence.
 
 ## Commands
 

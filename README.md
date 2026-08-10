@@ -196,6 +196,16 @@ tables:
 
 EasySAM automatically loads `.env` files if present in the target directory. It evaluates environment variables using the standard `${MY_VAR}` syntax in both global (`resources.yaml`) and local (`easysam.yaml`) files immediately after they are loaded.
 
+Global CLI options can also be set via environment variables:
+
+| CLI option | Environment variable |
+| --- | --- |
+| `--environment` | `EASYSAM_ENVIRONMENT` |
+| `--aws-profile` | `EASYSAM_AWS_PROFILE` |
+| `--target-region` | `EASYSAM_TARGET_REGION` |
+
+Explicit CLI flags always take precedence over environment variables.
+
 You can also pass environment variables to your functions directly using the `envvars` property.
 
 ```yaml
