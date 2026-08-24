@@ -1,19 +1,20 @@
-import logging as lg
 import json
-import time
-import shutil
-from pathlib import Path
-import subprocess
+import logging as lg
 import re
-from packaging.version import Version
+import shutil
+import subprocess
+import time
+from pathlib import Path
 
+import boto3
 from benedict import benedict
+from packaging.version import Version
 from rich.live import Live
 from rich.spinner import Spinner
 
-from easysam.generate import generate
-from easysam.commondep import commondep
 import easysam.utils as u
+from easysam.commondep import commondep
+from easysam.generate import generate
 
 SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
@@ -199,6 +200,13 @@ def sam_deploy(cliparams, directory, deploy_ctx, resources):
         subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
         lg.info('Successfully deployed SAM template')
 
+        lg.info('>>> Calling reconcile_event_source_mappings')
+        try:
+            reconcile_event_source_mappings(cliparams, deploy_ctx, resources)
+        except Exception:
+            lg.exception('reconcile_event_source_mappings failed')
+        lg.info('>>> reconcile_event_source_mappings finished')
+
     except subprocess.CalledProcessError as e:
         lg.error(f'Failed to deploy SAM template: {e}')
         raise UserWarning('Failed to deploy SAM template') from e
@@ -252,3 +260,65 @@ def copy_common_dependencies(directory, resources):
                 lg.debug(f'Copying {dep_filepath} file to {lambda_common_path}')
                 lambda_common_filepath = Path(lambda_common_path, dep_filepath.name)
                 shutil.copy(dep_filepath, lambda_common_filepath)
+
+
+def reconcile_event_source_mappings(cliparams, deploy_ctx, resources):
+    functions = resources.get('functions', {})
+    lg.info(f'Functions: {json.dumps(functions, indent=4)}')
+    pollable = {
+        name: func.get('polls')
+        for name, func in functions.items()
+        if func.get('polls')
+    }
+
+    lg.info(f'Reconciling event source mappings for {len(pollable)} functions')
+
+    if not pollable:
+        return
+
+    aws_stack = deploy_ctx['environment']
+    region = deploy_ctx.get('target_region')
+
+    session_kwargs = {}
+    if region:
+        session_kwargs['region_name'] = region
+    if cliparams.get('aws_profile'):
+        session_kwargs['profile_name'] = cliparams['aws_profile']
+
+    session = boto3.Session(**session_kwargs)
+    lam = session.client('lambda')
+
+    for func_name, polls in pollable.items():
+        full_function_name = f'{func_name}-{aws_stack}'
+
+        try:
+            mappings = lam.list_event_source_mappings(
+                FunctionName=full_function_name
+            )['EventSourceMappings']
+        except lam.exceptions.ResourceNotFoundException:
+            lg.warning(f'Function not found for ESM reconcile: {full_function_name}')
+            continue
+
+        for poll in polls:
+            queue_name = poll['name']
+            desired_enabled = poll.get('enabled', True)
+            suffix = f'-{queue_name}-{aws_stack}'
+
+            match = next(
+                (m for m in mappings if m['EventSourceArn'].endswith(suffix)),
+                None,
+            )
+            if not match:
+                lg.warning(f'No ESM found for {full_function_name} <- {queue_name}')
+                continue
+
+            actual_enabled = match['State'] == 'Enabled'
+            if actual_enabled == desired_enabled:
+                lg.debug(f'{full_function_name} <- {queue_name}: Enabled={actual_enabled} (OK)')
+                continue
+
+            lg.info(
+                f'{full_function_name} <- {queue_name}: '
+                f'Enabled={actual_enabled} -> {desired_enabled}, fixing'
+            )
+            lam.update_event_source_mapping(UUID=match['UUID'], Enabled=desired_enabled)

@@ -1,0 +1,16 @@
+# lambda:
+#   name: testtriggerlambda
+#   resources:
+#     polls:
+#     - testqueue
+
+# "enabled" can be explicitly set (true/false) per poll.
+# If not defined, defaults to true.
+
+lambda:
+  name: testtriggerlambda
+
+  resources:
+    polls:
+      - name: testqueue
+        enabled: false

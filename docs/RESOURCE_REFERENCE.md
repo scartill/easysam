@@ -159,6 +159,7 @@ functions:
       - name: jobs
         batchsize: 10
         batchwindow: 5
+        enabled: True
     send:
       - notifications
     services:
@@ -183,6 +184,7 @@ Notes:
   - `bedrock` (grants bedrock invoke model access)
   - `mqtt` (grants IoT publish and describe endpoint access)
   - `budget` (grants `CostExplorerRead` and `BudgetsRead` capabilities to access account cost information)
+- `enabled` can be explicitly set (`true`/`false`) per poll. If not defined, defaults to true.
 
 ## Function URLs (Lambda)
 
