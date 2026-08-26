@@ -264,7 +264,7 @@ def copy_common_dependencies(directory, resources):
 
 def reconcile_event_source_mappings(cliparams, deploy_ctx, resources):
     functions = resources.get('functions', {})
-    lg.info(f'Functions: {json.dumps(functions, indent=4)}')
+
     pollable = {
         name: func.get('polls')
         for name, func in functions.items()
