@@ -159,7 +159,7 @@ functions:
       - name: jobs
         batchsize: 10
         batchwindow: 5
-        enabled: True
+        enabled: true
     send:
       - notifications
     services:

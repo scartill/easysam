@@ -292,9 +292,12 @@ def reconcile_event_source_mappings(cliparams, deploy_ctx, resources):
         full_function_name = f'{func_name}-{aws_stack}'
 
         try:
-            mappings = lam.list_event_source_mappings(
-                FunctionName=full_function_name
-            )['EventSourceMappings']
+            paginator = lam.get_paginator('list_event_source_mappings')
+            mappings = [
+                m
+                for page in paginator.paginate(FunctionName=full_function_name)
+                for m in page.get('EventSourceMappings', [])
+            ]
         except lam.exceptions.ResourceNotFoundException:
             lg.warning(f'Function not found for ESM reconcile: {full_function_name}')
             continue
@@ -321,4 +324,8 @@ def reconcile_event_source_mappings(cliparams, deploy_ctx, resources):
                 f'{full_function_name} <- {queue_name}: '
                 f'Enabled={actual_enabled} -> {desired_enabled}, fixing'
             )
-            lam.update_event_source_mapping(UUID=match['UUID'], Enabled=desired_enabled)
+            try:
+                lam.update_event_source_mapping(UUID=match['UUID'], Enabled=desired_enabled)
+            except Exception:
+                lg.exception(f'Failed to update ESM for {full_function_name} <- {queue_name}')
+                continue
