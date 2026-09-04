@@ -663,6 +663,7 @@ Resources:
           Type: SQS
           Properties:
             Queue: !GetAtt {{ lprefix }}{{ poll.name.replace('-', '') }}Queue.Arn
+            Enabled: {{ poll.enabled | default(true) | lower }}
             {% if poll.batchsize is defined %}
             BatchSize: {{ poll.batchsize }}
             {% endif %}
