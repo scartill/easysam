@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 
 from benedict import benedict
 import click
+from dotenv import load_dotenv
 
 from easysam.generate import generate
 from easysam.deploy import deploy, delete
@@ -14,20 +15,24 @@ from easysam.deploy import remove_common_dependencies
 from easysam.init import init
 
 from easysam.inspect import inspect
+from easysam.local_cli import local
+
+# Load .env early so EASYSAM_* env vars are available for Click's envvar defaults
+load_dotenv()
 
 
 @click.group(help='EasySAM is a tool for generating SAM templates from simple YAML files')
 @click.version_option(version('easysam'))
 @click.pass_context
-@click.option('--aws-profile', type=str, help='AWS profile to use')
+@click.option('--aws-profile', type=str, help='AWS profile to use', envvar='EASYSAM_AWS_PROFILE')
 @click.option(
     '--context-file',
     type=click.Path(exists=True),
     help='A YAML file containing additional context for the resources.yaml file. '
     'For example, overrides for resource properties.',
 )
-@click.option('--target-region', type=str, help='A region to use for generation')
-@click.option('--environment', type=str, help='An environment (AWS stack) to use in generation', default='dev')
+@click.option('--target-region', type=str, help='A region to use for generation', envvar='EASYSAM_TARGET_REGION')
+@click.option('--environment', type=str, help='An environment (AWS stack) to use in generation', default='dev', envvar='EASYSAM_ENVIRONMENT')
 @click.option('--verbose', is_flag=True)
 def easysam(ctx, verbose, aws_profile, context_file, target_region, environment):
     ctx.obj = {
@@ -118,6 +123,7 @@ def init_cmd(obj, prismarine):
 def main():
     try:
         easysam.add_command(inspect)
+        easysam.add_command(local)
         easysam()
 
     except UserWarning as e:

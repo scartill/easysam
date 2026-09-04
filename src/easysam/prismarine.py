@@ -44,7 +44,7 @@ def generate(directory: Path, resources: dict, errors: list[str]):
 
         if not cluster.prefix.startswith(resources['prefix']):
             errors.append(
-                f'When using with EasySAM, a Prismarine Cluster prefix ({cluster.prefix}) must start with the master prefix ({resources["prefix"]})'
+                f'When using with EasySAM, a Prismarine Cluster prefix ({cluster.prefix}) must start with the master prefix ({resources["prefix"]})'  # noqa: E501
             )
             continue
 

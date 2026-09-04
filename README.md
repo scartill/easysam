@@ -18,6 +18,7 @@ It helps you define Lambda functions, API Gateway routes, DynamoDB tables, S3 bu
   - Prismarine model-driven tables
   - OpenSearch Serverless search collections
   - MQTT/IoT Core custom authorizers
+  - Local Lambda execution (no Docker required)
 
 ## Prerequisites
 
@@ -112,6 +113,48 @@ For all options:
 uv run easysam --help
 ```
 
+## Local execution
+
+Run your Lambda handlers locally without deploying — no Docker required. EasySAM starts a local HTTP server that mocks API Gateway routing while using real cloud resources (DynamoDB, S3, etc.).
+
+```bash
+# Start local server (default: http://127.0.0.1:3000)
+uv run easysam --environment dev local -d .
+
+# Custom port and REST API v1 event format (default)
+uv run easysam --environment dev local -d . --port 8080
+
+# Use HTTP API v2 event format
+uv run easysam --environment dev local -d . --event-format v2
+
+# Inject authorization context (simulates authenticated user)
+uv run easysam --environment dev local -d . --auth-context '{"principalId": "dev-user"}'
+
+# Or from a file
+uv run easysam --environment dev local -d . --auth-context auth-context.json
+```
+
+Then call your endpoints:
+
+```bash
+curl http://127.0.0.1:3000/items
+```
+
+### Invoke a single function
+
+For non-HTTP triggers (SQS, Kinesis, DynamoDB streams), invoke a function directly:
+
+```bash
+# With an event file
+uv run easysam --environment dev local -d . invoke myfunction --event event.json
+
+# With inline JSON
+uv run easysam --environment dev local -d . invoke myfunction --event '{"Records": [...]}'
+
+# With empty event (default)
+uv run easysam --environment dev local -d . invoke myfunction
+```
+
 ## Minimal `resources.yaml`
 
 ```yaml
@@ -152,6 +195,16 @@ tables:
 ### Environment Variables and `.env` files
 
 EasySAM automatically loads `.env` files if present in the target directory. It evaluates environment variables using the standard `${MY_VAR}` syntax in both global (`resources.yaml`) and local (`easysam.yaml`) files immediately after they are loaded.
+
+Global CLI options can also be set via environment variables:
+
+| CLI option | Environment variable |
+| --- | --- |
+| `--environment` | `EASYSAM_ENVIRONMENT` |
+| `--aws-profile` | `EASYSAM_AWS_PROFILE` |
+| `--target-region` | `EASYSAM_TARGET_REGION` |
+
+Explicit CLI flags always take precedence over environment variables.
 
 You can also pass environment variables to your functions directly using the `envvars` property.
 
