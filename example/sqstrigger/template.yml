@@ -16,6 +16,7 @@ Globals:
     Environment:
       Variables:
         ENV: !Ref Stage
+        EASYSAM_ENVIRONMENT: !Ref Stage
         ACCOUNT_ID: !Ref AWS::AccountId
   Api:
     Cors:
