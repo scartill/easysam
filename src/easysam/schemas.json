@@ -217,6 +217,9 @@
         "schedule": {
           "type": "string"
         },
+        "schedules": {
+          "type": "boolean", "const": true
+        },
         "layers": {
           "type": "object",
           "patternProperties": {

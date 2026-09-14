@@ -468,6 +468,35 @@ Resources:
       BuildArchitecture: x86_64
   {% endif %}  # end lambda layer
 
+  # EventBridge Scheduler roles
+  {% if functions is defined %}
+  {% for function_name, function in functions.items() %}
+  {% if function.schedules is defined and function.schedules.target is defined %}
+
+  {{ function_name.replace('-', '') }}SchedulerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: scheduler.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: Invoke{{ function.schedules.target.replace('-', '') }}
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !GetAtt {{ function.schedules.target.replace('-', '') }}Function.Arn
+
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+
   # Functions
   {% if functions is defined %}
   {% for function_name, function in functions.items() %}
@@ -531,6 +560,21 @@ Resources:
             SecretArn: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*
         - SSMParameterReadPolicy:
             ParameterName: "*"
+        {% if function.schedules is defined %}
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - scheduler:CreateSchedule
+                - scheduler:UpdateSchedule
+                - scheduler:DeleteSchedule
+                - scheduler:GetSchedule
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - iam:PassRole
+              Resource: !GetAtt {{ function_name.replace('-', '') }}SchedulerRole.Arn
+        {% endif %}
         {% for poll in function.polls %}
         - SQSPollerPolicy:
             QueueName: !GetAtt {{ lprefix }}{{ poll.name.replace('-', '') }}Queue.QueueName
@@ -640,6 +684,10 @@ Resources:
           {% for search_collection in function.searches %}
           SEARCH_{{ search_collection.replace('-', '_').upper() }}_COLLECTION_ID: !GetAtt {{ search_collection.replace('-', '') }}Collection.Id
           {% endfor %}
+          {% endif %}
+          {% if function.schedules is defined and function.schedules.target is defined %}
+          SCHEDULER_TARGET_ARN: !GetAtt {{ function.schedules.target.replace('-', '') }}Function.Arn
+          SCHEDULER_ROLE_ARN: !GetAtt {{ function_name.replace('-', '') }}SchedulerRole.Arn
           {% endif %}
 
       {% set has_events = namespace(found=false) %}
