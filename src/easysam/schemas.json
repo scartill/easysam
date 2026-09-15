@@ -218,7 +218,16 @@
           "type": "string"
         },
         "schedules": {
-          "type": "boolean", "const": true
+          "type": "object",
+          "properties": {
+            "target": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "target"
+          ],
+          "additionalProperties": false
         },
         "layers": {
           "type": "object",
