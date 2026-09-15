@@ -343,6 +343,18 @@
         "schedule": {
           "type": "string"
         },
+        "schedules": {
+          "type": "object",
+          "properties": {
+            "target": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "target"
+          ],
+          "additionalProperties": false
+        },
         "integration": {
           "type": "object",
           "properties": {
