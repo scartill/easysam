@@ -491,8 +491,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - lambda:InvokeFunction
-                Resource: !GetAtt {{ function.schedules.target.replace('-', '') }}Function.Arn
-
+                Resource: !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:automationv2magicwheel-${Stage}"
   {% endif %}
   {% endfor %}
   {% endif %}
@@ -686,7 +685,7 @@ Resources:
           {% endfor %}
           {% endif %}
           {% if function.schedules is defined and function.schedules.target is defined %}
-          SCHEDULER_TARGET_ARN: !GetAtt {{ function.schedules.target.replace('-', '') }}Function.Arn
+          SCHEDULER_TARGET_ARN: !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:{{ function.schedules.target.replace('-', '') }}-${Stage}"
           SCHEDULER_ROLE_ARN: !GetAtt {{ function_name.replace('-', '') }}SchedulerRole.Arn
           {% endif %}
 
