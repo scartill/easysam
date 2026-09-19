@@ -1,3 +1,15 @@
+# 1.13.0 (2026-09-19)
+
+- Added local Lambda execution mode: run handlers locally without Docker via a mock API Gateway HTTP server (`local` command), with support for REST API v1 and HTTP API v2 event formats and injectable authorization context.
+- Added `invoke` subcommand to `local` for directly invoking a single function with an event file or inline JSON (useful for SQS, Kinesis, and DynamoDB stream triggers).
+- Added explicit `Enabled` control for SQS event source mappings, with post-deploy reconciliation to enforce the configured state.
+- Added `EASYSAM_ENVIRONMENT` variable to the generated template and improved environment variable handling in local mode.
+- Added AWS profile and region injection in local mode so local handlers use real cloud resources.
+- Changed the target directory to a positional CLI argument.
+- Fixed `pip` and SAM CLI version checks in `deploy.py`.
+- Improved logging for SAM deployment.
+- Removed the superfluous `mergedeep` dependency and updated the Prismarine dependency.
+
 # 1.12.1 (2026-05-12)
 
 - Added `GatewayResponse` CORS headers for API Gateway 401/403 pre-Lambda responses.

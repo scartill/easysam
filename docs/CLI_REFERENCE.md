@@ -145,14 +145,17 @@ easysam inspect common-deps backend/function/myfunction --common-dir common
 Start a local HTTP server that mocks API Gateway routing, calling Lambda handlers directly without deployment.
 
 ```bash
-easysam --environment dev local -d .
-easysam --environment dev local -d . --port 8080 --event-format v2
-easysam --environment dev local -d . --auth-context '{"principalId": "dev-user"}'
+easysam --environment dev local .
+easysam --environment dev local . --port 8080 --event-format v2
+easysam --environment dev local . --auth-context '{"principalId": "dev-user"}'
 ```
+
+Arguments:
+
+- `DIRECTORY` (positional): project directory (default: `.`)
 
 Options:
 
-- `-d, --directory PATH`: project directory (default: `.`)
 - `--port INTEGER`: port to listen on (default: `3000`)
 - `--host TEXT`: host to bind to (default: `127.0.0.1`)
 - `--event-format [v1|v2]`: API Gateway event format — `v1` for REST API, `v2` for HTTP API (default: `v1`)
@@ -175,9 +178,9 @@ Behavior:
 Invoke a single Lambda function with a custom event (for non-HTTP triggers).
 
 ```bash
-easysam --environment dev local -d . invoke myfunction --event event.json
-easysam --environment dev local -d . invoke myfunction --event '{"Records": [...]}'
-easysam --environment dev local -d . invoke myfunction
+easysam --environment dev local . invoke myfunction --event event.json
+easysam --environment dev local . invoke myfunction --event '{"Records": [...]}'
+easysam --environment dev local . invoke myfunction
 ```
 
 Options:
@@ -191,6 +194,6 @@ Output: handler response printed as formatted JSON to stdout.
 ```bash
 easysam --environment dev inspect schema .
 easysam --environment dev generate .
-easysam --environment dev local -d .                    # test locally before deploying
+easysam --environment dev local .                    # test locally before deploying
 easysam --environment dev --aws-profile my-profile deploy . --tag project=myapp
 ```

@@ -119,19 +119,19 @@ Run your Lambda handlers locally without deploying — no Docker required. EasyS
 
 ```bash
 # Start local server (default: http://127.0.0.1:3000)
-uv run easysam --environment dev local -d .
+uv run easysam --environment dev local .
 
 # Custom port and REST API v1 event format (default)
-uv run easysam --environment dev local -d . --port 8080
+uv run easysam --environment dev local . --port 8080
 
 # Use HTTP API v2 event format
-uv run easysam --environment dev local -d . --event-format v2
+uv run easysam --environment dev local . --event-format v2
 
 # Inject authorization context (simulates authenticated user)
-uv run easysam --environment dev local -d . --auth-context '{"principalId": "dev-user"}'
+uv run easysam --environment dev local . --auth-context '{"principalId": "dev-user"}'
 
 # Or from a file
-uv run easysam --environment dev local -d . --auth-context auth-context.json
+uv run easysam --environment dev local . --auth-context auth-context.json
 ```
 
 Then call your endpoints:
@@ -146,13 +146,13 @@ For non-HTTP triggers (SQS, Kinesis, DynamoDB streams), invoke a function direct
 
 ```bash
 # With an event file
-uv run easysam --environment dev local -d . invoke myfunction --event event.json
+uv run easysam --environment dev local . invoke myfunction --event event.json
 
 # With inline JSON
-uv run easysam --environment dev local -d . invoke myfunction --event '{"Records": [...]}'
+uv run easysam --environment dev local . invoke myfunction --event '{"Records": [...]}'
 
 # With empty event (default)
-uv run easysam --environment dev local -d . invoke myfunction
+uv run easysam --environment dev local . invoke myfunction
 ```
 
 ## Minimal `resources.yaml`
