@@ -19,6 +19,9 @@
               },
               "batchwindow": {
                 "type": "integer"
+              },
+              "enabled": {
+                "type": "boolean"
               }
             },
             "required": [

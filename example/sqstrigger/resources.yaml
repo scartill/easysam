@@ -1,0 +1,12 @@
+prefix: SqstriggerLambda
+
+import:
+  - backend
+
+queues:
+  testqueue:
+
+authorizers:
+  testauthorizer:
+    function: testauthlambda
+    token: Authorization
