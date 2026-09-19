@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:238a5725d64f06ffe35cdccc0d8a0eb58afc90059f60a5e0473ea2e2aa07c66b",
+  "claims": [
+    {
+      "id": "claim_b7209ec1d616426aa4ed40c383ad6235",
+      "statement": "The `easysam` CLI entrypoint in `src/easysam/cli.py` accepts shared options `--environment`, `--target-region`, `--aws-profile`, `--context-file`, and `--verbose` that form the deployment context (`deploy_ctx`) used by the `generate`, `deploy`, `inspect cloud`, and `delete` subcommands.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/cli.py#L24-L50",
+          "version": "repo-lines-v1:sha256:cd3d9846694b7a51b30e60f08f33e89b7bf8bef4fa9fec3374f141eb222faeb9:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYxZWNmZDQwYWVmNzZiOWE4ZmU2YzAwODU2MzNmNjQ0OTMzNmY2YjNkMDE5Mzg5ZjY1ODNiMzFkZDFkNDAxNTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE2MmM1ZGRiM2E0MWY0NjRmZjM2MTE4NmNhYWZmMTY0ZmY0N2IyMThiNGMwYTBkMjEzOGNhNTJlNGM0NWE1MmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk5ZTFiMmQ2MWFkYjYwOTM5NDhmODhmNmJiYTZlMmE1MGI4ZDJiNzViMjlhNDdjMGVjZTFhZGE0ZjQyYzg5OGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_83c057f3a03d48e4b2144e50aaa53e1f",
+      "statement": "The `inspect schema` command (`src/easysam/inspect.py`) loads and resolves the full resource model and validates it against JSON Schema Draft 7 (`schemas.json` for global `resources.yaml`, `local_schemas.json` for per-file `easysam.yaml`) plus a set of custom validators covering buckets, tables, streams, lambdas, paths, imports, prismarine, authorizers, and MQTT.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/cli.py#L125-L125",
+          "version": "repo-lines-v1:sha256:849f32baa165cd05e9b982041c586bbcec36b7168a2790753c643b077cb0dc3e:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODQ5ZjMyYmFhMTY1Y2QwNWU5Yjk4MjA0MWM1ODZiYmNlYzM2YjcxNjhhMjc5MDc1M2M2NDNiMDc3Y2IwZGMzZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODQ5ZjMyYmFhMTY1Y2QwNWU5Yjk4MjA0MWM1ODZiYmNlYzM2YjcxNjhhMjc5MDc1M2M2NDNiMDc3Y2IwZGMzZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmJjNTI1ZjRmZWNlNzA1YzVhNDJkNTZlMzNmNDQ0NTQ4MTJiZGY4NjU1ZGM2NTEyOWE1N2Y1OTM4ZGJkMDg0OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDlkY2ZhMTUwM2E4MTc2OTVhNjg4OGYzNWE0M2FjZDZjMjRhMDE1MTE2ZmM2MTk5MGRmMDE4MzIwNzQ0YjczMCJ9"
+        },
+        {
+          "resource": "repo://src/easysam/inspect.py#L34-L69",
+          "version": "repo-lines-v1:sha256:f033f8f90e9aceb4efc67a65d661105d524ef8f52a5520119c3082411255240b:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0YzBhOWJiMDg1MWNhNmQwNmI5ZTA5MTc5YzA4OTdhZmEyN2UwMjI4NzJjOTFlNmJkYmZlNmFiNmM0NzcyNGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQyYmU0MDQzZWYxYjNiOWJiNTBkMDUyMmJjZTFhZmY0NzRhODMyZTUyNmZmY2EzMTUyOWQxYjk4YjQ0YTdiNTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlmMzFiODMzMDhhOTBmZDIwODczNGQ5OGQ5YjU5NjEzNTRjZjU2MjQ3MWNmMjM0YjJmMDgzYzMzNDVhNTlhZDEifQ"
+        },
+        {
+          "resource": "repo://src/easysam/validate_schema.py#L8-L35",
+          "version": "repo-lines-v1:sha256:acb96084eaf371621c7dc92656e02cbd06bd92549a40cd41525e3859c12c2965:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ5YTA5YmQxOTQ5OGI0ODVmMjk1N2Q0OTE1ZWE4NjE1ZTNlZWRlNWFhN2NlYmVkOTRkN2EzY2Y4NzljYzdiNTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY5Mjg2OTI2YWE1ZjVmNzM5YzhmMzUxYmMwNmNkYmY5MGFlMDkwNTNlMGY1ZDhjYWYxYjkyZTczOTI5MWYzOTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM4YjE5NTRlYzQ3YjA2NWM3NDRmNDM4YzE5ZTM0ZjZlZGIxODFjZDJmZmE3YmZiMjMyYjZlNzlmOGI3ODdiZGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e738bb29307e42a69fcdd69d6597cb60",
+      "statement": "The custom schema validators enforce domain rules: `validate_buckets` (private bucket cannot be public), `validate_tables` (trigger function must exist in `functions`), `validate_streams` (exactly one of `bucketname`/`extbucketarn`, referenced buckets must exist, external ARNs must be valid), `validate_lambda` (resource references must resolve), `validate_paths` (`open` and `authorizer` are mutually exclusive; lambda paths must have one), `validate_import` (import directories exist), `validate_prismarine` (base directories exist), `validate_authorizers` (exactly one identity type; function must exist), and `validate_mqtt` (authorizer function must exist).",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/validate_schema.py#L170-L183",
+          "version": "repo-lines-v1:sha256:3be3b667dfe2daf35c2c3ec2419b15ce5ea72d3551e61dba69158dc3cac40c81:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBmODg5YTU4NzRjMWNiODdjOGNiZjgzMDMyYzY5ZTM4ZWUwYzBhM2MxNzRiMTcyMDNlMTA4NmIzZDU4MThkYjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlMGMzNWJmOTc4OTUxMzVlYTZhZTZkNjA4OGU3M2EyMmM5NDQyNmQ2MDY1YzkzZWFiMDBjYmMwYjAwYTM2YzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNlNDIyZTRhMjBmNzUyMDNmOWMxNzBiZDExZjRiYTgwMTA3NTY1NjZiZmQyNzU4YjEyMTM2MDhhM2YxN2FjYjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY5OTQyM2QwMzRlMmIwNzc5ZmY5OTEzOThkMzU2MWMwMWYwNjE3NGQ4MWVjNzhmOTUzNjk4NThmZTA0YjVmMjIifQ"
+        },
+        {
+          "resource": "repo://src/easysam/validate_schema.py#L277-L298",
+          "version": "repo-lines-v1:sha256:a3adbc6c6643a17d0e5fafbea1050280b66c86e54fbe17508e9782f1f207be9f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVmMWU0ZDZmNTMzMjJmNDYwNTBlNGQ4MmUzZmExNmYzNmQ0NDMzODVlZGU4NjM3OTE3Mjg4YjI4NzE1ZDJkY2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNThkODY1YTFhNjQyMjNkOTc4Mjk2NDU4NzQxZDE2ZDFhMzFjMjIyY2EwNzIyMDEwM2ViNWY2YWIxOGVkYmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlMzA4ZGY3NGJhOGI3NmM2OTlkMzVkZGYwODc4MzU0OTNlOGIyN2M3ZWFlODRkY2Q3MTk3YTc2Y2VhMTljNTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://src/easysam/validate_schema.py#L68-L108",
+          "version": "repo-lines-v1:sha256:7d66a0d2cfc523ff2076805fe672ad5a5000dd75ec12e4a709c2dd554920a242:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFiY2E0OTUzYmNjZDM1ZmJjZWM0YjM0NjZlZmRmNTc4YjlhMWFmYjBmYjZkMmE5YjcxZDMyYjRkZmM3MmVkMzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM1YzQ5YmI4NjRlMWZjZTc5Yjc5YTdkOTQxYzk2MzkyYTc2MmFmZWZkNjE4MTkyNjgyMTE1NjgyYjU5NTgyNDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE2ZjE5ZDg3NmFmMzIyMmE5ZGMyNzRmOWVhNWM5NjllMGJlNmI1OWI4NGM0ZTM1NTEzNjUzMzU1MWVkMmUyYTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fe954612dca642c89bce0b808b113120",
+      "statement": "The `inspect cloud` command (`src/easysam/inspect.py`) validates live AWS resources that EasySAM references but does not manage: IAM policies for bucket `extaccesspolicy` references (must exist as `<PolicyName>-<environment>` in local IAM policies), SSM parameters for custom Lambda layers resolved via `{{resolve:ssm:...}}`, and direct Lambda layer ARN references (must be valid layer versions). It requires `--environment` and normally `--aws-profile`.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/inspect.py#L71-L110",
+          "version": "repo-lines-v1:sha256:4b116165d1f240881b7728f95896349ff64e7bd46d9cabfebffdd90fb39ca6fa:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhNDg1ZTQwOWQzNDExMmJmODQ5NjM5ODI3ODcwNmRkNDk2NGY4MWVkOTJmMTI4MzlhMzQ4MTMyMGI4OTE2N2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhiOGQxZjAyZDJiYWM2NTgzYjZjMTdkZmYyMDY2NjBiMGRjOGJmMDJiM2EzMDI4YmYwNzU1ZGQ5ZmFiMzllYWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjZDdlZGMyYzg0YTNkZTM4N2YxODFlNTgwMmQ3OGNhMGViOGY1ZDJlNTgxM2ZjMjNmNDhjMWQzN2RmYTgxN2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://src/easysam/validate_cloud.py#L25-L94",
+          "version": "repo-lines-v1:sha256:73629802418d43df5dd5d893ad1338f80bcbba9f88d44abf39eae575603b60f1:eyJzZWxlY3RlZExpbmVDb3VudCI6NzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdhOWQ3OGE1MjBkMDhmMjQwZjdmY2Q5MzIwZjJiMzViN2MyOTU2Y2NkZWY3ODY4YzRkN2UzOTVjM2MwYWM0YjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzOGFhNzNjN2Q4MmYxYmY2N2FmY2RiNmJiZjJjYWZiNmQ0OTdiOTE0ODI4YmIyZmM3YjBhNmRmODhmZjJmN2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjExNDFjM2E0YTAxODg1YTI1MzJhNjQ5YWIyYzA2NDg0YjhmZDQzMjBlNjY2MzU4YmM4ZDQ3Njk1MWRjNDJjMzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://src/easysam/validate_cloud.py#L6-L23",
+          "version": "repo-lines-v1:sha256:a6987a07e9e628265ef8efc11742f916ea79fc7d90f22823935efe918b0b1a43:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1MTg1Nzk0ZmJjNGRkNTRjYmE2MmZjMzYxYWE2MDRkYjY1ZGFlYjg2YzI0MzBiODBlYzJmN2EyYzE0MWMwNzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEyZjE0ZThjMmMyNTMzYjA2NjgzNmRiMThiYWQyMWVjMTMzMjA3NjRhNmQzMzIyMzcyNTNlYzM1ZDg5NjdmOTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZiNTEzZjdhMTY4NGJlNzQ0ZWFkNzQ4ZDhhYjIzNzg2OTIwNGQ2ZmFlNTNiNDAxMWYwMzQyMTFhMWJhZTQ5MmYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_075002ee578244edbb8789d2c2d49bde",
+      "statement": "The `deploy` command (`src/easysam/deploy.py`) regenerates the template internally via `generate()`, then runs version checks (pip ≥ 25.1.1, SAM CLI ≥ 1.138.0 via subprocess `--version` and `packaging.version.Version` comparison), removes and re-copies common dependencies via AST-based `commondep` tracing, runs `sam build`, runs `sam deploy` with stack name/parameters/capabilities/tags/region/profile, reconciles event source mappings for pollable functions, and cleans up common dependencies unless `--no-cleanup`.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/deploy.py#L147-L211",
+          "version": "repo-lines-v1:sha256:1b7362861764a86f5c7aead844bc56dcb444f0d97587d3a4819426e36b9ef322:eyJzZWxlY3RlZExpbmVDb3VudCI6NjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1YTg3ZjZmZGU2NTlmY2U4OGQyNzhlNjNhM2RiZmU4OWQ4MzA0Y2M3YzZjYjA1ZDcxMWIyNDI2MWJhYjZhZWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyNTExY2YzYTllZmVkYjYyYmZkZGRjNzg3MmNmZTM4YzNmMzcwMzczYzg1NTVlOWMyZTA1ZmEzMThhYmFlMzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFiNGQ3YWM0YWRlOTg5Nzk1MDExZWE5YTBhYTJmYThkZGY0YzJlZjQ3OGVmMTc2NmEwNjEwNjc0NDEwOTI5MTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNlOWNmZjVlNTkyMzRlZjMzYjA1ZDc4YTNhOTRlMTIxMDI5MDc4YTQ0ODRlZmIyNmZiOGFkZGNhNzg4ZWIyMzIifQ"
+        },
+        {
+          "resource": "repo://src/easysam/deploy.py#L23-L57",
+          "version": "repo-lines-v1:sha256:84eb84aa385e19ced81b15529b9bd670edab23ca9ea2a61d91c8282df45194f4:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwNWNlYWVjZDBlMjZkMDEzNDgxMzNiYTAwZjNhMWVjN2I2NzAwMDhkMzdiM2IyYTE3OTg2ZGUxNzAwYzNiNDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1NDIxNjY3ZDMzNGFmODA4YzA5N2VlYmNjYWJhMzhhZjUxMTk4ODc1MjczM2NmNjdlOGM3ZDhiYWZhZTUyZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZjNDA4MzE1YjcxMWYwY2E5NjM0ZjZiZjYwNTY3YzY1NDUxNzZjNDliOTA5NGFhNjM2ZjA0YmNmODgxMDQ5YWIifQ"
+        },
+        {
+          "resource": "repo://src/easysam/deploy.py#L264-L330",
+          "version": "repo-lines-v1:sha256:2dcde0f5d006e412d90d2ec205c0269e1174fd7da4ef8cc9fcadf5473d969e4b:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlNzJlOGVhZGI2NDA4ODBkM2RiZjM4MDJhOTc4NDQwNTM3NDcxMjdkYzJiMTNlYzM4NjgwYjM2NGEwYjg1NjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlkOGE5ZTljMzI1MjgyMGM2NWE4MTY1MjBiOGRiNDkzMjI4MDg0OWVjOGM3ZDJlYjYyNzJhZmRmZWJlMDU5YzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA2ZWI3NmE5NmE1YzNjNDEwMjM0YjUwYjhkZDhkMzNmODczMjI3MDI2NGFiZjRkNTk5ZmNmZTU1NjZkY2VjMDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://src/easysam/deploy.py#L96-L126",
+          "version": "repo-lines-v1:sha256:42026b8c48f07773f32b001245a0004561895c2ef5d3f77be81342627705432e:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA2ZDI1ZjkyNDZhYmEzYmQ3ZmQ1MzZkOTYwNTcxNGZmNzQzNjVkOGYwZTdjYzRmNDljMmZkMTFmYmNhZmRlYWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImViOTE0MWQzMTUxY2I0YzU2MjY3ZTg1YTJjZGQ5OTM4YjI0MjMzOTQxMTgxYmQ4MzA5YjA3ZTM0ZmVkMDA5NDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNkNjg3MDM3OTk1Mzg4MzEzNWYzN2FjODhiMTViNzk4YWQ1NjllZjgwNjdiMWEyZGM4YWUxY2ZiYmIyYWM0NzgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f6937b9f9caf45c9bc2d554e99e09456",
+      "statement": "The `commondep` module (`src/easysam/commondep.py`) traces `common.*` imports using AST analysis: it scans `common/` for available packages (directories and `.py` files excluding `__`-prefixed names), parses each Lambda's Python files for `import common.X` and `from common.X import ...`, recursively traces transitive dependencies, and returns the sorted list of required modules for copying into each Lambda directory.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/commondep.py#L16-L91",
+          "version": "repo-lines-v1:sha256:31bec1cdf676963bf607ec9da48a0d3cd5cf7b5231d18c5d718854ad3c842ad0:eyJzZWxlY3RlZExpbmVDb3VudCI6NzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNkN2VlYjI5YjBhNGM1Y2RjYmQyOGU0MTc0ZjYwYzUyOGE5OWY2NjE4M2Q0ZWYyZTE5OWJjNGQ3Yjg1MjI1ZWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIwZTc1MDJiMWFhYWM0YWJmZWI0NTQxMzJjOTBlMjc3ODViZmU4OWY1NWMxMmUxOTY0NmZlMGU2NjcwZmI3NzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEwMWI1ZTA4YWY0ZmMxN2MwOTg0OTUxNmJjZmNjMjBmMjE4MDBiMjU0ZmNmZDA2ZGY5M2JkN2Y3MGNiMzJlNDMifQ"
+        },
+        {
+          "resource": "repo://src/easysam/commondep.py#L6-L14",
+          "version": "repo-lines-v1:sha256:bf8b26fe754b4acdf7724f242fe8e9b4cbbedb87944554a79b836335bf3f57fc:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWMyNjVmOGNiOTRhMjc5YzliOTU5ZTZhNGVlYmIxYThkYjI4ODEyMDEwODAxZGFkMjkwN2JmMmYyOTc2YzVkZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTA5ZDM4MGIwNTBjODM3MTg5ZTk3YjE5YmJhZDJiNTcwNGE3MWRkMzg3NDIxYTAxYTgwNDY0NzRiZGVlZTUxZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZmYyMDVjMDczZDVkMWJhNDExNWUwZTYwODllZTU1YzA1MjY5MjkyYmIzZTA2ZTE2MmZjMTg1YWQwZWM2MzBkNSJ9"
+        },
+        {
+          "resource": "repo://src/easysam/deploy.py#L227-L262",
+          "version": "repo-lines-v1:sha256:e77722c83bb07dd52bc3d94bcd2675c85929ab85264aa9ff8e5f25df490ca3f9:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc2YzcwMWZmZTNkYmMyYTE5YzMwMDE4N2MzZjA4NWM0YzRlM2NkOTBhOWM2MTY1MDNkZjk0NzE5ZWUwMmU0MzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg3YzI2NzMwZjllNDAxYzEyYzVmZjIxMjY2YTcwZDQ5MTUzMGMxMTJjYjAxMGI5MWI1ODlkYjBkMjgzNmU2NTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRlYzVlN2ExNDI5MDZiMjM4NzAwM2I4YjAyMDg5NTRhZGZjMDAyODI4YjdjYzZhZGJlNmU3YWQ3MDc2ZDc2NDgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_95b4971aa15148958cd1633fc9fb67c4",
+      "statement": "The `delete` command (`src/easysam/deploy.py`) calls CloudFormation `delete_stack` directly (not via SAM CLI) with `DeletionMode` set to `FORCE_DELETE_STACK` when `--force` is passed, otherwise `STANDARD`; the `--await` flag polls `describe_stacks` until `DELETE_COMPLETE` or the stack is no longer present, raising `UserWarning` if the status is anything other than `DELETE_IN_PROGRESS` or `DELETE_COMPLETE`.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/deploy.py#L59-L93",
+          "version": "repo-lines-v1:sha256:b4e748b2ab823fb986fbc94f6b0831c0ccbd6ed17f6b1b7745891c2595807191:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1NjBjZDJjOWM3OTQ5NGMwMjM0ZDNjZmZiMDY5MmIxNDBkYTgzMjEyYmE0MTRjYjljMjFjZjhhYmIxMjNlODQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM4NDQwYjU3NmU4MGJjMDRkMjEzYzM5MTE0OWY0NGRjNDBkMjFlM2IxZGE0YWNjZTY1ODI4YzA3MmY2ZTcyOWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg5YmMzZDRkYzM1MzNkMTc2NDJkMTM5ZTQ2ZmUzMWE3NmViN2U5OWNkNTcwOWRhNWJlNzdhZDZhMmRjZjkyZjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ4MmVjMTk4ZmJlNzAzZjQ3MTNmNmEyM2MyN2IwZGM2NDAwYjBmYWRiNjdiOGNiODYxYmRlMzc3Y2FkZTgzYzUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b148c77109ec4094a4196d3fe5bf71c8",
+      "statement": "The `local` command group (`src/easysam/local_cli.py`) provides `easysam local .` (starts a local HTTP server mocking API Gateway routing) and `easysam local invoke <function>` (invokes a single function with a custom event), passing port/host/event-format/auth-context options and injecting `AWS_DEFAULT_REGION` and `AWS_PROFILE` from the CLI context when not already set.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_cli.py#L53-L96",
+          "version": "repo-lines-v1:sha256:fc8e9df97e10fa6b103d751d4d92278fbc7a8922f250dfe8f9098bfcbfe12068:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjliZGI1YTcyN2YyY2M5MDQ2Y2E5M2E4MjhlZDFmOTMzNzZjMmE1OWY4OWMwMjU5YzMyNDhjMDIxYjMwZWE4NDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIzZGYyYWNmMDZlOGMzZjAzYzcxMzVjNmU4YWM1YTljYTU0MzJhYmUwNmE3NGFjYTBmZGQ5YTUzYTAwOGY5ODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQyOWMxZDU2MzU4OTU3YmRiM2RjNTdjYWUyMDE4N2ZmMTY5NDhhMjgyMmYzODFiMGU4ZDY0MDhjY2NlODQ1M2YifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_cli.py#L98-L158",
+          "version": "repo-lines-v1:sha256:9ca3dae39b6f32b1691cf9e362a5ec4551bd8fd32e02776348ebde02063ce1fb:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUwYjczMmE1MTFlMmFjZDFjMjNkMmRjYTExOWUxMzU5NzU1YTcwZjBmOGFjNGMzMjFiMjkzMTNlMWEyYjc1NDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwNTU0ZjhiY2UyYjUyMmMyMmE2YjYxMmM3Mjg0YzZjZWMxOGRmMmZiOTVjY2I1MThmZTk1NDIwNzI0YjJiMDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzNjM1YmM1MjdjYjlmZTM3NDE1NzE0NmMzOTY2MDY4ODQ2ODA0NDllZjhjNmIxNmZmMWU1NTE2ZDY5NTBkYmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_bd0166e96b65490f88f2ff1cb9841338",
+      "statement": "The `cleanup` command (`src/easysam/cli.py`) calls `remove_common_dependencies(directory)` which removes any `common/` trees found under `backend/**/common` in the project directory, and is also called automatically during deploy unless `--no-cleanup` is passed.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/cli.py#L107-L112",
+          "version": "repo-lines-v1:sha256:ba290e47cf479fbe491c4500b57ce4dabc0eff1c2ee0634a6c2b1d44a3f9db66:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2U1YTA1ZTA4N2U0YTYxNmY0ZjZhYmM5NDc0NjRlN2U4MmIwNzM0MzJlOGU0NzY5YWM3MjM2Y2VlOTEwNmMzOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzVlNzRkN2NhYTI0MWYzNDcxNDgzZmU5MzUyNGQ5ZDcyNGMzMTM5NDI3NWMwY2E0ZjY4MWRjMzFhMGMxZjBmNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzhjMDYwNmE4NDU0NzY3MTFjM2MxMmRiZWYyNzlmMmQ0ZDllMDQ2NzVhM2Y0ZjVjZjcyNmEzOTdkMzFkMDNjYiJ9"
+        },
+        {
+          "resource": "repo://src/easysam/deploy.py#L218-L224",
+          "version": "repo-lines-v1:sha256:650ab870d988237087fa1b7d58f83fd69d54e4213ec8cc90a0318dcb4a42dc38:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGVmMjA4YWM3YTA5MmFkYjhlODVmYzcxZWUxNjFkMmRlNzgwZmIwOWM2ZjE4MWM3YWE4NzZjNDFlNTU1ODlmMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNWViNWRmZmI4YmMxNTcxOTkwZjYyOGI2NGZhMzBiMWEyYTdiMTEzZmUwZTdkN2M2NDA2ZWNmMjkwMGFiNTIzMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNGZjNDZjNDdhMzBlMjM2NDNhZDc5NTc0MmI1MGVkOTRmNTY4NDMxMWZhZGZhYTZiNzA5YjMxOTgzZmIyZmUyYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzkwNTJmNmI2NGQ1NjY2YzA4M2U0YWZmYzYyNjhmZjdiNzQxY2IyMTZjN2FkYWU0Y2U5NjI0ZjRiMjJmYWYxNCJ9"
+        },
+        {
+          "resource": "repo://src/easysam/deploy.py#L55-L56",
+          "version": "repo-lines-v1:sha256:cd58be481ec301cc6bee193e3e371a5c10310c4bac9b348a6851eafcca0681ba:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmY4ZDYwMGMyNmZlZmU2NTQzNzYzZGIwNWEyOWNlNWE3ZWU5MGYyYjhiZjQ5MWI2NTQ3MzIxYjcxYWJjN2MwYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzIxNGQ1YTQzYTg3MDAyZDYzNTY3YmU2NTI3MDQ3MDdlNTY5NzliZTJjMjg0MjRjMTViYWM2MDM5MjMxOTk0NCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDdmZjE0ODNkMTBjOGVkMzZkMThjMmNlZDdmOWJmNTRiZmUyYzYxZWQ4MGVlNmI5MDEwMmI0NjE2ZTViYmViYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDQzNzMzYzU3YjBhMDQ4YjlkNGFjMTQwZjE0ZjRhYWJmM2FkMWNhODUyYTZmNmE4NjU5NzI4YzBjZjc3MzMzYSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_6718da3efdd34a959151982877cf6974",
+      "statement": "The production hardening checklist from `docs/PRODUCTION_HARDENING.md` recommends a CI pipeline of `inspect schema` → `inspect cloud` → `generate` → `deploy`, with environment-specific deploys via `--environment`, a versioned and reviewed context file, and CI Python version matching the `python:` version in `resources.yaml` to ensure binary dependency compatibility with the target Lambda runtime.",
+      "evidence": [
+        {
+          "resource": "repo://docs/PRODUCTION_HARDENING.md#L69-L89",
+          "version": "repo-lines-v1:sha256:d063ccf3c0270e9f87b81df9f62c053eb2e94387d93fd9773e3fb4dc9c442c44:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZiZGVkMGM2ODAwMTA5MDVlMGM0NDkyZWI4ZjZjOThmNjIyMTI2ZTU3ZTQ5ZDRmZTFlYmQzOGNkMGNmOGFkMTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA0NGY1ZWUzYTExNjBiNjUzNzdmZDY0YTk1Mjg0YzkwOTRlOGQ5YzJiZjU2OTM0MzQ1Y2RiZjE5ZjU2MDk0NGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZkNWQ5ODA5ZDM2NzA0MDU1ODE3OTdlMWU4ZGU5YTMxZjZlY2IwZDc3NDJkN2YxMDQwNjFkMjVlYTlhY2U3NDAifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-19T15:38:50.328Z"
+  }
+}

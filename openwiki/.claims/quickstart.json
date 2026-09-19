@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:f0943c9064367146894afc1c912ba2eb46c5eceed49da2cae0eb30d08df41850",
+  "claims": [
+    {
+      "id": "claim_c3234b1ab1a7435fa71e53c46a2d4e51",
+      "statement": "EasySAM current version is 1.13.0, released 2026-09-19, which added local Lambda execution mode (easysam local) with REST API v1 and HTTP API v2 event formats, an invoke subcommand for direct function invocation, explicit SQS event source mapping Enabled control with post-deploy reconciliation, EASYSAM_ENVIRONMENT variable in generated templates, AWS profile and region injection in local mode, and changed the target directory to a positional CLI argument.",
+      "evidence": [
+        {
+          "resource": "repo://CHANGELOG.md#L1-L11",
+          "version": "repo-lines-v1:sha256:f33dd3b682056f59a86da1392a87908a3d02ea68d3058c8d33b00854cfb084ea:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3YmM4YjllOWZmOTM3YTA5MDBjMTE4YzBlNGZlM2U2NmQwODNkNGRlYmJkMzczMTk1YzUwNTA1MGM0OGY0YzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkNGJiMjAwNmQyMzg3NDQxMDQ5MDVjMzEwNjQ4MmFiYjMwZWJhZjRiOTAxZmY5MThkNWQ5YWNjNDU3MjU3OGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUwYmM0Yjg4Y2I4N2RiZGJjNDBjZjdhMmU0YmU2MTZiZGUwZjIyZjUzM2NlOGVjZTlhMWFhMjM5M2RiNzJkNzUifQ"
+        },
+        {
+          "resource": "repo://pyproject.toml#L1-L21",
+          "version": "repo-lines-v1:sha256:fb7b1c1101f594b013be5c30c076d9b67d1c86bc51ff443d869cc34f793a9e74:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwMmE4MWMzODM2ZWRlZjJkMGJhMTFkMjM1M2ZiNmRhYmM3NzcxNTBhN2NhODNlYTBkOWU5YTcwMzEzZmVhYmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NDE2ZTA5Zjc4YmEzMTZjMDMyNTY4MjEzYjg1NWVlNzU2ZTQxNTY1ZDkxOGYwOTUxOWM4MWZkNjIwZjQwNjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIwNGU4NGM4MGVkNTNlMGZjMzhiYTQ3ODM4ZmEyYzVlZTgwODVjMTI1NzczOWY1ZDA1NjU4ODg0OTNjMmRiNjMifQ"
+        },
+        {
+          "resource": "repo://src/easysam/cli.py#L1-L147",
+          "version": "repo-lines-v1:sha256:eb01a5a9a5bb7a7715da1bc13cb1716d83663d50a07851f7d659ae35767c3bfb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQ3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIzY2I5ZmZjY2JhNTE0NmIyZGQxNzdhMzBjMzA1N2E0Mzk1ZWJkNWM3NDVkMDc4OWQyZWQ5NWQwY2Y0YWZlMjcxIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIxOGU5OTIzMmNkM2EzMDlmNTBjYmQ2ZjY2MjEyN2VlYWFmY2UxZjczNjI5MmRlZmIxMTNkOTgxYTIwYzdkODUyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-19T15:38:50.328Z"
+  }
+}

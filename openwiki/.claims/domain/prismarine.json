@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:7e1b00950e72590be098a03d65c22e84397c9f4685e9c1d49b487edbac0782eb",
+  "claims": [
+    {
+      "id": "claim_f919220e34a74fb3b3672695d90aca3f",
+      "statement": "Prismarine table generation happens during preprocessing in load.py, before schema validation. The function preprocess_prismarine resolves conditional-tables, calls prisma_easysam.build_dynamo_tables for each table package, and merges generated tables into resources_data['tables']. Model-defined triggers are stripped unless the integration entry sets trigger: true.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/load.py#L113-L179",
+          "version": "repo-lines-v1:sha256:02bafa60231e9dafbdc9b3de339eb0ecf858a65d2b795df5cc8ace21dd917868:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxZDgwZjFkNGUyMDRiM2I3YzgyZDMzMWYxZTdjNTJjODkzNTlhNmYzODY3ZTc2MzNiYzRhMGFhYmE5MzNlMjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU2MjkwNGIxMTEyYWRjMGExMmY5MjExYzhkZjIxYjExZGEwYTIxMDIzNzZiN2NjZTdiMGNiYWEyZGE1MDA2ZDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFjYTQ2ZWM3Mzg0NDQzYjlkMjYwYmUwZjY2ZDliNDRlN2E1NGE0ZjZkYmZjN2E0MzZiY2U4ZWM5ZDZmODVlOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRhMTllNWFkZjU4ODdkMmFjYzJkOGI4YTU0ZTQ3ODEzZjgyNDViMjg3NzQwZDE1MWQ0N2Y3Y2IxZGYxODQ2MzgifQ"
+        },
+        {
+          "resource": "repo://src/easysam/load.py#L136-L149",
+          "version": "repo-lines-v1:sha256:873d42d25283ccbed9f8fcd71703216d2a0160f7913647d6268b440b898c5215:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVkOTc0NGZiZmJlOGY4OGM4NjllZDE1NWNjYzk1MDVkMWU2NzFhNzM3YzE5NjZkZjg4MjAxMWQ5ODU5MDU4YzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjczM2U4NDg3Yzg1ZGZkY2Y5ZmE3YjkzYzc0NmM5NDYyNWFlNDdlMTIwYzc5N2U3OTFlNzM3ZjllZDdmZmM3M2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0MmUxOGQwY2QxMzIxOTgzNjFhZGNmYjg0OTkyYTU3MGE3M2JhNDJjZDhhOTg5YWEyYjI3YWU5Yzc1NWIxN2EifQ"
+        },
+        {
+          "resource": "repo://src/easysam/load.py#L172-L177",
+          "version": "repo-lines-v1:sha256:ae9f37b6cfc396c1afc047bd33cbf3badef8ee1251807b362e5eecadb18f81c3:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWY2OGM0OWEyOGQ4ZTRjMDA5N2Q5YWQ5MjdhMzFiMzU0NGYzYmYwYjEyYWFkNDkxOGY4NjU1NmE2ZGJmY2QzYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmQwMTAwNDIxM2RjNjllNGRkNzQzMGVhOGJlNmY1N2YxZjliMjI3OGFiYWVmYTJjNDM3MjJmMjNlMDNlNWYwZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWM0ZDNmOGY2YzIzYjhkMGE1NzIzNGFhMDA1NjBkMTFjNDljZWQwNTYxNTU1OGM3Y2M1Mzg5ZTFjZjIwMDAyZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2I2MWFjZmM1NDNhMzcxOGUxOTk4MzMwODIyZDgyZWI1OTE1NjQ1ZWMxOWYxZmQyMTMxZWMxYTM1MmI3MDJmZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_8e503e19c1414104b58e420759c37e82",
+      "statement": "Prismarine client code generation happens after template rendering in generate.py. The generate function calls generate_prismarine_clients only when 'prismarine' is present in resources_data, and each package is evaluated independently — client generation is skipped per-package if errors have been recorded, not globally.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/generate.py#L33-L90",
+          "version": "repo-lines-v1:sha256:a607abed79500a9faef3b81953b616080d51cd9f4a5554ebe58be451446c8f67:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdhMzNkNWRiNzQ2YjUzZGM2MzJhYzUyN2YyYTAxMDU2YTAyOTJlNGI2YzIwYTNiY2VlMDViODg2MzQ4OTcxMjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM0MDE3MTk1ZGQzMDljOTJmNGI0Y2MyMDg4NWE1MWQ1NjY3OTY4YzI1YjRlNTVjNWFkZGU0MGY5ODQzOGQzYWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEwYzRlODQ3MGY2MTdiZDEzN2NjYzE0YjM3N2M5ODAxNzQ5ZWJjMDdkMGVlM2NkNWY3ZDIyNGE0MGQwMGRmODMifQ"
+        },
+        {
+          "resource": "repo://src/easysam/generate.py#L86-L88",
+          "version": "repo-lines-v1:sha256:fe48d10e80b0ab3e53e5d24a829f5b6340b9a4207b1bad9ac935ea510eef9cac:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODk5MDAwMDYwMjAzMzI5MTBiODVmNjdhNjdmM2E3N2NlYWI4MzEyYjVhM2ZmMWJkMDA2YjEyM2E3MGUwM2ZjMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzA3NmMyYjljZjIxYTcwNmU0ZjMwMTViY2NhYmNmZTE5ZDFmYTgwZDM4NTdiMTljNmFjNzMzY2YwZmNjNjJhOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWEyYTY3MTA1ZmUxOTdmNDg3MDNkOGU2ZjM2ODRhZjUwOGYzZmU3MmIyM2E3NzBhM2Y1ODU1MWY2NDc1ZTAwYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjYxOWRiMTYyOTQ0NjY3N2NjYzFmMDIyMDE3OTBjOGU4MTZlZWNjMTY2ZWVmNGVkNjcxMzY5ZGM2N2U5MWJkNyJ9"
+        },
+        {
+          "resource": "repo://src/easysam/prismarine.py#L7-L58",
+          "version": "repo-lines-v1:sha256:22befae72902d97ed7d304d600af8c5f9b0f542c193587bc12a55375820ea14b:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFiOWU3ZDliNzZkZDNjNTZkN2UyMjI4NDZmNGMzNWYxMzA4NzI2YzEwNDZhMzlmMTMxZWJmNzI1NmZiNDQxODIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRmYmFhZWIyMmY0YmUxOWFlY2Q3NjcwYzZlZWNjZDk1YjlkMmJhYmI0MWIwZWRmOWQ5MTA0Njg1NjMxZDM5ZmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQyNDEwYjQxMmYyNGQ4NmZlYWU1MmU2ZDUxMWZkZWE1MzE5NTg3ODcyNjNiYmU3NTY4Y2QxMDM3YjMwYjhhNDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_94da1291ecc34be29b8c4c639c4631f8",
+      "statement": "EasySAM validates three Prismarine constraints: the cluster prefix must start with the master prefix (prismarine.py), the default-base and each table base directory must exist (validate_schema.py), and table generation uses prisma_common.get_cluster + prisma_easysam.build_dynamo_tables with the Python path set via prisma_common.set_path.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/load.py#L113-L133",
+          "version": "repo-lines-v1:sha256:5d2fb5acb12610df9b9aed390fa2729f755336510c26f9d06f9154d736527c71:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxZDgwZjFkNGUyMDRiM2I3YzgyZDMzMWYxZTdjNTJjODkzNTlhNmYzODY3ZTc2MzNiYzRhMGFhYmE5MzNlMjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlN2M5NTdiY2I0NGZiNjczYzk4YjAwNTBhNzVkMzgwODJkYjgxZDkxOGRlMzEzYTNmMDdjMTIzNTMwNmQ3ZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFjYTQ2ZWM3Mzg0NDQzYjlkMjYwYmUwZjY2ZDliNDRlN2E1NGE0ZjZkYmZjN2E0MzZiY2U4ZWM5ZDZmODVlOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhMGUwZjFhYjM5MDQxMjAyMWU0YmE3NGY5NDczZDg4OGYzOWY3MjJhMmQ1MmJhMDNmMWVkOTg2ODlkMDQxMGMifQ"
+        },
+        {
+          "resource": "repo://src/easysam/prismarine.py#L43-L49",
+          "version": "repo-lines-v1:sha256:7ec507ce7c04e4732cb5ddb246df8299ca2bbfa4be4f83db4d29ad4c67c01bf0:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMmU4MmE5NjkzNDIwNTA2NDI0MGFlZTU1NDE3ZTQ1M2Y3YTk0ZGMwNzUxZGY5NTIxZTMxYThhMzUyYzFjOWEyYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjZhZDA1MmM0NGI5NTNmMGQ4MzI4NmEyZGRkZWMyMTg1ZTdmMTg5ZGIwZTRmNTAyYzZmMDZmMzQ3NTg0NTRhNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzJiNWNjYjZjOWVmYjc2YmQ2MDkyZmI4ODE1YmYyYjNjYjJhOWE0ZmE1ZmY3YmY1MDAzMzFiOTQwZGUxZTljNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYmRlNGRhZDVmMGJmMjE3ZWQ2NTIzOTZlZDdiMjA3M2I0OTZlYzJiN2UxYWI5MzdmNjNmMTQ4ZDdiOTZmYmZhYiJ9"
+        },
+        {
+          "resource": "repo://src/easysam/validate_schema.py#L255-L275",
+          "version": "repo-lines-v1:sha256:aed2c67364245f1032da764494109240c93c0d45f692c7de8aa77c260bc02c25:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5NjcxNDkzYWU3NTU2MGU2NTAwNWQ1NmNkZjA5YzYwOWI0ZmU2Yjc1ODg4OGZjODYzYTkyYmU4ODZiNjA2ZDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNhMzRjMmI4Y2IzNTRlNGFhNzUzNzM3ODdmNTE3ZWYzZTBiNmVjYTJiYTM3YzIwZDYyMDQyNGNmODAzNGVjNGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY1YmJhMGYyMjhlOTMyNmM0MDE5NmUzNTNmNmI1MzcxZjczZDVjZDUyN2VmNGUzMDU1NjUyYWE3NmM2MTZmODgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a86bfa3edab54347bb48db8d4659de9b",
+      "statement": "conditional-tables in the prismarine config uses the same !Conditional YAML tag and resolve_conditionals machinery as the rest of the resource model. Trigger values can also be conditional, allowing per-environment control over whether stream triggers are attached to generated tables.",
+      "evidence": [
+        {
+          "resource": "repo://example/prismarine/resources.yaml",
+          "version": "repo-file-v1:sha256:e57c76007101e463aaa6a9011bc76e365ec25bb8b26503f4cdb1304d5aa4ca55"
+        },
+        {
+          "resource": "repo://example/prismarineconditionals/resources.yaml",
+          "version": "repo-file-v1:sha256:488c429ef0c0c009d3f60d47eca73650f402850af2543cf47a2e728bf9021467"
+        },
+        {
+          "resource": "repo://src/easysam/load.py#L143-L148",
+          "version": "repo-lines-v1:sha256:50199061cb93c77c2a7a8d74c6ffbd483a808ed238431261a118b6cd32574b80:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWQyNWI5YWE5ZjU0MGM2NjNkNTU2ODQ1NDgzODE4MzEzZGY2NDA1M2Q2NzQ1ZDY5MzRkZTMxYmY2MTE4NTBlMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWIxOTdmNThiN2NjNDc2MGEzMDgwY2Y2ZTczODI2NjE5NjllYjhiNTA4ZDIzMzQ5ZWZkZTZhNjQ4MDNjZDk4MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDRmNDExNjA3Mzg0ZTQ2YjY5M2IyZDc1OWMwYzU0MWYwNWJkMDEwZWYyZGU2NDQ3MDc5NGMyNDk0ZDgyM2VmYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWQ3ZTNmNWEwNjAzMjRiM2Q0ODFiNDJkNTYyOTY5ZTZkNzdiOTUzOWIwNDdmN2JiMDBmY2E3ODY0MGFkYWQ5YyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_1018da86a5b9495e9926dc0938cdbdaf",
+      "statement": "The generated prismarine_client.py provides typed CRUD access via a model class (e.g., ItemModel) with list, get, put, update, save, delete, and scan methods. In typed-dict mode the UpdateDTO is a TypedDict; in pydantic mode the client uses model_dump/model_validate and dynamically builds a Pydantic update DTO.",
+      "evidence": [
+        {
+          "resource": "repo://example/prismapydantic/common/myobject/prismarine_client.py",
+          "version": "repo-file-v1:sha256:5d50e57a5608949ae8aebfb9a1754767b4e7435925bf3b839c9d48a35056986b"
+        },
+        {
+          "resource": "repo://example/prismarine/common/myobject/prismarine_client.py",
+          "version": "repo-file-v1:sha256:b2eca4ae88b6d5e4cef6bf232477ee970be27c796eb2139311940a07e30a671b"
+        },
+        {
+          "resource": "repo://src/easysam/prismarine.py#L17-L17",
+          "version": "repo-lines-v1:sha256:77624fa4fa5e8d0683a10d062cb2dfcac8c1f4334bbc32c27f1ae6d505e0245c:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzc2MjRmYTRmYTVlOGQwNjgzYTEwZDA2MmNiMmRmY2FjOGMxZjQzMzRiYmMzMmMyN2YxYWU2ZDUwNWUwMjQ1YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzc2MjRmYTRmYTVlOGQwNjgzYTEwZDA2MmNiMmRmY2FjOGMxZjQzMzRiYmMzMmMyN2YxYWU2ZDUwNWUwMjQ1YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNlYmI0YTE1YzY2YTQ1Mzk0MjkwNjRkYjFlNGY0NWE3YmIxMTY0NTQwM2IwOWM1OTE2NjA0YTM1NTMyYzgwMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTBkM2I0NDE2MDFjOWM2MjdjYmJjZjQ3MWI1ZjllZDQwYmZjOThjMDg2ZjRjOTAzYzI5YjAwM2NiNTM3ZjM3NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_ad20d2c7f387422ba50862c5caf5895e",
+      "statement": "The init.py scaffold and example projects use a db.py re-export pattern (class ItemModel(pc.ItemModel): pass) so application code imports the generated client model from the package without depending on the generated file's import structure. This db.py is created alongside models.py when init is run with --prismarine.",
+      "evidence": [
+        {
+          "resource": "repo://example/prismarine/common/myobject/db.py",
+          "version": "repo-file-v1:sha256:4ee2333222d7df4ab1775646c635f1991c3b83d5fd4ec6ab5b445ee19777085d"
+        },
+        {
+          "resource": "repo://example/prismarine/common/myobject/models.py",
+          "version": "repo-file-v1:sha256:4e8fe5081059045c4b8a881c65706a21760bf0956059edc64775c7f1a66d5adb"
+        },
+        {
+          "resource": "repo://src/easysam/init.py#L134-L155",
+          "version": "repo-lines-v1:sha256:d42aad41a7d0e482b685d94167ec65f286a6071d2f4e812a9c2b9a4a98cc7920:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0MDU3YzFlOWE1NjhlMzFhZDQzN2ZiNDFmZGExZWVmZjIwMjQxYTZhZjVjZTBjOWYwZDcyMDFjNTZlNWViMGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEyODNhMDg5MzM0MzAwMGFkNmU4NWRkY2QwNTYwZDlkMDg0ZmQzMzMxNDJiZGViZjkzNzYyNGU4MjRmNjY0NTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0MGEwNDEwMmVlZTk1MTg1NGZlYzQxMWUxYTVmYmM4NzdmZGQ1ZjcxYjc5OTc2NGNiYTVkODE3Y2Q2MGM5OTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_386fedf3c6674d768dd76c70d10e2a63",
+      "statement": "Prismarine models support a ttl attribute on the @c.model decorator (e.g., @c.model(PK='Foo', SK='Bar', ttl='ExpireAt')). The ttl field name is passed through to the generated DynamoDB table definition.",
+      "evidence": [
+        {
+          "resource": "repo://example/prismarinettl/common/myobject/models.py",
+          "version": "repo-file-v1:sha256:0730a69696bb9f433b9d7fced1827591fb5a275f56b79b56a3952666547e1fb9"
+        },
+        {
+          "resource": "repo://example/prismarinettl/resources.yaml",
+          "version": "repo-file-v1:sha256:1d9c0d85ad72676c6828f13bcc091c49c51b7d9769bc4fe718b62d1f34775b56"
+        }
+      ]
+    },
+    {
+      "id": "claim_3033e553f1f743c185bf976aaaa79a91",
+      "statement": "easysam init --prismarine scaffolds common/dynamo_access.py, common/myobject/models.py, common/myobject/db.py, and a backend/function/itemlogger trigger lambda with easysam.yaml and a DynamoDB stream handler. The standard scaffold creates backend/database/easysam.yaml instead.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/init.py#L115-L147",
+          "version": "repo-lines-v1:sha256:bc4148d674132dfd7b8b8b8b0c9e6da43dbd7812e84553a83f05b20b0f7f5b6f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiMGNhYmRmNzdjZjBlZGE2YTgwNzEyZTM5NDIyZmFhOGMyZDY4ZGUzNjgzZDIwOWJlOTNmMjU1MjU5NGRjOWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY4YTg2NTJiNDJkYWI2ZDMyNGFjOThjYmZiYjljNjljZTI4OTUwYTljM2ZhM2VkZGViM2NmZGQwNTg0YTEyMjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmIyNjYyMWE0ZjdjZWE1YzcwNzc3MmVkYzAwNzUzNzIwNTgyZTNkN2M0NDc3MTBkZmQ1NzFlNDI5ZGRmM2YifQ"
+        },
+        {
+          "resource": "repo://src/easysam/init.py#L204-L278",
+          "version": "repo-lines-v1:sha256:85ff3027d87c72e90f36924e41e867602ff03d231e0bbc24d3e0df94eb579a37:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwN2NjMjQ5NWZkZDZkMTk2ZDRiYjQzYWI2NmNkOGNjOTU4NjNjZWIwMWVjYTA4NDk5MzlmNzRmYTQ1ZDBkNGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3Y2Y3MGIyOTcwZjQ0YmNhODZmYWMxMzJkMjMxZTIyYjEzOWFkN2U2ZjU4NWVmOGQ4OGQzYTE1NGFmMjRlMjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRjN2QzMjM2N2IwYjZjNjE5ODU0YzZkOTYyMzgyMGNmMjZiN2UzNGQ1N2I5N2UzNGQzM2M2ZTc2OGJiYWI4YmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMwNmVlOWIyMmUyNjIzODRmZjFhOGU5ZDhmMDZkODVmMTQ4OGMxYTNkNGUyOTZmOWJlMzA2Y2MwYTk1ZDQxYTYifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-19T15:38:50.328Z"
+  }
+}

@@ -1,3 +1,4 @@
 # Files
 
-- [Generate and Deploy Workflow](generate-deploy.md) - Step-by-step workflow from project init through schema validation, template generation, SAM deployment, and stack deletion. Includes a sequence diagram of the deploy pipeline.
+- [Generate and Deploy Workflow](generate-deploy.md)
+- [Local Execution Workflow](local-execution.md) - How the `easysam local` server loads resources, registers FastAPI routes, synthesizes API Gateway events, isolates handler imports, swaps per-function envvars under a serialization lock, and normalizes handler output to HTTP responses.

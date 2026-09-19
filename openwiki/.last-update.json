@@ -1,6 +1,8 @@
 {
-  "updatedAt": "2026-08-03T16:36:34.324Z",
+  "updatedAt": "2026-09-19T16:16:59.123Z",
   "command": "update",
-  "gitHead": "55213b649c8b4d94401d7aca37b157b114e19892",
-  "model": "mistralai/mistral-medium-3-5"
+  "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+  "model": "upstage/solar-pro4",
+  "status": "complete",
+  "language": "en"
 }

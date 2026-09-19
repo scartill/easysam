@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "pages": {
+    "/openwiki/architecture/overview.md": {
+      "pageVersion": "sha256:0bd2d072d164cec0fb06c88df61f6d54719faa1bf35981eb9c8e3dde006a7cb1",
+      "completedBy": "openwiki/0.5.2",
+      "completedRunId": "cc47785e-3ad1-499c-9c93-ac4b56d4acbc",
+      "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+      "sourceFingerprint": "sha256:7968de3befde54db1b691895415d803e5f0b191e419ebf03f66347e1c14b9ffb"
+    },
+    "/openwiki/architecture/source-map.md": {
+      "pageVersion": "sha256:964034b78d120e6ab7b248463b263aaa5b1dc18743fe257f0f1c6b4fa664f4c6",
+      "completedBy": "openwiki/0.5.2",
+      "completedRunId": "cc47785e-3ad1-499c-9c93-ac4b56d4acbc",
+      "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+      "sourceFingerprint": "sha256:7968de3befde54db1b691895415d803e5f0b191e419ebf03f66347e1c14b9ffb"
+    },
+    "/openwiki/domain/prismarine.md": {
+      "pageVersion": "sha256:7e1b00950e72590be098a03d65c22e84397c9f4685e9c1d49b487edbac0782eb",
+      "completedBy": "openwiki/0.5.2",
+      "completedRunId": "cc47785e-3ad1-499c-9c93-ac4b56d4acbc",
+      "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+      "sourceFingerprint": "sha256:7968de3befde54db1b691895415d803e5f0b191e419ebf03f66347e1c14b9ffb"
+    },
+    "/openwiki/domain/resource-model.md": {
+      "pageVersion": "sha256:abeaf4e94d6472056ad3e1b2fb412677da0381fa56c53cc05e985c4ae3b8596d",
+      "completedBy": "openwiki/0.5.2",
+      "completedRunId": "cc47785e-3ad1-499c-9c93-ac4b56d4acbc",
+      "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+      "sourceFingerprint": "sha256:7968de3befde54db1b691895415d803e5f0b191e419ebf03f66347e1c14b9ffb"
+    },
+    "/openwiki/features/local-execution-deep-dive.md": {
+      "pageVersion": "sha256:474f93e8a23bfe1c08eafcee54dc6a70cb143921c46789f71b7b9a180b07bd73",
+      "completedBy": "openwiki/0.5.2",
+      "completedRunId": "cc47785e-3ad1-499c-9c93-ac4b56d4acbc",
+      "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+      "sourceFingerprint": "sha256:7968de3befde54db1b691895415d803e5f0b191e419ebf03f66347e1c14b9ffb"
+    },
+    "/openwiki/integrations/conditional-overrides.md": {
+      "pageVersion": "sha256:4244401f51a60c4bcd632670a631ace030dc92b5a8e0dbac86f58371ebd0e7b5",
+      "completedBy": "openwiki/0.5.2",
+      "completedRunId": "cc47785e-3ad1-499c-9c93-ac4b56d4acbc",
+      "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+      "sourceFingerprint": "sha256:7968de3befde54db1b691895415d803e5f0b191e419ebf03f66347e1c14b9ffb"
+    },
+    "/openwiki/integrations/prismarine.md": {
+      "pageVersion": "sha256:780060a1b4487330d68cb6fd7bd03b5593bff202d6636600c142f0f8e48cf93c",
+      "completedBy": "openwiki/0.5.2",
+      "completedRunId": "cc47785e-3ad1-499c-9c93-ac4b56d4acbc",
+      "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+      "sourceFingerprint": "sha256:7968de3befde54db1b691895415d803e5f0b191e419ebf03f66347e1c14b9ffb"
+    },
+    "/openwiki/operations/runbook.md": {
+      "pageVersion": "sha256:238a5725d64f06ffe35cdccc0d8a0eb58afc90059f60a5e0473ea2e2aa07c66b",
+      "completedBy": "openwiki/0.5.2",
+      "completedRunId": "cc47785e-3ad1-499c-9c93-ac4b56d4acbc",
+      "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+      "sourceFingerprint": "sha256:7968de3befde54db1b691895415d803e5f0b191e419ebf03f66347e1c14b9ffb"
+    },
+    "/openwiki/quickstart.md": {
+      "pageVersion": "sha256:f0943c9064367146894afc1c912ba2eb46c5eceed49da2cae0eb30d08df41850",
+      "completedBy": "openwiki/0.5.2",
+      "completedRunId": "cc47785e-3ad1-499c-9c93-ac4b56d4acbc",
+      "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+      "sourceFingerprint": "sha256:7968de3befde54db1b691895415d803e5f0b191e419ebf03f66347e1c14b9ffb"
+    },
+    "/openwiki/testing.md": {
+      "pageVersion": "sha256:a9fd041c906364015723b9af2f0899887490ef32f954fe4cac1194957abd607d",
+      "completedBy": "openwiki/0.5.2",
+      "completedRunId": "cc47785e-3ad1-499c-9c93-ac4b56d4acbc",
+      "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+      "sourceFingerprint": "sha256:7968de3befde54db1b691895415d803e5f0b191e419ebf03f66347e1c14b9ffb"
+    },
+    "/openwiki/workflows/generate-deploy.md": {
+      "pageVersion": "sha256:6e52b104a70042ba5df33398d4a902d62b2bb716cde59ece1d859e28cf6983e8",
+      "completedBy": "openwiki/0.5.2",
+      "completedRunId": "cc47785e-3ad1-499c-9c93-ac4b56d4acbc",
+      "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+      "sourceFingerprint": "sha256:7968de3befde54db1b691895415d803e5f0b191e419ebf03f66347e1c14b9ffb"
+    },
+    "/openwiki/workflows/local-execution.md": {
+      "pageVersion": "sha256:986a6eecb1ad6fc8b0d91023f3c7d65d0932613a4350749b272be1c529729daa",
+      "completedBy": "openwiki/0.5.2",
+      "completedRunId": "cc47785e-3ad1-499c-9c93-ac4b56d4acbc",
+      "gitHead": "765a68bfc8db84aef97ad87c099125b340945179",
+      "sourceFingerprint": "sha256:7968de3befde54db1b691895415d803e5f0b191e419ebf03f66347e1c14b9ffb"
+    }
+  }
+}

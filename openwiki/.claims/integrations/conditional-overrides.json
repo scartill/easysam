@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:4244401f51a60c4bcd632670a631ace030dc92b5a8e0dbac86f58371ebd0e7b5",
+  "claims": [
+    {
+      "id": "claim_767a8e5ccf604b2fb876aa1f5bdf1169",
+      "statement": "Conditional resources use a custom YAML tag !Conditional parsed by conditional_constructor into a Conditional object with key, environment (default 'any'), and region (default 'any'); key is required at parse time or a ValueError is raised.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/load.py#L421-L497",
+          "version": "repo-lines-v1:sha256:7e10abbf11c1af2392577a7dfdc37d3343f15bf177a810194482630df719ff62:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzNmVmNTdmMjllYzNiODllZjlmY2FkZGM4MjRmMWM2MGQ4ZTJmZjcyYWM5YTJjYzM4ZTM2YmJkNGI0NWEwZjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiNDQ3YTlkMDRlZTAwZWYwNmI3YmNhZGM4MWU1MmExNWMyNjgzNTk4OGE0ZDNjMzViNjBhYzgzMTMyMzMxZWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1OWNjYmIwNGY4YjcwMTM1OTJjNmU5ODY0ZTIwMGU5ZmMxNGU5OTg1ZmEyZTgyN2Q1YjQ3MjRhYzdhOGJkM2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkyNDMzOTQxM2E3YjFkOTc5ZDJlMzNiYmE4NmI4ODY1OTdlN2M0ODkxOGJjNWNhOWFhZDE3NGZkNWFjZDIzNmYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_56a5f242eec94de28b276fd37e373449",
+      "statement": "resolve_conditionals recursively walks the resource tree, checks environment against deploy_ctx['environment'] and region against deploy_ctx['target_region'] using check_condition, and requires both to be true (AND logic) to include the entry, storing the resolved value under key.key.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/load.py#L471-L497",
+          "version": "repo-lines-v1:sha256:f0d508e9aebdb57de2f959b1777bd19b8fbeccd1712db8351d0ee5de5cc50d7f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5ZDVlZTMyMjQxOTA3YmQwOWJhODhlYTMxNDUzYWM1YzZiZWZlZmI3ODc0YjUzYzcxMzIzODRmYmM3MWQ1NzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiNDQ3YTlkMDRlZTAwZWYwNmI3YmNhZGM4MWU1MmExNWMyNjgzNTk4OGE0ZDNjMzViNjBhYzgzMTMyMzMxZWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ1NTQyMzkyYTI2YjM1MTRmZDIyMGQxNGYwOWZmY2RhOTBmNzI3ODRmYmI3ZGE4MzU4MDRmN2FjZDU3OTdlYzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkyNDMzOTQxM2E3YjFkOTc5ZDJlMzNiYmE4NmI4ODY1OTdlN2M0ODkxOGJjNWNhOWFhZDE3NGZkNWFjZDIzNmYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_613e8d8039c64c898cd0e074667febd2",
+      "statement": "check_condition implements match rules where 'any' matches all, lists are OR-matched, a leading ~ negates the match, and a missing deploy-context key raises FatalError.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/load.py#L446-L468",
+          "version": "repo-lines-v1:sha256:a0fcdf2fc4f59754fb93655ecad9381180196f2f828cf69c946ce81196064a73:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyMmY3NjIzNGJmMDA1Nzc1NmViNGIwN2MzYTg1NTViYWE0OGVmMjJjYzBhNzYwMDkxY2YxYTdmZGE4OGE3MjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVjODc2MGY0ODRkZmY2MzE2N2E4YTQ5N2Q4MGZhMjcxYTFlNzJiMWMyNGJmOTU3NjY4YzIxYWQ1NjIyN2QyMjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzNmU1ZWNlMzBmYzVkOTBjMWExZjVkZWVhMDFmYmIxNTBlY2I0YWI2OTdmNTI1MzdmOTAyMmNlM2Q0MzM1MGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRlODBlN2E0OWFjOTgzNzk3YTFjMzc3NWNjODIzNzczNTVlZjMxM2UxYzAyYTQ4YjQ1M2FmMWE2OTBiZjgxNmEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3fd246ee4c274a9083e9b687a07e5e88",
+      "statement": "In resources(), conditionals are resolved before overrides; apply_overrides patches resources_data from deploy_ctx['overrides'] using /-separated paths converted to . for bendedict key assignment, so overrides cannot resurrect resources excluded by conditionals.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/load.py#L500-L505",
+          "version": "repo-lines-v1:sha256:6f2d063105d6e8ee7e509f378315cec14cc8fbf49b2f7c6a34fe472ac6177b5f:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2Y4OWNlNTNiNThlMGJiN2MxYjc0MDIyYTFhY2E5NjIzMGRlOGMzNWM3MGM2ZTY5OTZiMWMwMWZmYTYxMDY3ZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZGFmNjhiMWM4YjkxYzkyZDBhNzMwMTcyNWZiMWQ3YmE1OGMxN2MyN2MzNzRmNjJjMjQ0ZmE3NTg1OTBkNGYzNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzk5ODM3YWVmMjA2MjE0MDExMDQyNjMzODJkNTc1ZThmMjcxZTIwNDEyYTcxMWY2NjU1YjIwNTUxYzRmNDgwZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjRjNTJiZGY0OWQ3ZWNlMzRlNjRkNzJmMWRiZjkwY2I5ZmFhZDMyZWU3MGQ1YWUxOGUxZTIxMWY2NzNlZmU5YiJ9"
+        },
+        {
+          "resource": "repo://src/easysam/load.py#L56-L110",
+          "version": "repo-lines-v1:sha256:ab6c5818829637770f7da35c3ac12dbf74f46feca042dd76859679185f14a05c:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwMjE5NzM5YWIyZjg4ZTY1ZDI0ZmYxYzlhNmJkM2E5YmRkNzg2NWVjM2ZkNzllMWI1NmE0OTQ4YmQzM2NlOGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRiMTFiNjUwYzk2YjhkM2I0NzE0MjkxY2JkOTliODkwZGI0YmJjNTU4YTBkYTMxMGFmMzI5Y2JkNmIxYzg1NmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5YWJhMDA3ZTU2MTIwMzVmNDFlMDdjYTJhYTUzNDAxMTc3MGVjYzhiY2I0MTQzZThhN2IxYjEyNDhjZWVlY2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVkODMwZmNlNzJlZjc3YTk1MDlhNmJlNzVjOTgzZTc4N2IxYTU3ODE2MjBjMGNlMjhiMTZkZjU3MzEzYjc0MDgifQ"
+        },
+        {
+          "resource": "repo://src/easysam/load.py#L91-L98",
+          "version": "repo-lines-v1:sha256:b23fd5fb9a1c0a3192887e2e9acfb774d4be68ef57afcd0881d0420413cbdd2f:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWQyY2JkNmQxOTJiMGU4MDAyNzFhZDllMDJlOTliMGQ0ODE4YzZlMTk3OTA4N2U0ZmNlNzE4NTQxNzdlMjMxYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGY3ZmIzNjM2NTg0ZDEyNWNkN2MxMWFmODY5OWRmYmUzZTY4Mjg1NWE0MmQyMWVhNzg5ZTMyMzNkNmViYzM4NSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDYyNjRiZDQ5NjM5NDdjZjA1ZjlmYTYxMTNkN2JjZWM1NWQ2NjQ2OWI4YWMxYmRmOTFmYWRiZmMyNDY4NzU3YSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTI2MmE3NTU2OWVlOGM4ZjU1N2MxZjY1N2YzMmZjNjRmNjUyMDAxODJkNDhkZTVjMWQ3YjRlZTJmYjFiNjFiYiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b80377dd03a64761aece3c92ec8e53c7",
+      "statement": "Conditional resolution happens at three points with the same deploy context: root resources.yaml, each easysam.yaml, and Prismarine conditional-tables.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/load.py#L143-L148",
+          "version": "repo-lines-v1:sha256:50199061cb93c77c2a7a8d74c6ffbd483a808ed238431261a118b6cd32574b80:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWQyNWI5YWE5ZjU0MGM2NjNkNTU2ODQ1NDgzODE4MzEzZGY2NDA1M2Q2NzQ1ZDY5MzRkZTMxYmY2MTE4NTBlMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWIxOTdmNThiN2NjNDc2MGEzMDgwY2Y2ZTczODI2NjE5NjllYjhiNTA4ZDIzMzQ5ZWZkZTZhNjQ4MDNjZDk4MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDRmNDExNjA3Mzg0ZTQ2YjY5M2IyZDc1OWMwYzU0MWYwNWJkMDEwZWYyZGU2NDQ3MDc5NGMyNDk0ZDgyM2VmYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWQ3ZTNmNWEwNjAzMjRiM2Q0ODFiNDJkNTYyOTY5ZTZkNzdiOTUzOWIwNDdmN2JiMDBmY2E3ODY0MGFkYWQ5YyJ9"
+        },
+        {
+          "resource": "repo://src/easysam/load.py#L273-L277",
+          "version": "repo-lines-v1:sha256:41b0a043e1f1e4c5ddce2e3614d1afa5c45a56794259a3a14afc28c09b834484:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmU5Y2ZkMDQyMjUzZDhmNDdhZGEyZTUxNzQwYjUwNmQyYTc5YmUzMjU0ZGE2N2JiOWE3YjA2MmFiZGFiZGE1OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWU5Y2ZmNTM3YWZjNTNhNTcyMjljZDliMTQyYzk4OGFlNjJhMGU4YjM4ODQwNGNkOGI3NGFjOTA4M2Y0NDIyNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2M5ZGZiY2JlOTk2MDE2NDJkNDg5NjBlZDgyYWNhYzc2ZDYzMmI1NTY5MTMyMjE3NGI3YmI5NWZhZGVhNDg3YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTE5ZjU2YjJjMTZiOGFlZjhhNjA4OTE2NDc0ZmNiYTFkZTIwNGNhMmVlMWQwMTEwY2JlZjY1NWRjNTAwMGIwZiJ9"
+        },
+        {
+          "resource": "repo://src/easysam/load.py#L91-L95",
+          "version": "repo-lines-v1:sha256:7927e5d2bb411383d45c601641a5c8c8764f793bb95be5cc2d0c0d52b19b5cc1:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWQyY2JkNmQxOTJiMGU4MDAyNzFhZDllMDJlOTliMGQ0ODE4YzZlMTk3OTA4N2U0ZmNlNzE4NTQxNzdlMjMxYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTMzNTQxYTE0NjJlZGJmOTIxOGZiMjkzZDkyMTMxODRmNzc2MTdmYzk5Y2VjZDExNDI4OGEyMDk3MmYxN2ZmNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDYyNjRiZDQ5NjM5NDdjZjA1ZjlmYTYxMTNkN2JjZWM1NWQ2NjQ2OWI4YWMxYmRmOTFmYWRiZmMyNDY4NzU3YSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGRhNTllOWJjMDNhNzdlNTg1MmVlZWMwMDA3MzZmODdjYzI0ZTY2MmU4MjQ0MDEwOTc0ZTU1MjE4NzdhNzhmNiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_50eb173e4e4f4a8584d8ef260874d86e",
+      "statement": "The load pipeline order is: load resources.yaml, load .env, register !Conditional constructor and parse, expand env vars, resolve conditionals, apply overrides, preprocess resources, validate, then render template.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/load.py#L56-L110",
+          "version": "repo-lines-v1:sha256:ab6c5818829637770f7da35c3ac12dbf74f46feca042dd76859679185f14a05c:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwMjE5NzM5YWIyZjg4ZTY1ZDI0ZmYxYzlhNmJkM2E5YmRkNzg2NWVjM2ZkNzllMWI1NmE0OTQ4YmQzM2NlOGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRiMTFiNjUwYzk2YjhkM2I0NzE0MjkxY2JkOTliODkwZGI0YmJjNTU4YTBkYTMxMGFmMzI5Y2JkNmIxYzg1NmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5YWJhMDA3ZTU2MTIwMzVmNDFlMDdjYTJhYTUzNDAxMTc3MGVjYzhiY2I0MTQzZThhN2IxYjEyNDhjZWVlY2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVkODMwZmNlNzJlZjc3YTk1MDlhNmJlNzVjOTgzZTc4N2IxYTU3ODE2MjBjMGNlMjhiMTZkZjU3MzEzYjc0MDgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a8b79455c942465795d54f50cf302087",
+      "statement": "The conditionals example demonstrates environment/region conditional buckets plus context-file overrides, with three dedicated tests covering prod, eu-west-2, and other environment/region combinations.",
+      "evidence": [
+        {
+          "resource": "repo://example/conditionals/deploy-context.yaml",
+          "version": "repo-file-v1:sha256:0ec3e026ea91abd43203209ddf99684bd4b2d8edd0d5bad2e145a6df5413a503"
+        },
+        {
+          "resource": "repo://example/conditionals/resources.yaml",
+          "version": "repo-file-v1:sha256:b8f46b6077634392eb42e6770588d3513e33a390dd13ea62a4f8aaeaed4efbc6"
+        },
+        {
+          "resource": "repo://tests/test_conditionals.py",
+          "version": "repo-file-v1:sha256:762c06e82d144167a58d94deecf74f3a15991ed663ea1ddf41c70c2bcdf7c835"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-19T15:38:50.328Z"
+  }
+}

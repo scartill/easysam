@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:0bd2d072d164cec0fb06c88df61f6d54719faa1bf35981eb9c8e3dde006a7cb1",
+  "claims": [
+    {
+      "id": "claim_42d04c71bc4a4bfa91247b03591fd275",
+      "statement": "cli.py is the Click command group entry point with global options --environment, --aws-profile, --context-file, --target-region, and --verbose; it exposes init, generate, deploy, delete, cleanup, and inspect commands, and registers inspect and local sub-groups in main().",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/cli.py#L123-L127",
+          "version": "repo-lines-v1:sha256:1b1ca0370b3239c036697878d093fb806773206159afbfdb8a9d62650a615e1c:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzJlMzEyNTdkYzBhZTFkNTkzMDM3YzI4MGM5YWQ1MDgxOWI4YTZjOGNmNzI4YmUwNzE2ZDAwYTNlZWNjMDRiYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzllNDRkNzVkY2JiZmIwYjY0MzljNWZmMmQ5ZDA3MGJhMjA3NzQxMjhkMTI2YmRmMzVhNjEzYWI2Yjc3NDEwMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDBjN2E5YjQ1ZWFkN2MwMzI4ZGY5NjUxNDNiODk5MWJjNWUyOTIxYmEzY2RlNTZmZDA0OWY3NjQ1ZGZmZDRjZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTg0NWE4ODA5YTYyZTg3N2NkMTE0YjQ1OGJkZGY0Yjg3N2FmNGVhNDRkNmMxOTZjZWQ3ZTQ1M2E4ZDNmNzNlZiJ9"
+        },
+        {
+          "resource": "repo://src/easysam/cli.py#L24-L45",
+          "version": "repo-lines-v1:sha256:179a181fd6681a33a49492f86b777e78b5829cb7efaa18ab32338f5ed99e87f2:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYxZWNmZDQwYWVmNzZiOWE4ZmU2YzAwODU2MzNmNjQ0OTMzNmY2YjNkMDE5Mzg5ZjY1ODNiMzFkZDFkNDAxNTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxZmViYzcwYWU1YzhkODhiMzEwMGY5YmE5ZmY1NTllOGVjM2E5MTc3Y2I2YzhiODljOWE4MmQ3MDMyMmYzMzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE2MmM1ZGRiM2E0MWY0NjRmZjM2MTE4NmNhYWZmMTY0ZmY0N2IyMThiNGMwYTBkMjEzOGNhNTJlNGM0NWE1MmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEyOWM1NmExODhlYzQ4NjhiZWQyYjlhMTMzYzgxMjQ5OWUzMTQ1YzVjNzFjMTA1OTQ2NDhlNDBmMmIyMmYyODUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_67606a3dfe1449beb0a8ba5afae48628",
+      "statement": "load.py is the core loading engine that reads resources.yaml, loads .env, resolves !Conditional tags, applies overrides from the deploy context, recursively imports easysam.yaml files, preprocesses Prismarine tables, sets defaults for functions/tables/streams/paths/searches, detects third-party Lambda layer support, and sorts resource sections.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/load.py#L392-L420",
+          "version": "repo-lines-v1:sha256:b49ad178ad836e9bf0348f9cd54358d8d5f92508aae0a3e86dccfe616641152c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRhN2JhYzk1YjY5ZjUwMzlkNGNkMzQyY2JlYTI5YjAzZjFjYTg5MGIxNTk1NWU4OTRiNDBlZTM0OTM5OGIxY2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNiNzFhYjhmYmE2MzYyMDJkNTFjMzQ1NGQ0NDhhMmM4ZTRhZDBiZDUxNzE0MTk2NjEwOWEzNGRkNThhODNjOGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJjNWUyMzgyNWQ2ZDc0YzJjYWMxODdmYzMyNTE0NTBmZWQxYjdhOTM3ZDA0YmU5ZGZlNDEyM2QxM2FiMTAzNjEifQ"
+        },
+        {
+          "resource": "repo://src/easysam/load.py#L56-L109",
+          "version": "repo-lines-v1:sha256:d4418d387bcfda603220a74433b0f2d891b2f27f7a76b4772914d84a3abcef11:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwMjE5NzM5YWIyZjg4ZTY1ZDI0ZmYxYzlhNmJkM2E5YmRkNzg2NWVjM2ZkNzllMWI1NmE0OTQ4YmQzM2NlOGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5YWJhMDA3ZTU2MTIwMzVmNDFlMDdjYTJhYTUzNDAxMTc3MGVjYzhiY2I0MTQzZThhN2IxYjEyNDhjZWVlY2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjYTQ2ZWM3Mzg0NDQzYjlkMjYwYmUwZjY2ZDliNDRlN2E1NGE0ZjZkYmZjN2E0MzZiY2U4ZWM5ZDZmODVlOTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8ec9a7a663cd42e99009691b8817b849",
+      "statement": "generate.py orchestrates generation by calling load.resources, invoking plugins, rendering template.j2 and swagger.j2 via Jinja2, and calling prismarine.generate; it wraps top-level failures in FatalError.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/definitions.py",
+          "version": "repo-file-v1:sha256:2861f75a7e766a06a4e504a1095c990e2640b65dca84a7305077c8703cd23ee1"
+        },
+        {
+          "resource": "repo://src/easysam/generate.py#L15-L94",
+          "version": "repo-lines-v1:sha256:54f97e68acb86a3edcb3f38846da353a1cfcec840b0a9b4525b7a8c66f4be966:eyJzZWxlY3RlZExpbmVDb3VudCI6ODAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5Y2JhMTkzMGQ0MjE1NTgwZjE2YTIxN2U0NmNmOWQ2YjE1ODFhY2ViN2JkZTFhNTIxZjRjN2JiNjE3NzhhNTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI4MDY0MDVlN2VkMzU2NDBjZjIzYjFkMTEyOTFlNTRmYjU5YTE0NzEzNGRiZDIxMTk1Y2VjMDgwNDBjMGZlNmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRjOTI3Y2JhY2NmYTQ0MTI2YzIzMGRiMDQ2MGEyNzNhMmI3MjczOTY1MWE3ZjkwZTgzYTg4YmY5OTAzMjI1NzUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c5a4f80ff0bd4974bf63648e27622482",
+      "statement": "deploy.py wraps the SAM CLI by checking pip and SAM versions, copying/removing common dependencies, running sam build and sam deploy with tags/region/profile, reconciling event source mappings after deploy, and implementing delete via CloudFormation delete_stack.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/deploy.py#L110-L212",
+          "version": "repo-lines-v1:sha256:b9df65afd4eea4631e36462411f4beee14234a6785ca51bc867ce5a1abe54067:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyMGQxODI4ODg5ZTM1ZjQzOTg2YzEyNzg3OWUwODU0MjJjNDhmOWY5NDk2ZmEzODhhYjI0NjMxY2QyZjQzZGNhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI1ZGY3OTlkZjE1YmJlZjczNjJiNDk2MmNiNzMyYTVjMGIwODU2OGM5MzFjMjAzMzhhMjNiMjNlODA2MmIyOTllIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI3YWY1MDVkMTY3MjhjM2I3OGFhZWQ5NWU4MGIxNjhlYjVhNzE0Mzg4M2U4OGZiMjIwZDEzZjM0NjY2N2E5OTMwIn0"
+        },
+        {
+          "resource": "repo://src/easysam/deploy.py#L23-L57",
+          "version": "repo-lines-v1:sha256:84eb84aa385e19ced81b15529b9bd670edab23ca9ea2a61d91c8282df45194f4:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwNWNlYWVjZDBlMjZkMDEzNDgxMzNiYTAwZjNhMWVjN2I2NzAwMDhkMzdiM2IyYTE3OTg2ZGUxNzAwYzNiNDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1NDIxNjY3ZDMzNGFmODA4YzA5N2VlYmNjYWJhMzhhZjUxMTk4ODc1MjczM2NmNjdlOGM3ZDhiYWZhZTUyZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZjNDA4MzE1YjcxMWYwY2E5NjM0ZjZiZjYwNTY3YzY1NDUxNzZjNDliOTA5NGFhNjM2ZjA0YmNmODgxMDQ5YWIifQ"
+        },
+        {
+          "resource": "repo://src/easysam/deploy.py#L264-L330",
+          "version": "repo-lines-v1:sha256:2dcde0f5d006e412d90d2ec205c0269e1174fd7da4ef8cc9fcadf5473d969e4b:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlNzJlOGVhZGI2NDA4ODBkM2RiZjM4MDJhOTc4NDQwNTM3NDcxMjdkYzJiMTNlYzM4NjgwYjM2NGEwYjg1NjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlkOGE5ZTljMzI1MjgyMGM2NWE4MTY1MjBiOGRiNDkzMjI4MDg0OWVjOGM3ZDJlYjYyNzJhZmRmZWJlMDU5YzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA2ZWI3NmE5NmE1YzNjNDEwMjM0YjUwYjhkZDhkMzNmODczMjI3MDI2NGFiZjRkNTk5ZmNmZTU1NjZkY2VjMDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_437c5869db7f4e0a8978c1a7c4138b1f",
+      "statement": "local_server.py provides the local Lambda execution path: local() loads resources via the same loader, sets global and per-function envvars, and runs a FastAPI/uvicorn server; create_app builds routes from resolved paths; per-request handler invokes Lambda code under an asyncio.Lock with envvar swapping and restores them afterward.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_server.py#L139-L174",
+          "version": "repo-lines-v1:sha256:6e3b73fb074c11aba246bfe64dee5efebed69ecd8d9b8a3d790e350f808b0e50:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYyYzRjZmIyZTdjZjM3NTI4MjFiN2MzMWJkNDI2N2ViYTQ2ODZhMzMyZTMyZWQ0ZWY2NzE0MmMwODkwMDhiNDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkNjdiNDY2Mzc4NzVjM2JiN2Y5MDNiMWRiODczNGI0YTI5NjY4NWRmNGRiZTY2YTRmNmNlZjdmZGM0MTE2M2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzMjI5OTAwYzUxNDFkOWU0ZmVkNjJmMWNkNWQwMjNlMTg2NGRmY2FjMzk1NTkyYWM1NTJhN2NjNDNlOTU5MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE5NGVhM2VlMmU4ZTM5OTY3NzllNzYzYmU1MWI5MGNmNGE5YTliY2I5MGE2OTBkNGZjOTNkODBmMWJjNzEyZTEifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_server.py#L177-L248",
+          "version": "repo-lines-v1:sha256:fa7e6c69c76eac8544d388e5ea70ac1a2efad14d4e335738d4d8f29aabb1a47a:eyJzZWxlY3RlZExpbmVDb3VudCI6NzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE3NjE3OTY0OWY1ODcwZTdmODA0NjE1NDI0ZTIzMGQ1MmI3YmY3YjE1MWU4MWU2YTg1Njk3NzU2MTU5YWM1ZTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNjNTRlYjhkOTA1MGIwYzEyOGNiZDFkZThhYmE1ZmEyNzUxMzA1NWNkYjgyYzkyMDY2YTg0YjU5MjI0ZGMwMmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFlZmFjOWE2YjY4ZDA5NDRmZDMzNmRjOGYzOTM4YjhhMTVjZGY2YzQ2ZWJiODViNDk4MzViODIxNGNhMDE5NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_server.py#L26-L91",
+          "version": "repo-lines-v1:sha256:f1cd1d0f1e90cb1aa3efc1deed6b435d0fba9da4a606afa677cd6da9e326e090:eyJzZWxlY3RlZExpbmVDb3VudCI6NjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwZjZiNWMwNTllYWYxNDI2YTgzNDBmNDdlNDM2ODVhM2E1MWU2YjVjZTk3OTBmZjBmMDYyZDE4MDc1NjVlZmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkODcxODg4NDA1NzExMzkyOTE1Y2M5MWE1ZWY4ZDlmYjdhMDkyYmIxYTFhNjc3MzMwMzBiNzc1MTNjYTAwNmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFmNTQ5OGZlNGMxZjdmZWE3NGZmZGEzNWRkYzJkZTg4NzgzYjk4MGRmYWJlNDQyMjI3ZjM4ZjhmYTE1ZTIwYTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk0ODg3NTlhZWQ1ZGU2M2UyNmFhZDE0ZTM0MWQ2NDY2YjhkNWY3ZjVlYmZkODJkMTA5MjVlZTUxNjExNjMwYzEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a61c64353a2c41b4b03f331e225ad235",
+      "statement": "Conditionals are resolved against deploy context (environment, target_region) before schema validation, and unresolved conditions raise FatalError so validators only see resources that apply to the target deployment.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/definitions.py",
+          "version": "repo-file-v1:sha256:2861f75a7e766a06a4e504a1095c990e2640b65dca84a7305077c8703cd23ee1"
+        },
+        {
+          "resource": "repo://src/easysam/load.py#L446-L497",
+          "version": "repo-lines-v1:sha256:678975bf36bb4bf05ed9c0baccf441b2b73955b8940ba5952cd3e7f8c7e1f1f0:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyMmY3NjIzNGJmMDA1Nzc1NmViNGIwN2MzYTg1NTViYWE0OGVmMjJjYzBhNzYwMDkxY2YxYTdmZGE4OGE3MjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiNDQ3YTlkMDRlZTAwZWYwNmI3YmNhZGM4MWU1MmExNWMyNjgzNTk4OGE0ZDNjMzViNjBhYzgzMTMyMzMxZWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzNmU1ZWNlMzBmYzVkOTBjMWExZjVkZWVhMDFmYmIxNTBlY2I0YWI2OTdmNTI1MzdmOTAyMmNlM2Q0MzM1MGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkyNDMzOTQxM2E3YjFkOTc5ZDJlMzNiYmE4NmI4ODY1OTdlN2M0ODkxOGJjNWNhOWFhZDE3NGZkNWFjZDIzNmYifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-19T15:38:50.328Z"
+  }
+}

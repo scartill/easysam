@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:964034b78d120e6ab7b248463b263aaa5b1dc18743fe257f0f1c6b4fa664f4c6",
+  "claims": [
+    {
+      "id": "claim_74d6182ea9a74c6fb916bc7926bdf062",
+      "statement": "The CLI entrypoint (cli.py) registers a Click command group with global options (--environment, --aws-profile, --context-file, --target-region, --verbose) and commands generate, deploy, delete, cleanup, init; it dynamically attaches inspect and local subcommand groups in main().",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/cli.py",
+          "version": "repo-file-v1:sha256:eb01a5a9a5bb7a7715da1bc13cb1716d83663d50a07851f7d659ae35767c3bfb"
+        }
+      ]
+    },
+    {
+      "id": "claim_ba2ae69dd2404799a06f48d9b999e694",
+      "statement": "Generation is orchestrated by generate.generate(), which calls load.resources() to build a benedict from resources.yaml plus recursively imported easysam.yaml files, then renders template.j2 and swagger.j2 via Jinja2, optionally invokes plugins, and optionally generates Prismarine clients; the standard return contract is ProcessingResult (tuple[benedict, list[str]]).",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/definitions.py",
+          "version": "repo-file-v1:sha256:2861f75a7e766a06a4e504a1095c990e2640b65dca84a7305077c8703cd23ee1"
+        },
+        {
+          "resource": "repo://src/easysam/generate.py",
+          "version": "repo-file-v1:sha256:32aeb88da292216ec8931e0f9d88c454d6433a318bd6516aa4a73150c24f4ea2"
+        },
+        {
+          "resource": "repo://src/easysam/load.py",
+          "version": "repo-file-v1:sha256:a5f57cb8797e882ce49c6df4e7ce3a0a7185ce7171af99f469174c141b102282"
+        }
+      ]
+    },
+    {
+      "id": "claim_b0aba6fa4c384cf382b967884a9d7116",
+      "statement": "load.py is the core loading engine: it reads resources.yaml, loads .env, resolves !Conditional tags against the deploy context, applies overrides from context, recursively imports easysam.yaml files from import directories, preprocesses Prismarine tables, applies defaults, sets enable_lambda_layer from the existence of thirdparty/, and sorts sections; the result is validated against schemas.json (global) and local_schemas.json (per-file).",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/load.py",
+          "version": "repo-file-v1:sha256:a5f57cb8797e882ce49c6df4e7ce3a0a7185ce7171af99f469174c141b102282"
+        },
+        {
+          "resource": "repo://src/easysam/local_schemas.json",
+          "version": "repo-file-v1:sha256:e915f0ef3a42c8cbdefe22f1d85bdded16da234c3a54de50b3377660e05f2c78"
+        },
+        {
+          "resource": "repo://src/easysam/schemas.json",
+          "version": "repo-file-v1:sha256:f03df625ff1c15658bd4fff10b6a4c9095164af6a59f563aec66e5beefdbdf56"
+        },
+        {
+          "resource": "repo://src/easysam/validate_schema.py",
+          "version": "repo-file-v1:sha256:0ce947b7582405dee365ac674e83552fc8775a5913b1964a551f1ed205f41d9f"
+        }
+      ]
+    },
+    {
+      "id": "claim_f98a973a1b9e4bf7b8f6ef32ee5f579c",
+      "statement": "deploy.py is a SAM CLI wrapper that runs generate, checks pip/SAM CLI versions, removes and copies common dependencies via AST-traced commondep(), runs sam build and sam deploy with tags/region/profile, then reconciles event source mappings for pollable functions; delete uses CloudFormation delete_stack with optional FORCE_DELETE_STACK.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/commondep.py",
+          "version": "repo-file-v1:sha256:4b1d95167f13a0cbef94f49c4ca7063aabc89ca5cbacb99ca1f87b61a6968a33"
+        },
+        {
+          "resource": "repo://src/easysam/deploy.py",
+          "version": "repo-file-v1:sha256:84286507a8db870ab1620f56bab40321d6c3d9cac22588dd6d5c120ebb3dcf8e"
+        }
+      ]
+    },
+    {
+      "id": "claim_efd246dad956450d80e0f1e67176daca",
+      "statement": "The local execution surface (easysam local) is implemented across local_cli.py (Click group for server + invoke), local_server.py (FastAPI factory with envvar save/restore and an asyncio invocation lock), local_routes.py (RouteInfo + build_routes for API paths, greedy catch-alls, and /__fn/ function URLs), local_handler.py (isolated import context and load_and_invoke), and local_event.py (REST v1 / HTTP v2 API Gateway event builders).",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_cli.py",
+          "version": "repo-file-v1:sha256:806f0e3cc001350e76034c7c9874e2f1f9c740ab8483d2b263e2c3ca684cb304"
+        },
+        {
+          "resource": "repo://src/easysam/local_event.py",
+          "version": "repo-file-v1:sha256:dc9dd332f6e31bf792586a0d74902590d527596c8265507eaa672eee3c363185"
+        },
+        {
+          "resource": "repo://src/easysam/local_handler.py",
+          "version": "repo-file-v1:sha256:dc50b3798f83a0af781cfe19c3fbdfe8b918e05ae3bd8242899e1574fd6a1e9e"
+        },
+        {
+          "resource": "repo://src/easysam/local_routes.py",
+          "version": "repo-file-v1:sha256:8c30fe1f34e08d57053362359d6ea111979152b7ef21372c08c827fa8c926ae8"
+        },
+        {
+          "resource": "repo://src/easysam/local_server.py",
+          "version": "repo-file-v1:sha256:77d840bb30b903a962957d58107e78d59ddac07f2d122a692451ae10d3b515d5"
+        }
+      ]
+    },
+    {
+      "id": "claim_197578ebc1b84790a944c4e5105c4376",
+      "statement": "template.j2 and swagger.j2 are first-class code-generation surfaces: template.j2 renders template.yml (SAM/CloudFormation) and swagger.j2 renders build/swagger.yaml (OpenAPI/Swagger for API Gateway) when paths are defined; both receive the resolved resources_data benedict as their render context.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/swagger.j2",
+          "version": "repo-file-v1:sha256:cde678e7561188f20201fef675c4ad05df8d00777618b22e91f71f3bb62194d6"
+        },
+        {
+          "resource": "repo://src/easysam/template.j2",
+          "version": "repo-file-v1:sha256:d33a87cdd4358a70dd3f717b01e14f88e3f6fedaeb792fd8be2944d3a36de5f3"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-19T15:38:50.328Z"
+  }
+}

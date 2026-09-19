@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:986a6eecb1ad6fc8b0d91023f3c7d65d0932613a4350749b272be1c529729daa",
+  "claims": [
+    {
+      "id": "claim_82dd20dfbd4040ea828f319018af6a2b",
+      "statement": "The local execution server reuses the same `load.resources()` loader that drives cloud generation and deployment, so local testing sees the same resolved resource model (conditionals applied, imports merged, defaults set, Prismarine tables preprocessed) without performing template rendering, SAM build, or CloudFormation deployment.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_cli.py#L115-L118",
+          "version": "repo-lines-v1:sha256:2e8c8eafec0b61a3260efccad68bcc85fb91488b65a4b7b56429564db883fe8e:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWI3NWExM2NkOGU2MTUwZTIyMDgyMzU0OTJiMGVmYzgyY2YzNTA3YjY4YTkyOWViZmMyM2UyYjEwNmIzMGRiNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODY4ZjE4ZWVlZjA2ZjIxZmE4MmVmMGU5Njc3YWM4MjUyMTkzYWNhZTJlOGQzMDZmOGI2YThjMWQwNTQxYjMwNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTZlZDBlZGY2YTM2ZjYwYWJmZTQ0OGRlYmQ3OThlNWQ4MTI0NjhkYjE3Njg2ZjVlZjQwYzY0OGE2NGE1MWJjYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGM4NjkzYTZhMDNhZGI4NjQ2OGMzNWJkNjJhOWYzMDdjYWJjNjk0ZmY0NmM2NTljYzIzZjA2ZjhjZmViMmY3YSJ9"
+        },
+        {
+          "resource": "repo://src/easysam/local_routes.py#L15-L19",
+          "version": "repo-lines-v1:sha256:29ddac8193ca98bb6ad610fe24bba04815ba4704e7310aea9425b52ab885b636:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWIwZjljY2NmMzg4ZTY2YTMwMmMxMmVmYjE2NWZhMzg1NzRkODdjNzM0ZjQ3MjkwMzU0ZDA0MjMyNzFkNzIzNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzkwMDlmNWU2MzU2NTQxNWQ5OTdmOGI3NzJlZDg2MjkxYjg5ZGE5ZWI5ZmY3NzdlYzg3OWQ2MTJjMDU3ZDkwNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMmI2NTBjYjFkNzY2YWEwYTM2ZGZiNDFlNTBhMTFlNGEyNWI0NDRkYzNhMDkyMmEyMzFjMjliZDM3ZjdkZGFmNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWUyNzM4OGRjNTgyMmIxYmYzM2VjMzQ1ODAyNjVlYTMzZTcxNDhmNDBlYzQ3NDIwZTZhZmRhYjc3MmY3NmMzOCJ9"
+        },
+        {
+          "resource": "repo://src/easysam/local_server.py#L53-L68",
+          "version": "repo-lines-v1:sha256:5f85eb804f1e41ea60339a0369291ddbdd71ba3ee2265d8e49decc42447d91d8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1OTdmZjU5MDM2NWEzMDhjNWI4NGMzZjdmZWUyNGZmYTJiNTVkYjVkMjFkOTcxYjcyZjllODhlYTUwNTRmYWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMyZmU3OGY1ZmUzYzViMmYzMDI3ZDk3ZDYzNmM0OTYyNWIzYTMxZDkyYjc5MTAzNzkxOGM2MjljY2Q0NDU3ZTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1ZjY4OTQwZTZhYTU2N2Q3MDFhOTBiZDhiM2FjMzEwNTA0NjEyNjAwNTU4OTAxMjE0Mzc1NmI4MDRlOGVmNzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZmYzNkMWZhY2MwZGVjYWQ2NjYyZDhmN2VhZTRjY2FiYjMzMzUxM2JlOTk5MzFlZGMwM2I2MjJmNGU3NzNmNWMifQ"
+        },
+        {
+          "resource": "repo://tests/test_local_e2e.py#L18-L25",
+          "version": "repo-lines-v1:sha256:1fb805fad557393c33f347b4056d10ea1c018f30ed3eaa82f28cbd890c97b5e6:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjY3NjlhOTZmMjNhYjRkNmMxYTc3ZTAwN2ZjNTIxMDc3ZDg1NTRjZjk4MDRlYjA3NDMwOTJiYWY2YTRhNmZmYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzEzOTU5ZjA3YTIzYWFmMWU4ZjZjNzA3NDJiMWMyZDA5MWMxNTdhNTc4YmNlOWRmZDYxYTg2MDkzNDZiYjJlNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWNmM2FlNTczNWVlNDk3ZjljMTZlOTc2Y2QxZDcxMTZmODc3YzNjZGUwMmI2MjAzMmQ3ODkyY2MxYTk1ZTQxYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjQyYzk2Y2I3NzdmYWZhZGU3ZmUwM2Q4MzM0YTMwZTA5OTEzNjZmMTA4NWU3MDU5MjA3MzM3YWQwMjUwNTA4NiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_c40ac75f713049e890bbc7b26be7a19f",
+      "statement": "Route construction in `local_routes.py` converts the resolved resource model into a sorted list of `RouteInfo` descriptors: non-greedy API paths become single exact routes, greedy paths expand into an exact route plus a catch-all `/{path:path}` route with `resource_path` set to `/{proxy+}` for AWS parity, and function URLs with `functionurl: true` are registered separately under `/__fn/{name}`; routes are sorted so non-greedy entries come before greedy catch-alls to prevent Starlette from shadowing exact routes.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_routes.py#L15-L79",
+          "version": "repo-lines-v1:sha256:fdc14c01d4a9532a02333bb055502c3ae0b53f71895599b0f2830d6ce8494834:eyJzZWxlY3RlZExpbmVDb3VudCI6NjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjViMGY5Y2NjZjM4OGU2NmEzMDJjMTJlZmIxNjVmYTM4NTc0ZDg3YzczNGY0NzI5MDM1NGQwNDIzMjcxZDcyMzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhmYzlkYjhlODU0ZDg4NjM1OWYxNjM5ZGI2MjEzYWJiNmRiZDBjOTA1N2EyNTI0Zjk4MDJjZGU0MjVhZTZmNGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJiNjUwY2IxZDc2NmFhMGEzNmRmYjQxZTUwYTExZTRhMjViNDQ0ZGMzYTA5MjJhMjMxYzI5YmQzN2Y3ZGRhZjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI2Mjg0OGQyNTFiZGQxODI4ZTVhNTAwOTQ2NjNhMDFiYzlkNTBhMGYyMjVhZmM4M2MzZTVjNmQ3ZDIzY2JjMDkifQ"
+        },
+        {
+          "resource": "repo://tests/test_local_routes.py#L4-L74",
+          "version": "repo-lines-v1:sha256:43a67f369819bf8edc842a054480e8ab947f2924fde5d454caa930a1afe2b25b:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlZWNiYjZjYWZlODBiNWQ1YzRlY2NiNGM4YzY4NDg1OGQ0N2JlMmVlYzIwMmJhNDUzMjUyMWQ1ZWU4ODNhMWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyZGJkYjM2OTZiZDYyNTQxMzY1YzY4MGU0NGEyM2ZmNzgyNzgyMTJlYmI4N2MzNzNiYmUzODYyOGVhMmRlOTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFlMmNhZGNhYmM0MzNkOWVkM2M4ZWYwYjQ4MGE1YjFjZTc3NTFhMzkzNjZlYWRiNzFiYTEyOTlmZWI5MmVmMmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://tests/test_local_server.py#L151-L176",
+          "version": "repo-lines-v1:sha256:9df6d06208c396fea7f7babd786c8ac6e8a71b9c41ceaac847022c711c9556d2:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA2ZjZiZGYxYmQ5MWEzMWQxNmY1OWY1MmM0MDkzNzBkMWE5YjY1ZTYyYzZjMDQ4YjNkMzI1MGI3MzQ1M2ZlNTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZmYTNhNGU1ZjljNDRlZmUyNTNlMzJjYmFkOGQ2Y2YwNDEzNmFjNjU1YzZmZmUxM2UxOTExZDViODU2NjJhYzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyOWYzNmRiYWQ4YjI4YWRlMjk5YzFhNjFjNmRiN2ZhNjc0YzUxYzljMjdkYjA5YzFjMDdkZjA3ODM2Njk2NzcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5482a6b3f2f1424fa1330c760bd4af55",
+      "statement": "Handler isolation is implemented by the `isolated_import_context` context manager in `local_handler.py`, which resolves `project_root` and `lambda_dir` to absolute paths, removes stale `common.*` modules from `sys.modules` whose `__file__` resolves under the project root on entry, sets `sys.path = [lambda_dir, project_root] + sys.path` so handler-local modules and `common/` resolve from source, imports `lambda_dir/index.py` via `importlib.util` under a unique per-invocation module name, and purges all modules whose resolved `__file__` starts with `project_root` or `lambda_dir` on exit while leaving third-party packages in `sys.modules`; `load_and_invoke` then dispatches on `inspect.iscoroutinefunction(handler)` to await async handlers directly or run sync handlers in a freshly created event loop via `run_in_executor`.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_handler.py#L37-L81",
+          "version": "repo-lines-v1:sha256:2048acbf6b7ee5f3ed59b8a7e253b286bedbcee694ad03c9d3d7cc908b7e75f9:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU2MWYzM2MxMzI1NjlhNzQ5NDZiMmZjZjU0NmNhM2M0NDI1ZGEwY2E1Y2Y2YjY4NmMyNjA5MGZhYTlkMTEyYjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdlY2Y2OTcwODMxN2Q1YmZhNzIyNjVkNWFlOTQ3YjQwMmNjMzZmYTA1OGQ5ZGM2YWM4OWZkMmJlN2VlN2E4MGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0NDc3MzQ3YzIzNDQxN2I2ZDNkYjQwM2NlY2IzYTdjY2NlYWQ1ZjNmYTU2YWIyOTRlNjA4YTE3ZjhkOTQ4MjEifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_handler.py#L83-L112",
+          "version": "repo-lines-v1:sha256:ee0d3828b062216ea9dc4d230c5f4fc05fc84bd607b02d5755b40a68abc56520:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzYjhjMmNkM2RkNmNlMmVjYjFiNzc4ZWM0ZjFhMzVjZGNjMmE4YjhmNDFmMjIzMTdiOWVmODZiODAyMTQ0ZDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhMTFjMDU2N2QwYTVmOWU5YjEzNWY2NWNkMjUzNzJkZmQ2Mjg3NzVmN2MxZWQyNTNmOGJhZDQyZGQyZDY2NjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRlOGZlZjc5Y2M4NjBhZmRlMmMyNDNmZjU5ODI2ODA3ZmRmMGRmZDJiMjgxNWM3N2JiMDg5MDM4OTI1YTU1ZWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://tests/test_local_e2e.py#L98-L120",
+          "version": "repo-lines-v1:sha256:3c9ca13d308e21f64ef458f7eaf119183c71f094954b0e67570f18a247c40900:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyN2NjYzBhNDZiMWJhMzE4OTNhYTc5M2Y0NTUxNzcwMzdiMjRlMWE1NjMzODBmMDcxN2ZhNmViNTEwMmFkNTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxYzgxMDhmZGZjNmZlNjc2ZDg1NDAzM2U4ZWUzY2E1YTgxNmY1YWI3NDZiOTUzMGM0OTUxOTU0MmQwODI3NDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFkMmE0NzU0OWJhNWJkYTFlMGMzYzUzOGNmOGU0YmY5NTNiYTlkODkxYzVkMmQ1MDQxMGE2OGY3ZWU5NzM1M2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://tests/test_local_handler.py#L10-L37",
+          "version": "repo-lines-v1:sha256:f6a6f3e8e4caf646b8481d8b375a6b3ec3af4af02d7b51b2d30b05f94cac5d6c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwMGQwMWU0MjJjZjVkMGM5YTZjM2M2MjI3ODlkMDRkYmMwNGY1YjA3OWJmODNkYWY1OTEwYzE0YWZmNGYxYmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEwMjIwNTVmMDI1YWQwZTQxYzRiNjQ2MzgxMDBkYjYyZTM5ZmQ2ZTAwOTE3ZDNhMGQxMjQ2NGQyYWVhZDViZTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUwZDIzNzllOGVjODMyYTE1MzY3ZmI0OTNmZjI0ZGQxMTRjZDY4YzA1NjRjMjcyZmEwZmU4ODcyOWIwYWIyM2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMwMTNiOTczN2E5NjMxNWEwODEwMDEwMDBlNmI0YTUyYTUzOTMzYzc2NDBmOGFlYWRkYTE2ZjM1ZWRkZGMyYzIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_50cd66d83535464c9bf955445d3d6104",
+      "statement": "Per-request handler invocation is serialized by a module-level `asyncio.Lock` named `_invocation_lock`, and per-function environment variables from `functions[name]['envvars']` are saved, set into `os.environ`, and restored in a `try...finally` block inside the lock so that an unhandled exception in the handler or event building cannot leave the lock permanently acquired or `os.environ` mutated; body reading and event synthesis happen outside the lock so concurrent requests do not block on `await request.body()`.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_server.py#L201-L223",
+          "version": "repo-lines-v1:sha256:d7b1d6c948f50eebeb0c7907179184508d0c6fd7cea93cd69a8f781595982e08:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YmJmMTU1Y2Y0MWU0MDdmMGU5ZDQxZTRjY2MzODY1YjNkY2MwZTVkNzJkYWI0OTBlZmY5OTlhNGUxZTMzYzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3ZTU4YTYyZDAzNGFhMDU2N2Q3ZDA3YzI3NjdjMTEzZTA4Y2ExNzE5MWZlYTU1YzFhY2NlMzY2YWU1OGIyNjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYwZDBkZWUxOGUyMmZmODhmMTcyOTllNmZmNWJhODEyOTZiYWMzY2U4YjJmOWQ2ZTkxN2E2ZTNhZTQ5Zjc3NjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZhM2FkOGY3NGE2OWI2MzhhZTk0ZTY5YmZmYzkwNGQyMDIyZjYxNzRiZGJjYTQ2MzRiN2JkMDZkNWI3MGFhY2UifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_server.py#L90-L91",
+          "version": "repo-lines-v1:sha256:780b5c553d0a337b4d3122f097b301fe1d54b71553ba988bf7919aa04c581cae:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzBlY2ZhNDg1MDc0ZDVkMzQ2NzFkOGFlNjdkYjNiNTUwMjgyNTg0NjhlYzE0NTRjOTI1NjY1MTg1N2Q2YmM3NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWQ4NzE4ODg0MDU3MTEzOTI5MTVjYzkxYTVlZjhkOWZiN2EwOTJiYjFhMWE2NzczMzAzMGI3NzUxM2NhMDA2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmQxYTc4MjZjOTYwMjlkNGI5YWE1MzA3MWMzNzJkMDQyYzExZjE1NmU1ZDA3N2NkNTUxNmU0OTFhZDEwMTk5ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTQ4ODc1OWFlZDVkZTYzZTI2YWFkMTRlMzQxZDY0NjZiOGQ1ZjdmNWViZmQ4MmQxMDkyNWVlNTE2MTE2MzBjMSJ9"
+        },
+        {
+          "resource": "repo://tests/test_local_server.py#L86-L104",
+          "version": "repo-lines-v1:sha256:a25ff8162b9ae5ec88cde61ca5b4c8c657b8154250b13351a37a87909ff7e769:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNjOWE5MTUyOGM5Zjk1YWQxZmQ2MDhjODhmYjJmNjI0OWZkODI5NDRjNWMxYTczOGRkZmYzYmZhYTY4NjA3NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzZjBjODc0MTMzZWViZTQxNDVkODEyNzMxODMzZWJjZDU3NWFkZTVmZGRlZTI2MDg1YmZlMjJiN2QyYjdiMTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM4OTNiNDZhZTM1NjM0MzA4NGQwODAyMjc2ZmFmMDAwOWFmMTM3NmUzMTM0NTdhYTQzYjZhZjgzNDQzYTZiZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJjMzI1ZjM1NDliMTM4MDNjMzQwOWVjOWZlM2I5ZWQ3ZjBmMWYwMWQ4OTEwZmJmZWExZjQyMzE0YjFiMGM5NjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fe9261599d614784b62430af2f87ea4a",
+      "statement": "The per-request route handler renames `path_params['proxy'] = path_params.pop('path')` only when `route.is_greedy and 'path' in path_params`, preserving `{path}` parameters on non-greedy routes; the synthesized Lambda event is built by `build_event()` outside the serialization lock using the request, path params, route's `resource_path`, event format, and auth context, and `normalize_response()` translates the handler result to an HTTP response after the lock is released, handling `None`, dicts with `statusCode` (including base64-decoded bodies and dict bodies JSON-encoded), dicts without `statusCode` (auto-wrapped as JSON 200), and string/primitive returns, while uncaught handler exceptions produce a 500 response with the traceback as plain text and structured logging at `[METHOD] /path -> FunctionName (statusCode, duration_ms)`.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_server.py#L191-L237",
+          "version": "repo-lines-v1:sha256:e989ccd1d5b5d95748bbcdc76b46efc73c70b6d84c798b47beda5910155b3052:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc4NjI4ZTY1MDc5MzI4Y2NjYjBhMzlmNTZiNmFmNjdhMjA2OTZhMzAxZjkxZTE1MTAxNzFjNTg3ZDBkMDU4M2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA2ZDQ0ZmUwY2E0YjRlYjUzMDlhYjI0ZGIwOGFmYmYyOGI5NjEzZWNlYmIxNjY3NTEwODE4ZjVhYTYwMTE2ZWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMwYjQ1ZDU4ZjhmZTJjOWEwNzZkZTRjMjY4YWE2ZjYyMjU3ZDc2OWI1YzU2MWZlOGVlZTU2M2MwZTc3NmZjMTEifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_server.py#L94-L136",
+          "version": "repo-lines-v1:sha256:78016fc24820282c273e0cd7fe93acbf8233e50fc19b44e79ba242c43e44ad0f:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3MTc5MjYzYmRjNDRhMzI4MTIxOTgzZTEzY2JjZjQ4ZDU2NjYxNzY4ZGRlY2VjYzc2NmIyOTkwMzA1YjdlZjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1OWMwNTczOWM2ZTJkYTJkMzA4NGIwYTg5ODcwNTMyMzQ3YmZhNTIzNmZmMzZiZDVlNGVlN2FlMzRkMzAwNjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5ZWNmZDc3ZDFmZmI1OWU0ZjRkOThiMDhlODQxMjU2YmI1ZWYwZjUwZmZiMTFhNjc2OGIwZTk3ZTQxZDRmMjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY3MzYzNTU1YjRhMmM4Y2M0YjI4Mjg1MDYyMWRkOTEyMWEzYzQ2ODI1ZGNmMjk2N2UxMDVkMDg1NGRlZjk3MmIifQ"
+        },
+        {
+          "resource": "repo://tests/test_local_server.py#L178-L214",
+          "version": "repo-lines-v1:sha256:6333e8d9f2fd9d44ef67fc40f16e4afadeceac970963d8fbe3e073ffe22d9246:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxNTE3Y2E3NzU4YjVmZjkyNzg0YTExYTU4YzA5MDAyYzBlZTNlMzY5YzI0MGNiNzUxMmNkNjkyYTQxN2M2MTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJmYTNhN2EyMmQ2ODljY2JmZDZiOTcxMzZiMTliZDJhNzk5ZDU0ZDI5MTBkYTliYzdlMzkzMGVhNGIwNDcyZjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI3NDg2M2M5ZTU3MzEzMjEyODdlZjFmY2ExYjY3YjU2ZDFiZWY1ZjE3Y2I3ZjdmOGIzMDlmMjJjNWJmODVjYWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_226b3281bba54908aacb2c878c1b436e",
+      "statement": "The server supports two API Gateway event formats selectable via `--event-format v1|v2` (default `v1`): `build_rest_api_event()` synthesizes a v1 REST API payload with `resource`, `path`, `httpMethod`, original-case `headers` and `multiValueHeaders`, single-value and multi-value query parameters built from `request.query_params.multi_items()` to preserve duplicate keys, `pathParameters`, `body`, `isBase64Encoded`, and `requestContext` containing `stage: 'local'`, `requestId`, `identity.sourceIp`, and `authorizer`; `build_http_api_event()` synthesizes a v2 HTTP API payload with `version: '2.0'`, `routeKey`, `rawPath`, `rawQueryString`, lowercase comma-joined headers, comma-joined query params for duplicates, and `requestContext` containing `http`, `authorizer.lambda` (wrapping the auth context), `time`, and `timeEpoch`; `build_event()` dispatches to the appropriate builder based on the format.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_event.py#L107-L187",
+          "version": "repo-lines-v1:sha256:92609184dc45f699aefc7f0a0be0e0cc17b5cd8bb2bbdd4666c4cb8451f0277d:eyJzZWxlY3RlZExpbmVDb3VudCI6ODEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxNjU5NWRhYTQyMzMzYzY0YzRmNjI5OTkzN2ZkZGM3MDcxNWYwNTY0ZDcwN2Y3OGEwMzA3NjQ4ZDVkN2Q4NTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3YjUyZGI0MTZhNTVjYmIwNTY3Y2EzNmRhOWUxMTY1MTc4NDc4Y2JlZjU5ZDU5MGE3OTE5YjJhNzRkMjIwMzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_event.py#L48-L104",
+          "version": "repo-lines-v1:sha256:7c95f24bb0932c57acdb43844ce3938486a5084d9058e2255f4f0b3d41ff6dce:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExYTM0NTQzMmQ0YWI4ZTZiYzUzZGJmMDVhOTRmNDMyZmJiMjgwZWNhOGM2ZDVlYmY5NzdiM2NiOTdkMGNkYzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJmYmQ0NWJmZWY5NGQ3YzEzYmE0NzE1YWY2NDkwYTFjYWQxZmFjM2IyN2FiNTA1M2NhMGMyNDliMmVjODYwYTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZlZjY1MWFlZDhlYzE2YjkwMTNhYjA2YWU3ZWI3ODU3YzYwNDdjYWFkNzU2ZjlhZmY2NjkwMWQ5MDY1YjRkN2QifQ"
+        },
+        {
+          "resource": "repo://tests/test_local_event.py",
+          "version": "repo-file-v1:sha256:63286195557fc1eb13d9ae1f927c85e8b7980b5114f8979bc8a0accb139142ce"
+        },
+        {
+          "resource": "repo://tests/test_local_server.py#L107-L125",
+          "version": "repo-lines-v1:sha256:64a5a59dd7a2a4cbd14784dcbb065125b7df498ad99e50f72b76694851ff0308:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAyNmM2M2NjNmExZTVjZjFmMGI4ZjhkNmQyY2NlMTVmYzFlYzYyZTE1NTY4OWJmNjQ1NGUwNmYyYWM3ZTVmYzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4MjZkM2Q3MTczZjNkZWNhNDI4ZmVkY2ZiZDJiMGY3YjA1MzhjZmZlYmYxMWFiZGIwMzZkODczYjVmZWNlMmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1Njg1NzBhNGQ4ZWYwOGYzMTI3YzEyN2E4MGZkYjc4ZDljZTgzNjZlYzVkYTg1ODdhZjczZTRkMjY2ZDVhMWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRiYjI1NTY0MjU3M2VkMDg5NDJhYmY3MDg1NjM0NDhhOTE2OWNlNmMzOWMzNGU2OGVhM2M3ZDNlZjY5MjFiMTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2e1e8dff04324c9a9c777abdaebcacaa",
+      "statement": "Binary request bodies are base64-encoded when the content type is in `BINARY_CONTENT_TYPES` (`application/octet-stream`, `image/png`, `image/jpeg`, `image/gif`, `image/webp`, `application/pdf`, `application/zip`); otherwise the body is decoded as UTF-8 with error replacement, and `normalize_response` decodes base64-encoded response bodies when `isBase64Encoded: True`, using the `Content-Type` header for the media type or falling back to `application/octet-stream` for binary and `application/json` otherwise.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_event.py#L14-L46",
+          "version": "repo-lines-v1:sha256:569a4e1d297928d118a3eedb00d2ac4574e84135f7da84a63d3628c30237bcab:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlNzZiZDZmMjNlNjI5NmNlNjRjMTRhNTAwNjQ4ZWUzZmQyOTU0ZWM3MDU2ODE1ZmY3Y2Q4ODFkZTZjMzNhNWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJlMDczYTRlMmQ2ZDA5NjViZTU1ODdjYWZkYzQzMzdkZmVmYWNlMzQxYTg4ODZkOGVjYTljNWFmOWY5YWE1ODEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcyZWEwMDI3ZDM5YmIxMzg4ZDUwYzE5Y2Y0ZmE3MjNiYjUwMGNjNWM4NjY5NWE4NWU3NmYwMzM2MjQyMmQ3OGIifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_server.py#L103-L130",
+          "version": "repo-lines-v1:sha256:3fcbd89f64e763ef757d817b0db26fb09658c0e80bca88c0357b334ed7c4649b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJiOTZlMjMwOGM0MzJjOGUyMmM0Mzk0ZWUwNDA4ZmZjODQ3YjQ5M2RlMjAzYTk2YmYyOWM5NDJiODYxODY0YjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MDMyZTk2NGQwOTMyMzUxZTVkMTg1MjY5MjgxYjE3MWEzYTA5YjA4YjI4NmU2NjFlYTQ3MDMyM2M4MmViNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBjZmRiOGVmNWZjMjBjYmUwMTZkMzE4NzRhYWFlODNhYTQ4OWIyMTIxZjA5ZmM5YmFjMDE1YjAwMmUxMjY4NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRhMzFjOTA3ODFlYWE2YWI2YzQ1Yzk2OTU0ZTdhNTIwZTk0N2Y2MWVhYjdhOWNkYWYyZmQ5ZmVlNGZhMTQxZWUifQ"
+        },
+        {
+          "resource": "repo://tests/test_local_server.py#L202-L214",
+          "version": "repo-lines-v1:sha256:97ac9f6486539b459a78c3158d5b689fbe67a2b3ea39339d60ad142dde518eb8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI1YmExNmJmZGZiMWFiODU0NDgwMDQ4MzlhMTA4MzU3MmMwZDY4NGNhYmNmODJhNmQ3ZTAyMGVkMTdmZDViMDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJmYTNhN2EyMmQ2ODljY2JmZDZiOTcxMzZiMTliZDJhNzk5ZDU0ZDI5MTBkYTliYzdlMzkzMGVhNGIwNDcyZjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJmYzU2Y2IwYjk4OTk0YjNhMzBiNmRiYzc5ZjQyNWViMTc3MmI1NWQ3NTQwYThiZjk4NDU1MmRmYmY3ZjU5ZTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5fd79831358f40af81843cd56353ad1c",
+      "statement": "The CLI surface in `local_cli.py` provides a `local` Click group with `invoke_without_command=True` that accepts `--port` (default 3000), `--host` (default `127.0.0.1`), `--event-format` (choice `v1`/`v2`, default `v1`), `--auth-context` (JSON file path or inline JSON string), and a `directory` argument (default `.`, must exist); when invoked without a subcommand it parses the auth context, loads resources, and calls the `local()` facade which sets global envvars, injects `AWS_DEFAULT_REGION`/`AWS_REGION` from `target_region` and `AWS_PROFILE` from the CLI profile or `EASYSAM_AWS_PROFILE`, builds the app, and runs uvicorn; the `invoke` subcommand accepts a required function name and an optional `--event` (file path, inline JSON, or default `{}`), loads resources, sets global and per-function envvars, creates a `MockLambdaContext`, invokes the handler via `asyncio.run(load_and_invoke(...))`, and prints the result as JSON with `default=str` to handle non-serializable types.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_cli.py#L53-L96",
+          "version": "repo-lines-v1:sha256:fc8e9df97e10fa6b103d751d4d92278fbc7a8922f250dfe8f9098bfcbfe12068:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjliZGI1YTcyN2YyY2M5MDQ2Y2E5M2E4MjhlZDFmOTMzNzZjMmE1OWY4OWMwMjU5YzMyNDhjMDIxYjMwZWE4NDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIzZGYyYWNmMDZlOGMzZjAzYzcxMzVjNmU4YWM1YTljYTU0MzJhYmUwNmE3NGFjYTBmZGQ5YTUzYTAwOGY5ODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQyOWMxZDU2MzU4OTU3YmRiM2RjNTdjYWUyMDE4N2ZmMTY5NDhhMjgyMmYzODFiMGU4ZDY0MDhjY2NlODQ1M2YifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_cli.py#L98-L158",
+          "version": "repo-lines-v1:sha256:9ca3dae39b6f32b1691cf9e362a5ec4551bd8fd32e02776348ebde02063ce1fb:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUwYjczMmE1MTFlMmFjZDFjMjNkMmRjYTExOWUxMzU5NzU1YTcwZjBmOGFjNGMzMjFiMjkzMTNlMWEyYjc1NDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwNTU0ZjhiY2UyYjUyMmMyMmE2YjYxMmM3Mjg0YzZjZWMxOGRmMmZiOTVjY2I1MThmZTk1NDIwNzI0YjJiMDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzNjM1YmM1MjdjYjlmZTM3NDE1NzE0NmMzOTY2MDY4ODQ2ODA0NDllZjhjNmIxNmZmMWU1NTE2ZDY5NTBkYmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_handler.py#L13-L35",
+          "version": "repo-lines-v1:sha256:2c4c89ad9b99436920c8a68355a17dc29ae65c871f8195a035e6e015cc132cb0:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2ZmJhZTBiOTFkNDRmYzBkNDlmNWRlNjkxZGE2ZmM0MzFmMjYwMTM0YmY3MzFlMGUyMWY3NjQ4MDk0MzM0Y2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5MWJmM2Q5NmYxYjExOTY4OGRlZWE5YTAwNGIyYjNmZWJiMTgwYmI4ZmIyMzQ0NjI1NjE0YWRjODU5NTYzYWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM5NzAzMDlmYTM5ZDU5MmE3NTAwY2QwYzAwYjk0NmUwOGM1MWJlZWZjNWI2YmI1OTkyNTIyZTgzYTVjYTI4NDQifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_server.py#L26-L88",
+          "version": "repo-lines-v1:sha256:667829235beef5e75588aad4b6961c189127ed1a360bd94ba421550957b43b7b:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwZjZiNWMwNTllYWYxNDI2YTgzNDBmNDdlNDM2ODVhM2E1MWU2YjVjZTk3OTBmZjBmMDYyZDE4MDc1NjVlZmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFmNTQ5OGZlNGMxZjdmZWE3NGZmZGEzNWRkYzJkZTg4NzgzYjk4MGRmYWJlNDQyMjI3ZjM4ZjhmYTE1ZTIwYTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFkNzRmNGFhMDNlODExN2IzZjIzYzFkYjQ1YzViN2U0ZDQ0YzQ0YzFkZWE4ZjAxMDlhM2ViZmRhYmYxZjFiM2MifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_053be8b60e514c4194c086f56cfc6f9a",
+      "statement": "Authorizer Lambdas are not executed locally — instead `--auth-context` provides a fixed `requestContext.authorizer` payload injected into every request's event, parsed by `_parse_json_option` which tries a file path first (trapping `OSError`/`ValueError` on Windows for inline JSON strings) then falls back to inline JSON parsing, with the injection differing by format (v1 puts the dict directly under `requestContext.authorizer`; v2 wraps it under `requestContext.authorizer.lambda`); the implementation explicitly does not include hot reload, local timeout enforcement from `resources.yaml`, or per-route auth context selection, and allows infinite handler execution for debugging.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_cli.py#L153-L158",
+          "version": "repo-lines-v1:sha256:f8928ccc41d81a16629988d9501ccbd1583e96492e20eb9e2a3181691a946152:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWQwMGM0NmE5Zjc3ZGMxYTM1ZWM1YTRjZTgyN2QzN2UzMjU5MzAyYTI3NjU3MmU3ODc4YjEyODA4NmY1NmJhNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTA1NTRmOGJjZTJiNTIyYzIyYTZiNjEyYzcyODRjNmNlYzE4ZGYyZmI5NWNjYjUxOGZlOTU0MjA3MjRiMmIwNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDhlZjdlZTE5NmMyYzI3NWZlNjE5YWI3YWNlZTlkMzdhNzE4NGRlZDYwMGQ1Mjk4OTI4MGNjZmI5MzU1ZDk5MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://src/easysam/local_cli.py#L22-L51",
+          "version": "repo-lines-v1:sha256:e5eab4b28c4ef6e415a383d16dd445f7f6d6b97559ff696af5a3a393c37561ed:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmYmIyMGI1YTc0NmU4OTllZTBhMTc2ODY1OWNiNDFkNzE0MDgzZDBkM2M3N2M4NzZlMGFlYjYwZTVhNmI1YWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2YjI0ZDU1OTUzZjRiMTUzM2E4YTExMzY5ZmMzOTFhNmJmYjM5OWU2MjRkMjMyNmU0ZmM2NTBhMWFmNDc5OWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjliOGRiMmJiMjRiYmIxM2M4ZTc3NzE5ZTA4YmJkNWQ5Y2ZkMTc2YzdiMWFjYTA4MTkyOGE1OTE1NmY2ZDRiNjAifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_event.py#L154-L163",
+          "version": "repo-lines-v1:sha256:03312f9d64d977dc6c06a27ee8f118872ce8f7329c2682a3bc0cf75446d3c70d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ5ZWY5NzlmN2U4YmRiZDE2MWU4MTYwMWIzOGFiMzU4MmQ2YzJiZmE2ZGVkNDA0ZDNkMzE0MGNjMmIzODA4ZDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlNjczYWJkNDU3YTk3ZWVhMTdhNjAwNjJlYjBmYWVhNmJkZjA5NDg2OGNjNmI4ZjhjMGViZGEyZjYxZWQ0MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNDA1YzdiMmJlZmIzY2Y4YTkwY2I2NzQ5Y2M5NTFjNjczMjI1OGYzMzc0ZTNkNTU5NWNiNGQ3NTgwOTcwZWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_event.py#L93-L103",
+          "version": "repo-lines-v1:sha256:c4fc855fd1a784ed96bb822cdc153177f53e1da3cbe7b94182f515f3b513306d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ5ZWY5NzlmN2U4YmRiZDE2MWU4MTYwMWIzOGFiMzU4MmQ2YzJiZmE2ZGVkNDA0ZDNkMzE0MGNjMmIzODA4ZDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlNjczYWJkNDU3YTk3ZWVhMTdhNjAwNjJlYjBmYWVhNmJkZjA5NDg2OGNjNmI4ZjhjMGViZGEyZjYxZWQ0MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNDA1YzdiMmJlZmIzY2Y4YTkwY2I2NzQ5Y2M5NTFjNjczMjI1OGYzMzc0ZTNkNTU5NWNiNGQ3NTgwOTcwZWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f81ac97cf7a740f8b6f9f93d4d62bed4",
+      "statement": "The local execution workflow differs from the cloud deployment path in how `common/` modules are resolved: during `deploy`, `commondep.py` AST-analyzes each lambda's imports and copies only the used `common/` modules into each lambda's directory, whereas in local mode the copy step is skipped and `sys.path` is set to `[lambda_dir, project_root]` so `import common.utils` resolves directly from source, relying on the selective `sys.modules` purge in `isolated_import_context` to pick up `common/` changes between requests; the default bind address is `127.0.0.1` (loopback only), CORS is wide-open for local development, and `--auth-context` is global across all routes.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/local_cli.py#L26-L34",
+          "version": "repo-lines-v1:sha256:69b82f4829301aca57038b300e9a63109ea34cb5649ece2d3751be6bf3753c12:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTZhNzE1MjU3MmVlODRmMTA5MDZjNzRiOWYyYTkyNDM0ZGRhYjBlM2M0MjgxM2IwNGU1OTdlZmNlYzk1MWIyNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTU3ODA1YzNmZTdhYzYzMDc0ZjY5Y2RiMjViOWFjZDdhODY3OTJkZmU1NDA4MThhYzRmODc2NGI0OWU3ZDE0YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZmUyZjFmOTI5NGE2YjMyZDQ5NWM2ZjU5ZDM4MGI2YjRjYzIxZjRkYjc0ZDExMjFiZWU2MDgyZDJjMTQ5YTI5OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTkzNzZmY2JlZmUwMjliN2ZjZGYxYTRiNDRjNjNkYTZjZjE0OTgyZjYzMjAzNWQ4YzMzZjkxNDhkMjI2MThlNiJ9"
+        },
+        {
+          "resource": "repo://src/easysam/local_handler.py#L44-L65",
+          "version": "repo-lines-v1:sha256:a0817d43d3a56ff15b335c2c44331b55123d9c51de68b9563585b9b48f25f748:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUwYTE0MTc4YzI1NmZkNDUyYTljNzRmNGIxNmNhYjllZmIxYzUxZjFlNGM5MjBlMzg0ZTRiYzgzOWVkMmM3NWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc2MWE1NmY4ZjI2ZjQxYzhhOWQxNDc1MmZkOTIwNGJiMTk4MGNiYTIxYjBlMjg3ZjZmNDRmODI0MmM1YjI4ZjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMxOWVhYWU4MTZmZjdmYzEwNWVjMTgyOWI4ZGY0YzJiMDgwOWZhMmYwYzk3N2RjMWIyMzFlN2JlZDY0NmJhNTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRjNjVhNjgxOTVmMWNmOTQ0OWFkM2Q5N2E1NTRiNjhiMDBjOTBkOWFiYWEyZWNiYzlhYTNkNTNhNTcyMGM5MjIifQ"
+        },
+        {
+          "resource": "repo://src/easysam/local_server.py#L156-L165",
+          "version": "repo-lines-v1:sha256:19bb10cacc17380d97af6d745cea3289c636357f59a5c3e867cb4d59b9ac6268:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhiM2I5N2MxNGQ4NmM2ZDY1ODhjMWNiYjAxMmQzNWJhZjdjN2U4M2FhNGM3ZjE3ODQ4ZDkwNzZmYWE2NmZiOTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY3MzQ0MDgyYjVhMjE4ZmM2OGZiZWNhMTAwY2I1ZjQ4ZGJkMmZiMDQ3YTI4NThmYzFmMzAzNzkyOTNlNDhhZGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0ODJhZjVhNzQ4ZTk2OGE1ZjhkMTNlNTUyMzQzZDFhOWNhNjNhMGEzOWZmODk3YTE0Y2Q3MDFmOWZkOWQ5YTkifQ"
+        },
+        {
+          "resource": "repo://tests/test_local_e2e.py#L28-L41",
+          "version": "repo-lines-v1:sha256:0ef34efa5f80dc58f9f70bd9608e351d7081b49b2f2252d33f21bd9be798c01f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4MGQ1OWE0YzdhZjFiZjExYWZlMDcxODRiNWQ3MmI1ZmJkMDNjMzM1ODdmOWFhOGZhY2FiZmM3MDlhZmJhYzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYzNmRlZjdjOGZkNmI4NTQ5YzE1OTA4ZGYzMjFiNWJkYmFhMjc2Njg2MmNiOTg4NzBhYzVlMWM0MzVkZGJjMTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY2ZmQzOWJhNjUxODkxYmUwYjc3MWFjNGQ3NzExYmMwODAyYjllMjNjNTI2OTc2NDdiYWZiODVhYjRlOGYyNTQifQ"
+        },
+        {
+          "resource": "repo://tests/test_local_e2e.py#L98-L110",
+          "version": "repo-lines-v1:sha256:701df32069d3e791e0e42ca8913085dda81cdf7f3fee760872a47266fd1dd499:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyN2NjYzBhNDZiMWJhMzE4OTNhYTc5M2Y0NTUxNzcwMzdiMjRlMWE1NjMzODBmMDcxN2ZhNmViNTEwMmFkNTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFkMmE0NzU0OWJhNWJkYTFlMGMzYzUzOGNmOGU0YmY5NTNiYTlkODkxYzVkMmQ1MDQxMGE2OGY3ZWU5NzM1M2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE2ZDEwYjkzODI4MjdjNTY4NGNjMjNhY2M5OTYxM2I5YjRiZGQxYzU0ZmJkZjUxYjFjZDEwNmFlNzA0YzY1OTYifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-19T15:38:50.328Z"
+  }
+}

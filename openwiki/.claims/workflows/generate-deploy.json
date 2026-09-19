@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:6e52b104a70042ba5df33398d4a902d62b2bb716cde59ece1d859e28cf6983e8",
+  "claims": [
+    {
+      "id": "claim_d3fcd74630114972aba3f70e3aef3ea9",
+      "statement": "Deploy is implemented in src/easysam/deploy.py and internally calls src/easysam/generate.py to regenerate and validate the template before invoking SAM build/deploy; if generation produces errors, deploy aborts with a UserWarning before any SAM invocation.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/deploy.py#L23-L57",
+          "version": "repo-lines-v1:sha256:84eb84aa385e19ced81b15529b9bd670edab23ca9ea2a61d91c8282df45194f4:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwNWNlYWVjZDBlMjZkMDEzNDgxMzNiYTAwZjNhMWVjN2I2NzAwMDhkMzdiM2IyYTE3OTg2ZGUxNzAwYzNiNDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1NDIxNjY3ZDMzNGFmODA4YzA5N2VlYmNjYWJhMzhhZjUxMTk4ODc1MjczM2NmNjdlOGM3ZDhiYWZhZTUyZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZjNDA4MzE1YjcxMWYwY2E5NjM0ZjZiZjYwNTY3YzY1NDUxNzZjNDliOTA5NGFhNjM2ZjA0YmNmODgxMDQ5YWIifQ"
+        },
+        {
+          "resource": "repo://src/easysam/generate.py#L15-L93",
+          "version": "repo-lines-v1:sha256:065f28e2221763799785cedc18d05535c8f6c64c82f66cac2a8bb8e6e69615fd:eyJzZWxlY3RlZExpbmVDb3VudCI6NzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5Y2JhMTkzMGQ0MjE1NTgwZjE2YTIxN2U0NmNmOWQ2YjE1ODFhY2ViN2JkZTFhNTIxZjRjN2JiNjE3NzhhNTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZiNWFiMzk2Njc3NzhhNzVhZGExZTA5NGE2Y2VjODIxNmY4YmI2ZDk5MzA3Yjc4YTk3OWYxMzQwNTJlNzk4MTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI4MDY0MDVlN2VkMzU2NDBjZjIzYjFkMTEyOTFlNTRmYjU5YTE0NzEzNGRiZDIxMTk1Y2VjMDgwNDBjMGZlNmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjExNmRhNTk3M2UwOWYyYTVjMWM0ZTQzNmZlYzg2YzJiZTZhMDViYjU1ODI5MjJiMzJhMDMyOGI2Y2QzY2I5YmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_df7ba9e2c65448e285368f8762f616de",
+      "statement": "src/easysam/deploy.py enforces minimum tool versions before deployment (pip >= 25.1.1 and SAM CLI >= 1.138.0) and manages common/ dependency copying and cleanup around the sam build and sam deploy steps.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/deploy.py#L23-L57",
+          "version": "repo-lines-v1:sha256:84eb84aa385e19ced81b15529b9bd670edab23ca9ea2a61d91c8282df45194f4:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwNWNlYWVjZDBlMjZkMDEzNDgxMzNiYTAwZjNhMWVjN2I2NzAwMDhkMzdiM2IyYTE3OTg2ZGUxNzAwYzNiNDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1NDIxNjY3ZDMzNGFmODA4YzA5N2VlYmNjYWJhMzhhZjUxMTk4ODc1MjczM2NmNjdlOGM3ZDhiYWZhZTUyZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZjNDA4MzE1YjcxMWYwY2E5NjM0ZjZiZjYwNTY3YzY1NDUxNzZjNDliOTA5NGFhNjM2ZjA0YmNmODgxMDQ5YWIifQ"
+        },
+        {
+          "resource": "repo://src/easysam/deploy.py#L96-L100",
+          "version": "repo-lines-v1:sha256:8feefdf7a3e1c2641fb5187120be633704cbd397db6db58b1c0ae968d3c5be3a:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDZkMjVmOTI0NmFiYTNiZDdmZDUzNmQ5NjA1NzE0ZmY3NDM2NWQ4ZjBlN2NjNGY0OWMyZmQxMWZiY2FmZGVhZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWJmN2RhNjRhYWFjOTI0NjdhMWMyOWY3MTAzNjExYzBiMGJlMjJiODMwY2IzN2Q5NGNlZDdiMTUyYTQ5MjQ4MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWI5MTQxZDMxNTFjYjRjNTYyNjdlODVhMmNkZDk5MzhiMjQyMzM5NDExODFiZDgzMDliMDdlMzRmZWQwMDk0OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjA5ZDAyM2MxNjUzZTMzMTdhNjczNGI2MTUwZjQ2MTFiNjFjNjUwMzVhNGNlZDJjMTUwYWM5M2UxOGE2ZGEwZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4a85452309ce40319de7bf678d147b50",
+      "statement": "Delete is implemented in src/easysam/deploy.py and calls CloudFormation delete_stack directly (not SAM CLI), supporting FORCE_DELETE_STACK via --force and asynchronous waiting via --await.",
+      "evidence": [
+        {
+          "resource": "repo://docs/CLI_REFERENCE.md#L84-L100",
+          "version": "repo-lines-v1:sha256:fec6697a5fc79d658d6983a391c87c59af7766e4542727568d1a39fcc7e8fd17:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRiMTYxYWZhZDNlNzZkOTQ2ZGFjYzQ5ZTZjODJhMGE3OWEwYmQ1NDIwM2FiM2M5ODQ5NzFiYTE0MGFiNzBkMWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0Y2ZlMTk2NGM2MmU2Mjk4YzgwNWZjMmFlYWY4M2VlNWFiOTUyZjU1YjQ4ZTRmNmU4ZTI3OTNmNDI3OGIwMGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc2ZmZmNTQ1NjE5OTllMTliMWQ1ODNhMTExNzM2ZjQxMDgyNjZiNTJkZTQwNTEzODQ5Y2YxOTE1MjU3YjI5MDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNiNDk4YmY1MTY2Nzc5ZDEwOWNmOTMwMWZlZTJmODhkZjA4NjU3OWM1YjU2OWE5NTRjZjBmMmIzOGVjODA3NzMifQ"
+        },
+        {
+          "resource": "repo://src/easysam/deploy.py#L59-L93",
+          "version": "repo-lines-v1:sha256:b4e748b2ab823fb986fbc94f6b0831c0ccbd6ed17f6b1b7745891c2595807191:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1NjBjZDJjOWM3OTQ5NGMwMjM0ZDNjZmZiMDY5MmIxNDBkYTgzMjEyYmE0MTRjYjljMjFjZjhhYmIxMjNlODQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM4NDQwYjU3NmU4MGJjMDRkMjEzYzM5MTE0OWY0NGRjNDBkMjFlM2IxZGE0YWNjZTY1ODI4YzA3MmY2ZTcyOWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg5YmMzZDRkYzM1MzNkMTc2NDJkMTM5ZTQ2ZmUzMWE3NmViN2U5OWNkNTcwOWRhNWJlNzdhZDZhMmRjZjkyZjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ4MmVjMTk4ZmJlNzAzZjQ3MTNmNmEyM2MyN2IwZGM2NDAwYjBmYWRiNjdiOGNiODYxYmRlMzc3Y2FkZTgzYzUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_213f246ded364dbc9276042aa37fefc1",
+      "statement": "EasySAM provides two inspect-time validation gates: schema validation (src/easysam/inspect.py + src/easysam/validate_schema.py) that validates resolved resources against schemas.json/local_schemas.json and custom rules, and cloud validation (src/easysam/validate_cloud.py) that checks external IAM policies, SSM parameters, and Lambda layer ARNs for the selected environment.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/inspect.py#L34-L70",
+          "version": "repo-lines-v1:sha256:bc2c7dcd07aa78d8ff1774ce7006854b65576a38bce30d77ccd8bca23125b1aa:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0YzBhOWJiMDg1MWNhNmQwNmI5ZTA5MTc5YzA4OTdhZmEyN2UwMjI4NzJjOTFlNmJkYmZlNmFiNmM0NzcyNGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQyYmU0MDQzZWYxYjNiOWJiNTBkMDUyMmJjZTFhZmY0NzRhODMyZTUyNmZmY2EzMTUyOWQxYjk4YjQ0YTdiNTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFmM2I2NjNhYTQ5ZjQ0YzY4Nzk1YmFhOTQ1OTMwZjM1ZmViOWY2MzVlNjFkNDY5MjRmMGY4ZmQ3Yzc0MGY0MjgifQ"
+        },
+        {
+          "resource": "repo://src/easysam/validate_cloud.py#L1-L94",
+          "version": "repo-lines-v1:sha256:2dd5b6ba72a840ca55c940c0b93e5eaaa284bb981701b85a093d2df25f70b5fd:eyJzZWxlY3RlZExpbmVDb3VudCI6OTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1Y2FmYjYyMGQ3NmYwZDNkZmI1NGUzMWJhNTYxZTdjZDNiODA0ZDYxNzAwNzNjM2JhZjNiODg2Y2E4MWU1NzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzOGFhNzNjN2Q4MmYxYmY2N2FmY2RiNmJiZjJjYWZiNmQ0OTdiOTE0ODI4YmIyZmM3YjBhNmRmODhmZjJmN2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_41b155e73c2149b494fdb749ab9de4e7",
+      "statement": "Generate renders the SAM template from resolved resources_data and returns a ProcessingResult (resources_data plus errors); inspect cloud reuses load_resources and then calls validate_cloud so cloud checks depend on successful loading but are separate from schema validation.",
+      "evidence": [
+        {
+          "resource": "repo://src/easysam/generate.py#L15-L93",
+          "version": "repo-lines-v1:sha256:065f28e2221763799785cedc18d05535c8f6c64c82f66cac2a8bb8e6e69615fd:eyJzZWxlY3RlZExpbmVDb3VudCI6NzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5Y2JhMTkzMGQ0MjE1NTgwZjE2YTIxN2U0NmNmOWQ2YjE1ODFhY2ViN2JkZTFhNTIxZjRjN2JiNjE3NzhhNTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZiNWFiMzk2Njc3NzhhNzVhZGExZTA5NGE2Y2VjODIxNmY4YmI2ZDk5MzA3Yjc4YTk3OWYxMzQwNTJlNzk4MTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI4MDY0MDVlN2VkMzU2NDBjZjIzYjFkMTEyOTFlNTRmYjU5YTE0NzEzNGRiZDIxMTk1Y2VjMDgwNDBjMGZlNmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjExNmRhNTk3M2UwOWYyYTVjMWM0ZTQzNmZlYzg2YzJiZTZhMDViYjU1ODI5MjJiMzJhMDMyOGI2Y2QzY2I5YmQifQ"
+        },
+        {
+          "resource": "repo://src/easysam/inspect.py#L71-L99",
+          "version": "repo-lines-v1:sha256:44d795061dda0e57e80d5bc3ab907a0bff300e78786b8bc89c849fe5e7623ded:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhNDg1ZTQwOWQzNDExMmJmODQ5NjM5ODI3ODcwNmRkNDk2NGY4MWVkOTJmMTI4MzlhMzQ4MTMyMGI4OTE2N2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjllMTU5M2Y0ZTA4YjVmYWI3ZTI0MzYyMzUxYTM2NzljNWE0NzZkMzBlYjI4NzQ5ZjdiMjUzZjM2ZDEzMjRmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjZDdlZGMyYzg0YTNkZTM4N2YxODFlNTgwMmQ3OGNhMGViOGY1ZDJlNTgxM2ZjMjNmNDhjMWQzN2RmYTgxN2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFlYjdiZDQxNzg0ZmViNDY0Nzc1MTk5ZDNhMTk5MzI0MmY1MTBmZTQ1NjM5YzgzOWFmM2I0NGI2ZTkwYWIzZjIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-19T15:38:50.328Z"
+  }
+}

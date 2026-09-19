@@ -3,6 +3,17 @@ type: Reference
 title: EasySAM Quickstart
 description: Entry point for the EasySAM code wiki. Covers what EasySAM is, how to install it, the core workflow, and links to architecture, domain, operations, and testing docs.
 tags: [easysam, quickstart, overview]
+verified:
+  - by: openwiki/0.5.2
+    at: 2026-09-19T15:38:50.328Z
+sources:
+  - id: openwiki-source-ca6cb4b1a14fd7969dfae3ec
+    resource: repo://CHANGELOG.md
+  - id: openwiki-source-05ccef8d4cf1698187f20464
+    resource: repo://pyproject.toml
+  - id: openwiki-source-4ac1c0d195c62c553ac66f88
+    resource: repo://src/easysam/cli.py
+generated: { by: "openwiki/0.5.2", at: "2026-09-19T15:38:50.328Z" }
 ---
 
 # EasySAM Quickstart
@@ -11,8 +22,8 @@ EasySAM is an opinionated YAML-to-SAM generator for modular AWS serverless appli
 
 - **Language:** Python 3.12+ (src in `src/easysam/`)
 - **Package:** `easysam` on PyPI, entrypoint `easysam.cli:main`
-- **Current version:** 1.12.1 (see `pyproject.toml`, `CHANGELOG.md`)
-- **Key dependencies:** Click (CLI), Jinja2 (template rendering), python-benedict (YAML dict handling), jsonschema (validation), Prismarine (model-driven DynamoDB), boto3 (AWS clients), rich (terminal output)
+- **Current version:** 1.13.0 (see `pyproject.toml`, `CHANGELOG.md`)
+- **Key dependencies:** Click (CLI), Jinja2 (template rendering), python-benedict (YAML dict handling), jsonschema (validation), Prismarine (model-driven DynamoDB), boto3 (AWS clients), rich (terminal output), FastAPI + uvicorn (local execution server)
 
 ## Install
 
@@ -44,13 +55,27 @@ For a Prismarine scaffold: `uv run easysam init --prismarine`
 
 | Section | What it covers |
 | --- | --- |
-| [Architecture Overview](architecture/overview.md) | CLI-to-deploy pipeline, module roles, Jinja template rendering |
+| [Architecture Overview](architecture/overview.md) | CLI-to-deploy pipeline, module roles, Jinja template rendering, and local execution server flow |
 | [Source Map](architecture/source-map.md) | One-line reference for every `src/easysam/` module |
 | [Generate & Deploy Workflow](workflows/generate-deploy.md) | Step-by-step init→validate→generate→deploy→delete flow with sequence diagram |
 | [Resource Model](domain/resource-model.md) | `resources.yaml` + `easysam.yaml` structure, conditionals, overrides, env vars |
 | [Prismarine Integration](domain/prismarine.md) | Model-driven DynamoDB tables and client code generation |
+| [Local Execution Workflow](workflows/local-execution.md) | Local Lambda execution server, route registration, handler isolation, and envvar locking |
+| [Conditionals and Deploy Overrides](integrations/conditional-overrides.md) | `!Conditional` resolution and context-file overrides, and how they interact with loading and validation |
 | [Operations Runbook](operations/runbook.md) | Validation, cloud checks, deployment safety, production hardening |
 | [Testing Guide](testing.md) | Test structure, example-generation tests, how to add tests |
+
+## Task routing
+
+Use this page as a starting point, then jump to the section that matches your task:
+
+- **Starting a new project:** [Generate & Deploy Workflow](workflows/generate-deploy.md) for the full init→deploy sequence; [Resource Model](domain/resource-model.md) for the YAML shape you will edit.
+- **Editing resources or wiring up DynamoDB:** [Resource Model](domain/resource-model.md) for fields and invariants; [Prismarine Integration](domain/prismarine.md) when you want model-driven tables and typed clients.
+- **Running API Gateway routes locally:** [Local Execution Workflow](workflows/local-execution.md) for the server, route registration, event formats, and handler isolation.
+- **Conditional or environment-specific resources:** [Conditionals and Deploy Overrides](integrations/conditional-overrides.md) for `!Conditional` semantics and `--context-file` overrides.
+- **Validating, deploying, or tearing down stacks:** [Operations Runbook](operations/runbook.md) for pre-deploy checks, version gates, and delete semantics.
+- **Understanding the codebase:** [Architecture Overview](architecture/overview.md) for the pipeline and module roles; [Source Map](architecture/source-map.md) for a module-by-module reference.
+- **Adding or changing tests:** [Testing Guide](testing.md) for test categories and the example-generation pattern.
 
 ## External documentation
 

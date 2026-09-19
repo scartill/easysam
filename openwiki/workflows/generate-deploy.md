@@ -1,13 +1,28 @@
 ---
-type: Workflow
-title: Generate and Deploy Workflow
-description: Step-by-step workflow from project init through schema validation, template generation, SAM deployment, and stack deletion. Includes a sequence diagram of the deploy pipeline.
-tags: [workflow, generate, deploy, cli]
+type: "Reference"
+title: "Generate and Deploy Workflow"
+openwiki_generated: true
+verified:
+  - by: openwiki/0.5.2
+    at: 2026-09-19T15:38:50.328Z
+sources:
+  - id: openwiki-source-17e562d99a324c4472571fc7
+    resource: repo://docs/CLI_REFERENCE.md
+  - id: openwiki-source-76059441794faf322fc854f9
+    resource: repo://src/easysam/deploy.py
+  - id: openwiki-source-778363b9ddba351fd47aa280
+    resource: repo://src/easysam/generate.py
+  - id: openwiki-source-6a998f9c09695c437759a6e6
+    resource: repo://src/easysam/inspect.py
+  - id: openwiki-source-c15458a8ff9ea3d6838e74e7
+    resource: repo://src/easysam/validate_cloud.py
+generated: { by: "openwiki/0.5.2", at: "2026-09-19T15:38:50.328Z" }
 ---
+
 
 # Generate and Deploy Workflow
 
-This page documents the end-to-end lifecycle of an EasySAM project: initialization, validation, template generation, AWS deployment, and teardown.
+This page documents the end-to-end lifecycle of an EasySAM project: initialization, validation, template generation, AWS deployment, and teardown. The implementation entrypoints are `src/easysam/generate.py`, `src/easysam/deploy.py`, `src/easysam/inspect.py`, and `src/easysam/validate_cloud.py`; deployment behavior is anchored by `deploy.py`, which regenerates the template, checks prerequisite tool versions, handles common dependencies, and drives SAM build/deploy.
 
 ## Lifecycle overview
 
@@ -15,55 +30,69 @@ This page documents the end-to-end lifecycle of an EasySAM project: initializati
 sequenceDiagram
     participant User
     participant CLI as cli.py
+    participant Inspect as inspect.py
     participant Load as load.py
-    participant Validate as validate_schema.py
-    participant Jinja as template.j2
+    participant ValidateSchema as validate_schema.py
+    participant ValidateCloud as validate_cloud.py
+    participant Generate as generate.py
+    participant Jinja as template.j2 / swagger.j2
     participant Prisma as prismarine.py
+    participant Deploy as deploy.py
     participant SAM as SAM CLI
     participant AWS as AWS CloudFormation
 
-    User->>CLI: easysam init
-    CLI->>User: Scaffold resources.yaml, common/, backend/
+    User->>CLI: easysam init [--prismarine]
+    CLI->>User: Scaffold resources.yaml, common/, backend/, thirdparty/
 
     User->>CLI: easysam inspect schema .
-    CLI->>Load: load resources.yaml + imports
+    CLI->>Inspect: inspect schema
+    Inspect->>Load: load_resources(resources.yaml + imports)
     Load->>Load: Resolve !Conditional, apply overrides, preprocess
-    Load->>Validate: Validate against schemas.json
-    Validate-->>CLI: Errors or success
-    CLI-->>User: Validation result
+    Load->>ValidateSchema: Validate against schemas.json + local_schemas.json + custom rules
+    ValidateSchema-->>Inspect: Errors or success
+    Inspect-->>User: Validation result (or selected subsection via --select)
+
+    User->>CLI: easysam inspect cloud .
+    CLI->>Inspect: inspect cloud
+    Inspect->>Load: load_resources(...)
+    Load-->>Inspect: resources_data
+    Inspect->>ValidateCloud: validate_cloud(obj, resources_data, environment, errors)
+    ValidateCloud->>AWS: IAM list_policies, SSM get_parameter, Lambda get_layer_version_by_arn
+    ValidateCloud-->>Inspect: Cloud validation errors or success
+    Inspect-->>User: Cloud validation result
 
     User->>CLI: easysam generate .
-    CLI->>Load: load resources.yaml + imports
-    Load->>Validate: Validate
-    Load-->>CLI: resources_data (benedict)
-    CLI->>Jinja: Render template.j2
-    Jinja-->>CLI: template.yml
-    CLI->>Jinja: Render swagger.j2 (if paths)
-    Jinja-->>CLI: build/swagger.yaml
-    CLI->>Prisma: Generate prismarine_client.py (if prismarine)
-    Prisma-->>CLI: Client code written
-    CLI-->>User: template.yml generated
+    CLI->>Generate: generate(cliparams, directory, pypath, deploy_ctx)
+    Generate->>Load: load_resources(...)
+    Load-->>Generate: resources_data (benedict)
+    Generate->>Generate: Execute plugins (if defined)
+    Generate->>Jinja: Render template.j2 -> template.yml
+    Generate->>Jinja: Render swagger.j2 -> build/swagger.yaml (if paths defined)
+    Generate->>Prisma: generate_prismarine_clients(...) (if prismarine configured)
+    Generate-->>User: template.yml generated
 
     User->>CLI: easysam deploy .
-    CLI->>Load: Regenerate (generate + validate)
-    CLI->>CLI: Check pip and SAM CLI versions
-    CLI->>CLI: Copy common dependencies to lambda dirs
-    CLI->>SAM: sam build
-    SAM-->>CLI: Build artifacts
-    CLI->>SAM: sam deploy --stack-name ENV
+    CLI->>Deploy: deploy(cliparams, directory, deploy_ctx)
+    Deploy->>Generate: generate() internally (regenerate + validate)
+    Deploy->>Deploy: check_pip_version / check_sam_cli_version
+    Deploy->>Deploy: copy_common_dependencies(directory, resources)
+    Deploy->>SAM: sam build
+    SAM-->>Deploy: Build artifacts
+    Deploy->>SAM: sam deploy --stack-name <environment> --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
     SAM->>AWS: Create/update CloudFormation stack
     AWS-->>SAM: Stack ARN
-    SAM-->>CLI: Deploy complete
-    CLI->>CLI: Cleanup common dependencies
-    CLI-->>User: Deployment successful
+    SAM-->>Deploy: Deploy complete
+    Deploy->>Deploy: remove_common_dependencies() unless --no-cleanup
+    Deploy-->>User: Deployment successful
 
-    User->>CLI: easysam delete --await
-    CLI->>AWS: cloudformation.delete_stack
-    AWS-->>CLI: DELETE_COMPLETE
-    CLI-->>User: Stack deleted
+    User->>CLI: easysam delete --await [--force]
+    CLI->>Deploy: delete(cliparams, environment)
+    Deploy->>AWS: cloudformation.delete_stack (STANDARD or FORCE_DELETE_STACK)
+    AWS-->>Deploy: DELETE_COMPLETE (when --await)
+    Deploy-->>User: Stack deleted
 ```
 
-*Sequence of CLI commands from init through deploy to delete.*
+*End-to-end sequence from init through schema/cloud validation, generation, SAM build/deploy, and delete. Deploy itself re-runs generate internally before invoking SAM.*
 
 ## 1. Init (`easysam init`)
 
@@ -92,7 +121,7 @@ With `--prismarine`, the scaffold includes Prismarine model files (`common/myobj
 
 Requires `pyproject.toml` in the current directory.
 
-## 2. Validate (`easysam inspect schema`)
+## 2. Schema validation (`easysam inspect schema`)
 
 Source: `src/easysam/inspect.py`, `src/easysam/validate_schema.py`
 
@@ -142,6 +171,8 @@ Output goes to the project directory. The `template.yml` is the primary artifact
 easysam --environment dev generate .
 ```
 
+Generate returns a `ProcessingResult` (the resolved `resources_data` plus any errors) so callers such as `deploy.py` can inspect validation outcomes without running a separate schema command.
+
 ## 5. Deploy (`easysam deploy`)
 
 Source: `src/easysam/deploy.py`
@@ -160,10 +191,13 @@ easysam --environment dev --aws-profile my-profile deploy . --tag project=myapp
 ```
 
 Key deploy options:
+
 - `--dry-run` — print the SAM deploy command without executing
 - `--sam-tool` — override the SAM invocation (default: `uv run sam`)
 - `--override-main-template` — use a custom Jinja template instead of `template.j2`
 - `--tag key=value` — repeatable CloudFormation tags
+
+Deployment aborts if generation produces errors: `deploy()` checks the error list returned by `generate()` and raises `UserWarning` before invoking SAM.
 
 ## 6. Delete (`easysam delete`)
 
@@ -195,6 +229,17 @@ You can inspect dependencies without deploying:
 ```bash
 easysam inspect common-deps backend/function/myfunction
 ```
+
+## Safe deployment pipeline
+
+Schema validation and cloud validation are intended to run before generation/deploy so that template rendering and SAM deployment operate on already-resolved, externally-verified resources. Cloud validation is especially important because `deploy()` does not re-check external IAM/SSM/Lambda dependencies; it assumes `inspect cloud` (or an equivalent check) has already passed.
+
+Recommended pre-deploy sequence:
+
+1. `easysam inspect schema .` — confirm resource model is valid for the target environment/context
+2. `easysam inspect cloud .` — confirm dependent external AWS resources exist and are reachable
+3. `easysam generate .` — produce `template.yml` (and Swagger/Prismarine artifacts if applicable)
+4. `easysam deploy .` — SAM build + deploy
 
 ## CI/CD recommended pipeline
 
