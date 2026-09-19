@@ -6,7 +6,6 @@ from typing import cast
 from benedict import benedict
 from jinja2 import Environment, FileSystemLoader
 import yaml
-from mergedeep import merge
 
 from easysam.prismarine import generate as generate_prismarine_clients
 from easysam.definitions import FatalError, ProcessingResult
@@ -114,7 +113,8 @@ def invoke_plugin(
     jenv = Environment(loader=loader)
     template = jenv.get_template(template_j2_filename)
     aux_data = dict(plugin.get('aux', {}))
-    output = template.render(merge(resources_data, aux_data))
+    resources_data.merge(aux_data)
+    output = template.render(resources_data)
     output_yaml_path = Path(resources_dir, plugin_name).with_suffix('.yaml')
     write_result(output_yaml_path, output)
 
