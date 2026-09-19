@@ -200,12 +200,11 @@ def sam_deploy(cliparams, directory, deploy_ctx, resources):
         subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
         lg.info('Successfully deployed SAM template')
 
-        lg.info('>>> Calling reconcile_event_source_mappings')
+        lg.info('Reconciling event source mappings')
         try:
             reconcile_event_source_mappings(cliparams, deploy_ctx, resources)
         except Exception:
             lg.exception('reconcile_event_source_mappings failed')
-        lg.info('>>> reconcile_event_source_mappings finished')
 
     except subprocess.CalledProcessError as e:
         lg.error(f'Failed to deploy SAM template: {e}')
