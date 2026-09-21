@@ -348,7 +348,7 @@ See the full index: [example/README.md](example/README.md).
 ## Development
 
 ```bash
-git clone https://github.com/adsight-app/easysam.git
+git clone https://github.com/scartill/easysam.git
 cd easysam
 uv sync
 source .venv/bin/activate
@@ -362,7 +362,7 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 If you hit an issue:
 
-1. Search [existing issues](https://github.com/adsight-app/easysam/issues)
+1. Search [existing issues](https://github.com/scartill/easysam/issues)
 2. Open a new issue with a reproducible example
 
 ## License
