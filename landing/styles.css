@@ -551,6 +551,10 @@ pre .comment { color: #64748b; font-style: italic; }
   border-color: var(--primary-color);
 }
 
+.theme-prismarine .contributor-badge:hover {
+  border-color: var(--primary-color);
+}
+
 .theme-prismarine .footer-left p a,
 .theme-prismarine .integration-card a {
   color: #34d399;
