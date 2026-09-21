@@ -8,6 +8,17 @@ from pathlib import Path
 
 import boto3
 from benedict import benedict
+from botocore.exceptions import (
+    ClientError,
+    CredentialRetrievalError,
+    NoCredentialsError,
+    PartialCredentialsError,
+    ProfileNotFound,
+    SSOError,
+    SSOTokenLoadError,
+    TokenRetrievalError,
+    UnauthorizedSSOTokenError,
+)
 from packaging.version import Version
 from rich.live import Live
 from rich.spinner import Spinner
@@ -18,6 +29,105 @@ from easysam.generate import generate
 
 SAM_CLI_VERSION = '1.138.0'
 PIP_VERSION = '25.1.1'
+
+# Substrings that indicate an authentication / credential problem in captured
+# subprocess (SAM CLI) output, so we can surface a clean message instead of a
+# buried stack trace.
+_AUTH_ERROR_MARKERS = (
+    'token has expired',
+    'error when retrieving token from sso',
+    'sso session associated with this profile has expired',
+    'the sso session',
+    'error loading sso token',
+    'expiredtoken',
+    'expired token',
+    'the security token included in the request is expired',
+    'unable to locate credentials',
+    'unauthorizedssotokenerror',
+    'refresh failed',
+    'credentials were refreshed, but the refreshed credentials',
+)
+
+
+def _auth_error_message(profile: str | None, detail: str | None = None) -> str:
+    """Build a friendly authentication error message."""
+    profile_note = f" (profile '{profile}')" if profile else ''
+    message = f'AWS authentication failed{profile_note}.'
+
+    if detail:
+        message += f'\nReason: {detail}'
+
+    message += (
+        '\n\nHow to fix:\n'
+        '  - SSO profiles:   aws sso login --profile ' + (profile or '<your-profile>') + '\n'
+        '  - Check that --aws-profile / EASYSAM_AWS_PROFILE names a valid profile\n'
+        '  - Static creds:   verify AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY or ~/.aws/credentials'
+    )
+    return message
+
+
+def verify_credentials(cliparams: dict, deploy_ctx: benedict):
+    """Verify AWS credentials are usable before running an expensive deploy.
+
+    Calls STS GetCallerIdentity and translates the common
+    credential/SSO/token failures into a clean, actionable ``UserWarning``
+    instead of letting a raw botocore traceback surface later.
+    """
+    profile = cliparams.get('aws_profile')
+    region = deploy_ctx.get('target_region') if deploy_ctx else None
+
+    lg.info('Verifying AWS credentials')
+
+    try:
+        session_kwargs = {}
+        if profile:
+            session_kwargs['profile_name'] = profile
+        if region:
+            session_kwargs['region_name'] = region
+
+        session = boto3.Session(**session_kwargs)
+        identity = session.client('sts').get_caller_identity()
+        lg.debug(f'Authenticated as {identity.get("Arn")}')
+
+    except ProfileNotFound as e:
+        raise UserWarning(
+            f"AWS profile '{profile}' was not found. "
+            'Check --aws-profile / EASYSAM_AWS_PROFILE and your ~/.aws/config.'
+        ) from e
+
+    except (
+        SSOTokenLoadError,
+        UnauthorizedSSOTokenError,
+        TokenRetrievalError,
+        SSOError,
+    ) as e:
+        raise UserWarning(_auth_error_message(profile, str(e))) from e
+
+    except (NoCredentialsError, PartialCredentialsError, CredentialRetrievalError) as e:
+        raise UserWarning(_auth_error_message(profile, str(e))) from e
+
+    except ClientError as e:
+        error = e.response.get('Error', {})
+        code = error.get('Code', '')
+        auth_codes = (
+            'ExpiredToken',
+            'ExpiredTokenException',
+            'InvalidClientTokenId',
+            'UnrecognizedClientException',
+            'AccessDenied',
+        )
+        if code in auth_codes:
+            raise UserWarning(_auth_error_message(profile, error.get('Message', code))) from e
+        raise
+
+
+def _looks_like_auth_error(output: str | None) -> bool:
+    """Return True if captured subprocess output indicates an auth failure."""
+    if not output:
+        return False
+
+    lowered = output.lower()
+    return any(marker in lowered for marker in _AUTH_ERROR_MARKERS)
 
 
 def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
@@ -43,6 +153,12 @@ def deploy(cliparams: dict, directory: Path, deploy_ctx: benedict):
     lg.info(f'Deploying SAM template from {directory}')
     check_pip_version(cliparams)
     check_sam_cli_version(cliparams)
+
+    # Fail fast with a friendly message if credentials/SSO are not usable,
+    # before spending time on build. Dry runs never touch AWS.
+    if not cliparams.get('dry_run'):
+        verify_credentials(cliparams, deploy_ctx)
+
     remove_common_dependencies(directory)
     copy_common_dependencies(directory, resources)
 
@@ -197,7 +313,18 @@ def sam_deploy(cliparams, directory, deploy_ctx, resources):
 
     try:
         lg.debug(f'Running command: {" ".join(sam_params)}')
-        subprocess.run(sam_params, cwd=directory.resolve(), text=True, check=True)
+        # Capture stderr so we can detect auth failures and present a clean
+        # message, while still streaming stdout to the user for progress.
+        result = subprocess.run(
+            sam_params,
+            cwd=directory.resolve(),
+            text=True,
+            check=True,
+            stderr=subprocess.PIPE,
+        )
+        if result.stderr:
+            lg.debug(f'SAM CLI stderr:\n{result.stderr}')
+
         lg.info('Successfully deployed SAM template')
 
         lg.info('Reconciling event source mappings')
@@ -207,7 +334,17 @@ def sam_deploy(cliparams, directory, deploy_ctx, resources):
             lg.exception('reconcile_event_source_mappings failed')
 
     except subprocess.CalledProcessError as e:
-        lg.error(f'Failed to deploy SAM template: {e}')
+        captured = (e.stderr or '') + (e.stdout or '')
+
+        if _looks_like_auth_error(captured):
+            raise UserWarning(_auth_error_message(cliparams.get('aws_profile'))) from e
+
+        # Surface the SAM CLI's own error output so the diagnostic is visible
+        # rather than buried, then fail with a concise message.
+        if e.stderr:
+            lg.error(f'SAM CLI error output:\n{e.stderr.strip()}')
+
+        lg.error(f'Failed to deploy SAM template (exit code {e.returncode})')
         raise UserWarning('Failed to deploy SAM template') from e
 
 

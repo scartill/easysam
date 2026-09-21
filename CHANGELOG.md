@@ -1,5 +1,6 @@
 # Unreleased
 
+- Improved deploy authentication errors: expired/missing AWS credentials or SSO tokens now produce a clear, actionable message (with the `aws sso login` hint) instead of a buried stack trace. Credentials are verified up front via STS before build, and auth failures surfaced by the SAM CLI mid-deploy are detected and prettified.
 - Added FIFO SQS queue support: declare a queue as an object with `fifo: true` (in addition to the existing null-valued standard queues). FIFO-specific properties (`content_based_deduplication`, `deduplication_scope`, `fifo_throughput_limit`) with sensible defaults, plus general `visibility_timeout` and `message_retention_period` for any queue. The `.fifo` name suffix is appended automatically, and `deduplication_scope: messageGroup` auto-sets `fifo_throughput_limit: perMessageGroupId`.
 - FIFO queues work with Lambda `polls` and `send`; using a FIFO queue as an API Gateway `sqs` integration target is rejected by validation.
 - Added queue name-length validation against the SQS 80-character limit.
