@@ -253,6 +253,7 @@ Resources:
                 - 'sqs:GetQueueUrl'
                 - 'sqs:SendMessageBatch'
               Resource: '*'
+      {% if authorizers is defined %}
       - PolicyName: AuthorizerPolicy
         PolicyDocument:
           Version: '2012-10-17'
@@ -264,6 +265,7 @@ Resources:
                 {% for auth_name, auth_params in authorizers.items() %}
                 - !GetAtt {{ auth_name }}Function.Arn
                 {% endfor %}
+      {% endif %}
   {% endif %}  # end queues
 
   # Streams
@@ -383,7 +385,21 @@ Resources:
   {{ lprefix }}{{ queue_name.replace('-', '') }}Queue:
     Type: AWS::SQS::Queue
     Properties:
+      {% if queue and queue.fifo %}
+      QueueName: !Sub "{{ lprefix }}-{{ queue_name }}-${Stage}.fifo"
+      FifoQueue: true
+      ContentBasedDeduplication: {{ 'true' if (queue.content_based_deduplication is not defined or queue.content_based_deduplication) else 'false' }}
+      DeduplicationScope: {{ queue.deduplication_scope | default('queue') }}
+      FifoThroughputLimit: {{ queue.fifo_throughput_limit | default('perMessageGroupId' if queue.deduplication_scope == 'messageGroup' else 'perQueue') }}
+      {% else %}
       QueueName: !Sub "{{ lprefix }}-{{ queue_name }}-${Stage}"
+      {% endif %}
+      {% if queue and queue.visibility_timeout is defined %}
+      VisibilityTimeout: {{ queue.visibility_timeout }}
+      {% endif %}
+      {% if queue and queue.message_retention_period is defined %}
+      MessageRetentionPeriod: {{ queue.message_retention_period }}
+      {% endif %}
   {% endfor %}
   {% endif %}  # end queues
 

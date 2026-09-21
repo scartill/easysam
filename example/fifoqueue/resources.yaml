@@ -1,0 +1,21 @@
+prefix: FifoQueueLambda
+
+import:
+  - backend
+
+queues:
+  # Standard queue — unchanged, backward compatible (null value)
+  notifications:
+
+  # FIFO queue with all defaults
+  orders:
+    fifo: true
+
+  # Fully configured FIFO queue; messageGroup scope auto-forces
+  # fifo_throughput_limit to perMessageGroupId
+  payments:
+    fifo: true
+    content_based_deduplication: false
+    deduplication_scope: messageGroup
+    visibility_timeout: 60
+    message_retention_period: 86400

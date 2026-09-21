@@ -246,6 +246,26 @@ tables:
       startingposition: latest
 ```
 
+### SQS queues (standard and FIFO)
+
+Declare standard queues as null-valued keys, or FIFO queues with `fifo: true`:
+
+```yaml
+queues:
+  notifications:            # standard queue
+  orders:
+    fifo: true              # FIFO queue (name gets a `.fifo` suffix automatically)
+    content_based_deduplication: true
+```
+
+FIFO defaults are applied automatically (`ContentBasedDeduplication: true`,
+`DeduplicationScope: queue`, `FifoThroughputLimit: perQueue`), and
+`deduplication_scope: messageGroup` auto-sets `fifo_throughput_limit:
+perMessageGroupId`. FIFO queues work with Lambda `polls` and `send`, but cannot
+be an API Gateway `sqs` integration target. See the
+[Resource reference](docs/RESOURCE_REFERENCE.md) for all properties and
+operational notes (head-of-line blocking, deduplication window, migration).
+
 ### Conditional resources
 
 Conditional keys are resolved against deploy context (`environment`, `target_region`):

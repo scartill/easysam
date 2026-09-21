@@ -1,0 +1,10 @@
+lambda:
+  name: orderprocessor
+
+  resources:
+    polls:
+      # batchsize 1 is recommended for FIFO to isolate per-record failures
+      - name: orders
+        batchsize: 1
+    send:
+      - payments

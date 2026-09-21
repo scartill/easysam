@@ -1,3 +1,11 @@
+# Unreleased
+
+- Added FIFO SQS queue support: declare a queue as an object with `fifo: true` (in addition to the existing null-valued standard queues). FIFO-specific properties (`content_based_deduplication`, `deduplication_scope`, `fifo_throughput_limit`) with sensible defaults, plus general `visibility_timeout` and `message_retention_period` for any queue. The `.fifo` name suffix is appended automatically, and `deduplication_scope: messageGroup` auto-sets `fifo_throughput_limit: perMessageGroupId`.
+- FIFO queues work with Lambda `polls` and `send`; using a FIFO queue as an API Gateway `sqs` integration target is rejected by validation.
+- Added queue name-length validation against the SQS 80-character limit.
+- Added `fifoqueue` example.
+- Fixed the API Gateway SQS role template so queues can be defined without an `authorizers` block.
+
 # 1.13.0 (2026-09-19)
 
 - Added local Lambda execution mode: run handlers locally without Docker via a mock API Gateway HTTP server (`local` command), with support for REST API v1 and HTTP API v2 event formats and injectable authorization context.

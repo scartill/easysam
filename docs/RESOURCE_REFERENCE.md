@@ -64,7 +64,64 @@ queues:
   notifications:
 ```
 
-Queue values are `null`/empty; queue names are the keys.
+Queue values are `null`/empty for standard queues; queue names are the keys.
+
+### FIFO queues
+
+A queue value may also be an object. Setting `fifo: true` produces a FIFO
+queue. The AWS-required `.fifo` suffix is appended to the generated queue name
+automatically (queue keys may only contain `[a-z0-9-]`, so you never write the
+suffix yourself).
+
+```yaml
+queues:
+  # standard queue (null value)
+  notifications:
+
+  # FIFO queue with defaults
+  orders:
+    fifo: true
+
+  # fully configured FIFO queue
+  payments:
+    fifo: true
+    content_based_deduplication: false
+    deduplication_scope: messageGroup
+    visibility_timeout: 60
+    message_retention_period: 86400
+```
+
+Queue configuration properties:
+
+| Property | Applies to | Default | Notes |
+| --- | --- | --- | --- |
+| `fifo` | any | `false` | Marks the queue as FIFO; appends `.fifo` to the name. |
+| `content_based_deduplication` | FIFO | `true` | Derives `MessageDeduplicationId` from a hash of the message body. Note: this default differs from the AWS SQS native default (`false`). See the deduplication window note below. |
+| `deduplication_scope` | FIFO | `queue` | `messageGroup` or `queue`. |
+| `fifo_throughput_limit` | FIFO | `perQueue` | `perQueue` or `perMessageGroupId`. Automatically set to `perMessageGroupId` when `deduplication_scope` is `messageGroup` (CloudFormation rejects `messageGroup` + `perQueue`). |
+| `visibility_timeout` | any | (unset) | `VisibilityTimeout` in seconds (0–43200). |
+| `message_retention_period` | any | (unset) | `MessageRetentionPeriod` in seconds (60–1209600). |
+
+FIFO queues work as Lambda event sources (`polls`) and send targets (`send`)
+with no extra configuration. A FIFO queue **cannot** be used as an API Gateway
+`sqs` integration target — schema validation rejects that combination.
+
+**Operational considerations:**
+
+- **Head-of-line blocking**: a message that repeatedly fails its `polls`
+  consumer blocks all processing for its `MessageGroupId` until it is resolved
+  or expires. Dead-letter/redrive is not yet configurable here, so catch
+  exceptions in the handler and consider `batchsize: 1` to isolate per-record
+  failures.
+- **Content deduplication window**: with `content_based_deduplication: true`
+  (the default), SQS silently drops messages with an identical body sent within
+  a 5-minute window.
+- **Standard → FIFO migration**: AWS cannot convert an existing standard queue
+  to FIFO in place. Changing `myqueue:` (null) to `myqueue: { fifo: true }`
+  triggers CloudFormation resource replacement (delete + recreate), which can
+  lose in-flight messages.
+- **Name length**: the rendered name `<prefix>-<queue>-<stage>[.fifo]` must stay
+  within the SQS 80-character limit; validation flags names that risk exceeding it.
 
 ## Streams
 
