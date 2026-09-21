@@ -272,6 +272,17 @@ a {
   font-size: 0.95rem;
 }
 
+.feature-card-link {
+  display: block;
+  cursor: pointer;
+}
+
+.feature-more {
+  color: var(--accent-color);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 /* Quick Start Section */
 .quickstart-section {
   padding: 5rem 0;
@@ -469,4 +480,68 @@ pre .comment { color: #64748b; font-style: italic; }
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+
+/* Prismarine Subpage Theme (emerald/teal gem palette) */
+.theme-prismarine {
+  --primary-color: #10b981;
+  --primary-hover: #059669;
+  --accent-color: #2dd4bf;
+}
+
+.theme-prismarine .badge {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.theme-prismarine .command-prompt {
+  color: #10b981;
+}
+
+.theme-prismarine .step-number {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.theme-prismarine pre .cmd { color: #2dd4bf; }
+.theme-prismarine pre .key { color: #34d399; }
+
+.theme-prismarine .doc-card:hover {
+  border-color: var(--primary-color);
+}
+
+.theme-prismarine .footer-left p a,
+.theme-prismarine .integration-card a {
+  color: #34d399;
+  text-decoration: underline;
+}
+
+/* EasySAM Integration Highlight */
+.integration-section {
+  padding: 5rem 0;
+  border-top: 1px solid var(--border-color);
+  background-color: rgba(17, 24, 39, 0.4);
+}
+
+.integration-card {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 2rem;
+  border-radius: 0.75rem;
+}
+
+.integration-card > p {
+  color: var(--text-muted);
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.integration-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 1.5rem;
 }

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prismarine - A Pythonic ORM for DynamoDB</title>
+  <meta name="description" content="Prismarine is a Pythonic ORM for DynamoDB. Define models with TypedDict or Pydantic, generate type-safe client code, and interact with DynamoDB without boilerplate." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="theme-prismarine">
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="prismarine.html" class="brand">
+        <span class="brand-icon">💎</span>
+        <span class="brand-text">Prismarine</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#quickstart">Quick Start</a>
+        <a href="#easysam">EasySAM</a>
+        <a href="https://github.com/scartill/prismarine" target="_blank" rel="noopener" class="btn btn-secondary nav-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container hero-content">
+        <div class="badge">Type-Safe DynamoDB, the Pythonic Way</div>
+        <h1 class="hero-title">A Pythonic ORM for DynamoDB</h1>
+        <p class="hero-subtitle">
+          Prismarine defines DynamoDB models with plain Python <code>TypedDict</code> (or Pydantic) classes and generates fully type-safe client code — CRUD, secondary indexes, streams, and TTL — with almost no boilerplate.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#quickstart" class="btn btn-primary">Get Started</a>
+          <a href="https://github.com/scartill/prismarine" target="_blank" rel="noopener" class="btn btn-outline">View on GitHub</a>
+        </div>
+
+        <div class="command-box">
+          <span class="command-prompt">$</span>
+          <code>pip install prismarine</code>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('pip install prismarine')" title="Copy to clipboard">
+            📋
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Why Prismarine?</h2>
+          <p>Model your data in Python and let Prismarine generate the type-safe client for you.</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🧬</div>
+            <h3>Model with Python Types</h3>
+            <p>Define tables as <code>TypedDict</code> or <code>pydantic.BaseModel</code> classes decorated with <code>@c.model</code> to declare partition and sort keys.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">⚙️</div>
+            <h3>Auto-Generated Client</h3>
+            <p>Run <code>prismarine generate-client</code> to emit a <code>prismarine_client.py</code> with typed <code>get</code>, <code>put</code>, <code>update</code>, <code>list</code>, <code>scan</code>, and <code>delete</code> methods.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🔎</div>
+            <h3>Secondary Indexes</h3>
+            <p>Declare GSIs with the <code>@c.index</code> decorator and get generated, type-safe query methods scoped to each index.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3>Named-Argument Safety</h3>
+            <p>Operations require named arguments, so renaming a key surfaces as a compile-time error in your IDE and linter — no silent failures.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🌊</div>
+            <h3>Streams &amp; TTL</h3>
+            <p>Configure DynamoDB stream triggers and Time-To-Live expiration declaratively on the model via the <code>trigger</code> and <code>ttl</code> options.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">💠</div>
+            <h3>TypedDict or Pydantic</h3>
+            <p>Ship with lightweight <code>TypedDict</code> by default, or opt into Pydantic models for runtime validation — the API surface stays the same.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Start Section -->
+    <section id="quickstart" class="quickstart-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Quick Start</h2>
+          <p>From a model definition to type-safe CRUD in three steps.</p>
+        </div>
+
+        <div class="code-steps">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-body">
+              <h3>Define a Model</h3>
+              <p>In <code>models.py</code>, describe your table with a decorated <code>TypedDict</code>:</p>
+              <pre><code><span class="key">from</span> typing <span class="key">import</span> TypedDict, NotRequired
+<span class="key">from</span> prismarine <span class="key">import</span> Cluster
+
+c = Cluster(<span class="comment">'TapgameExample'</span>)
+
+<span class="cmd">@c.model</span>(PK=<span class="comment">'Foo'</span>, SK=<span class="comment">'Bar'</span>)
+<span class="key">class</span> Team(TypedDict):
+    Foo: str
+    Bar: str
+    Baz: NotRequired[str]</code></pre>
+            </div>
+          </div>
+
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-body">
+              <h3>Generate the Client</h3>
+              <p>Emit a fully typed <code>prismarine_client.py</code> alongside your models:</p>
+              <pre><code><span class="comment"># TypedDict (default)</span>
+<span class="cmd">prismarine</span> generate-client --base
+
+<span class="comment"># Or with Pydantic models</span>
+<span class="cmd">prismarine</span> generate-client --model-library pydantic --base</code></pre>
+            </div>
+          </div>
+
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-body">
+              <h3>Use Type-Safe CRUD</h3>
+              <p>Call the generated model methods with named arguments:</p>
+              <pre><code><span class="comment"># Create</span>
+TeamModel.put({<span class="comment">'Foo'</span>: <span class="comment">'foo'</span>, <span class="comment">'Bar'</span>: <span class="comment">'bar'</span>})
+
+<span class="comment"># Query by partition key</span>
+teams = TeamModel.list(foo=<span class="comment">'foo'</span>)
+
+<span class="comment"># Get / update / delete</span>
+team = TeamModel.get(foo=<span class="comment">'foo'</span>, bar=<span class="comment">'bar'</span>)
+TeamModel.update({<span class="comment">'Baz'</span>: <span class="comment">'new'</span>}, foo=<span class="comment">'foo'</span>, bar=<span class="comment">'bar'</span>)
+TeamModel.delete(foo=<span class="comment">'foo'</span>, bar=<span class="comment">'bar'</span>)</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EasySAM Integration Highlight -->
+    <section id="easysam" class="integration-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Works Great with EasySAM</h2>
+          <p>Prismarine is standalone, but pairs naturally with EasySAM for modular serverless apps.</p>
+        </div>
+
+        <div class="integration-card">
+          <p>
+            When used alongside <a href="index.html">EasySAM</a>, Prismarine models become the source of truth for your DynamoDB tables. Declare a
+            <code>trigger</code> or <code>ttl</code> right on the model, and EasySAM generates the matching CloudFormation —
+            enabling streams, wiring an <code>EventSourceMapping</code> to your Lambda, and configuring TTL and IAM permissions automatically.
+          </p>
+          <pre><code><span class="cmd">@c.model</span>(PK=<span class="comment">'Foo'</span>, SK=<span class="comment">'Bar'</span>, trigger=<span class="comment">'itemlogger'</span>, ttl=<span class="comment">'ExpireAt'</span>)
+<span class="key">class</span> Item(TypedDict):
+    Foo: str
+    Bar: str
+    ExpireAt: int  <span class="comment"># Unix timestamp</span></code></pre>
+          <div class="integration-actions">
+            <a href="index.html" class="btn btn-outline">Explore EasySAM</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Documentation & Resources Section -->
+    <section id="docs" class="docs-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Documentation &amp; Resources</h2>
+          <p>Learn the model decorators, indexes, and generated client API.</p>
+        </div>
+
+        <div class="docs-grid">
+          <a href="https://github.com/scartill/prismarine#readme" target="_blank" rel="noopener" class="doc-card">
+            <div class="doc-title">📖 Overview &amp; Quick Start</div>
+            <p>Directory structure, model definition, client generation, and CRUD basics.</p>
+          </a>
+          <a href="https://github.com/scartill/prismarine#advanced-usage" target="_blank" rel="noopener" class="doc-card">
+            <div class="doc-title">🧩 Decorators Reference</div>
+            <p>Full reference for <code>@c.model</code>, <code>@c.index</code>, and <code>@c.export</code>, including keys, custom names, streams, and TTL.</p>
+          </a>
+          <a href="https://github.com/scartill/prismarine#using-pydantic-models" target="_blank" rel="noopener" class="doc-card">
+            <div class="doc-title">💠 Pydantic Models</div>
+            <p>Opt into Pydantic-backed clients with runtime validation while keeping the same API.</p>
+          </a>
+          <a href="https://github.com/scartill/easysam-skills" target="_blank" rel="noopener" class="doc-card">
+            <div class="doc-title">🤖 Agent Skills</div>
+            <p>Companion AI agent skills for defining models, generating clients, and wiring resources.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-left">
+        <div class="brand">
+          <span class="brand-icon">💎</span>
+          <span class="brand-text">Prismarine</span>
+        </div>
+        <p>A Pythonic, type-safe ORM for DynamoDB. Works best with <a href="index.html">EasySAM</a>.</p>
+      </div>
+      <div class="footer-right">
+        <p>Released under the <a href="https://github.com/scartill/prismarine" target="_blank" rel="noopener">MIT License</a>.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
