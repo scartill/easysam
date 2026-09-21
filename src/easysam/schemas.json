@@ -18,7 +18,38 @@
     },
     "queues_schema": {
       "type": "object",
-      "properties": {},
+      "properties": {
+        "fifo": {
+          "type": "boolean"
+        },
+        "content_based_deduplication": {
+          "type": "boolean"
+        },
+        "deduplication_scope": {
+          "type": "string",
+          "enum": [
+            "messageGroup",
+            "queue"
+          ]
+        },
+        "fifo_throughput_limit": {
+          "type": "string",
+          "enum": [
+            "perQueue",
+            "perMessageGroupId"
+          ]
+        },
+        "visibility_timeout": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 43200
+        },
+        "message_retention_period": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 1209600
+        }
+      },
       "additionalProperties": false
     },
     "stream_bucket_schema": {
@@ -650,7 +681,14 @@
       "type": "object",
       "patternProperties": {
         "^[a-z0-9-]+$": {
-          "type": "null"
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/queues_schema"
+            }
+          ]
         }
       },
       "additionalProperties": false

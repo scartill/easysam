@@ -26,6 +26,7 @@ def validate(resources_dir: Path, resources_data: dict, errors: list[str]):
     validate_buckets(resources_data, errors)
     validate_streams(resources_data, errors)
     validate_tables(resources_data, errors)
+    validate_queues(resources_data, errors)
     validate_lambda(resources_data, errors)
     validate_paths(resources_dir, resources_data, errors)
     validate_import(resources_dir, resources_data, errors)
@@ -105,6 +106,38 @@ def validate_streams(resources_data: dict, errors: list[str]):
             if 'extbucketarn' in bucket:
                 if not bucket['extbucketarn'].startswith('arn:aws:s3:::') and bucket['extbucketarn'] != '<overriden>':
                     errors.append(f"Stream '{stream}': 'extbucketarn' must be a valid ARN")
+
+
+def validate_queues(resources_data: dict, errors: list[str]):
+    """Validate queue-specific rules.
+
+    Checks the rendered SQS queue name length against the AWS 80-character
+    limit. The deploy-time stage suffix (``-${Stage}``) length is unknown at
+    schema validation time, so we validate the known ``{lprefix}-{name}-``
+    portion plus the ``.fifo`` suffix for FIFO queues, and require it to stay
+    within a bound that leaves margin for the stage.
+    """
+    prefix = resources_data.get('prefix', '')
+    lprefix = prefix.lower()
+
+    # AWS SQS queue name limit is 80 chars. Reserve margin for the deploy-time
+    # `-${Stage}` suffix (e.g. `-dev`, `-prod`) which is not known here.
+    max_len = 80
+    stage_margin = 10  # generous allowance for `-<stage>` (hyphen + stage name)
+
+    for queue_name, queue_cfg in resources_data.get('queues', {}).items():
+        is_fifo = isinstance(queue_cfg, dict) and queue_cfg.get('fifo')
+        fifo_suffix_len = len('.fifo') if is_fifo else 0
+
+        # Known portion: `{lprefix}-{queue_name}-` + `.fifo` (stage inserted before suffix)
+        known_len = len(lprefix) + 1 + len(queue_name) + 1 + fifo_suffix_len
+
+        if known_len + stage_margin > max_len:
+            errors.append(
+                f"Queue '{queue_name}': rendered queue name "
+                f"'{lprefix}-{queue_name}-<stage>{'.fifo' if is_fifo else ''}' "
+                f'may exceed the SQS 80-character limit'
+            )
 
 
 def validate_lambda(resources_data: dict, errors: list[str]):
@@ -198,6 +231,10 @@ def validate_sqs_path(
     """Validate SQS path-specific rules."""
     if details['queue'] not in resources_data['queues']:
         errors.append(f"SQS path '{path}' queue must be a valid queue")
+    else:
+        queue_cfg = resources_data['queues'].get(details['queue'])
+        if isinstance(queue_cfg, dict) and queue_cfg.get('fifo'):
+            errors.append(f"SQS path '{path}' cannot target a FIFO queue")
 
     validate_request_response_templates(resources_dir, path, details, errors)
 

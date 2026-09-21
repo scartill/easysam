@@ -33,6 +33,7 @@ If EasySAM is installed project-locally with uv, replace `easysam` with `uv run 
 | `functionurl` | Lambda Function URLs (simple + CORS) | Lambda |
 | `aoss` | OpenSearch Serverless + DynamoDB Streams indexing | DynamoDB, Lambda, AOSS |
 | `kinesismutltiplebuckets` | Kinesis stream delivery to multiple S3 destinations | Kinesis, Firehose, S3, Lambda |
+| `fifoqueue` | Standard and FIFO SQS queues consumed via Lambda `polls`/`send` | SQS (FIFO), Lambda |
 
 ## Example notes
 
@@ -129,6 +130,14 @@ easysam --environment prod --target-region eu-west-2 inspect schema example/pris
   - internal bucket destination
   - conditional external bucket ARN destination via context override
 - Override file: `deploy-context.yaml`.
+
+### `fifoqueue`
+
+- Declares a standard queue (null value) alongside FIFO queues (`fifo: true`).
+- Shows FIFO defaults, `deduplication_scope: messageGroup` auto-forcing
+  `fifo_throughput_limit: perMessageGroupId`, and general queue properties.
+- A Lambda consumes a FIFO queue via `polls` (with `batchsize: 1`) and targets
+  another via `send`.
 
 ## Cleanup
 
