@@ -1,0 +1,13 @@
+version: 1
+applications:
+  - appRoot: landing
+    frontend:
+      phases:
+        build:
+          commands: []
+      artifacts:
+        baseDirectory: .
+        files:
+          - '**/*'
+      cache:
+        paths: []
