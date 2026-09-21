@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasySAM - YAML-to-SAM Generator for AWS Serverless Applications</title>
+  <meta name="description" content="An opinionated YAML-to-SAM generator for modular AWS serverless applications with local execution, zero Docker dependencies, and seamless SAM template generation." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="#" class="brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-text">EasySAM</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#quickstart">Quick Start</a>
+        <a href="#docs">Docs</a>
+        <a href="https://github.com/scartill/easysam" target="_blank" rel="noopener" class="btn btn-secondary nav-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container hero-content">
+        <div class="badge">AWS Serverless Made Simple</div>
+        <h1 class="hero-title">Deploy AWS Serverless Apps with Clean, Modular YAML</h1>
+        <p class="hero-subtitle">
+          EasySAM is an opinionated YAML-to-SAM generator for AWS Lambda, API Gateway, DynamoDB, S3, SQS, Kinesis, OpenSearch, and IoT Core.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#quickstart" class="btn btn-primary">Get Started</a>
+          <a href="https://github.com/scartill/easysam" target="_blank" rel="noopener" class="btn btn-outline">View on GitHub</a>
+        </div>
+
+        <div class="command-box">
+          <span class="command-prompt">$</span>
+          <code>uv add --dev easysam</code>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('uv add --dev easysam')" title="Copy to clipboard">
+            📋
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Why EasySAM?</h2>
+          <p>Everything you need to build, test, and deploy production-ready AWS SAM stacks faster.</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">📝</div>
+            <h3>YAML-First Model</h3>
+            <p>Define Lambda functions, API routes, DynamoDB tables, and S3 buckets in compact, readable resource definitions.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🚀</div>
+            <h3>No-Docker Local Execution</h3>
+            <p>Mock API Gateway and invoke Lambda handlers locally in milliseconds without spinning up heavyweight Docker containers.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🧩</div>
+            <h3>Recursive Imports</h3>
+            <p>Structure large applications into clean modules with <code>resources.yaml</code> and local <code>easysam.yaml</code> files.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Environment & .env</h3>
+            <p>Automatic <code>.env</code> file loading, <code>${VAR}</code> expansion, contextual overrides, and conditional resources per environment.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Native Triggers</h3>
+            <p>Seamlessly wire DynamoDB Stream triggers, SQS queues (standard & FIFO), Kinesis streams, Function URLs, and MQTT authorizers.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">💎</div>
+            <h3>Prismarine Integration</h3>
+            <p>Model-driven table definitions with auto-generated typed clients using TypedDict or Pydantic.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Start Section -->
+    <section id="quickstart" class="quickstart-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Quick Start (5 Minutes)</h2>
+          <p>Get up and running with EasySAM in four simple steps.</p>
+        </div>
+
+        <div class="code-steps">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-body">
+              <h3>Initialize Project</h3>
+              <p>Create a project and initialize EasySAM configuration:</p>
+              <pre><code><span class="cmd">mkdir</span> my-easysam-app
+<span class="cmd">cd</span> my-easysam-app
+<span class="cmd">uv</span> init
+<span class="cmd">uv</span> add --dev easysam
+<span class="cmd">uv</span> run easysam init</code></pre>
+            </div>
+          </div>
+
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-body">
+              <h3>Define Resources</h3>
+              <p>Write a minimal <code>resources.yaml</code> configuration:</p>
+              <pre><code><span class="key">prefix</span>: MyApp
+
+<span class="key">import</span>:
+  - backend</code></pre>
+            </div>
+          </div>
+
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-body">
+              <h3>Validate & Generate</h3>
+              <p>Inspect your schema and build the final SAM template:</p>
+              <pre><code><span class="comment"># Validate schema</span>
+<span class="cmd">uv</span> run easysam --environment dev inspect schema .
+
+<span class="comment"># Generate template.yml</span>
+<span class="cmd">uv</span> run easysam --environment dev generate .</code></pre>
+            </div>
+          </div>
+
+          <div class="step-item">
+            <div class="step-number">4</div>
+            <div class="step-body">
+              <h3>Deploy to AWS</h3>
+              <p>Deploy your SAM stack directly to your AWS environment:</p>
+              <pre><code><span class="cmd">uv</span> run easysam --environment dev --aws-profile my-profile deploy .</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Documentation & Resources Section -->
+    <section id="docs" class="docs-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Documentation & Resources</h2>
+          <p>Explore comprehensive guides, references, and examples.</p>
+        </div>
+
+        <div class="docs-grid">
+          <a href="https://github.com/scartill/easysam/blob/main/docs/CLI_REFERENCE.md" target="_blank" rel="noopener" class="doc-card">
+            <div class="doc-title">💻 CLI Reference</div>
+            <p>Detailed breakdown of commands for generation, local testing, validation, and deployment.</p>
+          </a>
+          <a href="https://github.com/scartill/easysam/blob/main/docs/RESOURCE_REFERENCE.md" target="_blank" rel="noopener" class="doc-card">
+            <div class="doc-title">📦 Resource Reference</div>
+            <p>Full reference guide for supported AWS resources, properties, and configurations.</p>
+          </a>
+          <a href="https://github.com/scartill/easysam/blob/main/docs/PRODUCTION_HARDENING.md" target="_blank" rel="noopener" class="doc-card">
+            <div class="doc-title">🛡️ Production Hardening</div>
+            <p>Best practices for deploying secure, resilient serverless applications in production.</p>
+          </a>
+          <a href="https://github.com/scartill/easysam/tree/main/example" target="_blank" rel="noopener" class="doc-card">
+            <div class="doc-title">📂 Examples Catalog</div>
+            <p>Hands-on examples covering DynamoDB, OpenSearch, IoT authorizers, Kinesis, and more.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-left">
+        <div class="brand">
+          <span class="brand-icon">⚡</span>
+          <span class="brand-text">EasySAM</span>
+        </div>
+        <p>Opinionated YAML-to-SAM generator for modular AWS serverless applications.</p>
+      </div>
+      <div class="footer-right">
+        <p>Released under the <a href="https://github.com/scartill/easysam/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
