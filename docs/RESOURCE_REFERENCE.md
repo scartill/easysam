@@ -184,6 +184,23 @@ Notes:
   - `mqtt` (grants IoT publish and describe endpoint access)
   - `budget` (grants `CostExplorerRead` and `BudgetsRead` capabilities to access account cost information)
 
+### Scheduler targets
+
+A Lambda function can include a `schedules` block to configure the generated scheduler role, permissions, and environment variables used to create schedules that invoke another Lambda function. Set `schedules.target` to the key of an existing function in the same `functions` mapping:
+
+```yaml
+functions:
+  my-function:
+    uri: backend/function/my-function
+    schedules:
+      target: my-target-function
+
+  my-target-function:
+    uri: backend/function/my-target-function
+```
+
+The target is an EasySAM function key, not a physical Lambda name. EasySAM resolves it to the target function's generated CloudFormation ARN. The scheduler configuration provides `SCHEDULER_TARGET_ARN` and `SCHEDULER_ROLE_ARN` to the schedule-managing function and grants the scheduler role permission to invoke that target.
+
 ## Function URLs (Lambda)
 
 Lambda Function URLs can be defined with simple or advanced configuration:
