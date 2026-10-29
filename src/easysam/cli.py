@@ -3,7 +3,6 @@ import logging as lg
 import sys
 from importlib.metadata import version
 import traceback
-from argparse import ArgumentParser
 
 from benedict import benedict
 import click
@@ -127,11 +126,7 @@ def main():
         easysam()
 
     except UserWarning as e:
-        parser = ArgumentParser()
-        parser.add_argument('--verbose', action='store_true')
-        args, _ = parser.parse_known_args()
-
-        if args.verbose:
+        if lg.getLogger().isEnabledFor(lg.DEBUG):
             lg.error(traceback.format_exc())
 
         lg.error(e)
