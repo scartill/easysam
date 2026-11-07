@@ -1,5 +1,9 @@
 # Unreleased
 
+- Added DynamoDB vector index support: a table may declare a `vectorindices` array (`name`, `attribute`, `dimensions`, `distance`, optional `hash`, optional `filters`). EasySAM renders a native `VectorIndexes` block on the `AWS::DynamoDB::Table`, injects each `hash`/`filter` attribute into `AttributeDefinitions` (default type `S`; pre-declare `type: N`/`B` for numeric/binary filter keys), and grants any referencing Lambda a `dynamodb:SearchVectors` IAM statement scoped to each index ARN. Limits: ≤5 indices per table, `dimensions` 1–4096, ≤18 `filters` per index.
+- Added `vectorindices` example.
+- This change consumes Prismarine's `vectorindices` block and is a coordinated release with Prismarine — ship the two together. During development it tracks the Prismarine `vector-indices` branch.
+
 # 1.14.0 (2026-10-29)
 
 - Added EventBridge Scheduler support: a Lambda function can declare a `schedules.target` block pointing at another function key to generate a dedicated scheduler IAM role, grant the function `scheduler:*` and `iam:PassRole` permissions, and inject `SCHEDULER_TARGET_ARN` / `SCHEDULER_ROLE_ARN` environment variables for managing schedules that invoke the target.

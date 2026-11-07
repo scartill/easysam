@@ -384,11 +384,30 @@ def process_default_tables(resources_data: dict, errors: list[str]):
                 trigger_config['startingposition'] = 'latest'
 
 
+def process_default_vectorindices(resources_data: dict, errors: list[str]):
+    for table_name, table in resources_data.get('tables', {}).items():
+        vindices = table.get('vectorindices')
+        if not vindices:
+            continue
+        attributes = table.setdefault('attributes', [])
+        seen = {a['name'] for a in attributes}  # table.attributes ONLY (Critique E3)
+        for vindex in vindices:
+            schema_attrs = []
+            if vindex.get('hash'):
+                schema_attrs.append(vindex['hash'])
+            schema_attrs.extend(vindex.get('filters', []) or [])
+            for attr in schema_attrs:
+                if attr not in seen:
+                    attributes.append({'name': attr})  # template defaults type -> S
+                    seen.add(attr)  # cross-index dedup
+
+
 def preprocess_defaults(resources_data: dict, errors: list[str]):
     process_default_searches(resources_data, errors)
     process_default_functions(resources_data, errors)
     process_default_streams(resources_data, errors)
     process_default_tables(resources_data, errors)
+    process_default_vectorindices(resources_data, errors)
     process_default_paths(resources_data, errors)
 
 

@@ -4,12 +4,12 @@ source: docs/specs/vector-indices.md
 generated-at: 2026-11-07T13:30:00+02:00
 inputs-ready: false
 completed: false
-status: not-started
+status: done
 ---
 
 # Task 03: Render the `VectorIndexes` block in `template.j2`
 
-- [ ] **Completion**
+- [x] **Completion**
 - **Source spec**: `docs/specs/vector-indices.md`
 - **Depends on**: `task-01-schema.md`
 - **Blocks**: `task-05-example-app.md`, `task-06-tests.md`

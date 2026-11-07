@@ -513,6 +513,20 @@
       ],
       "additionalProperties": false
     },
+    "vector_index_schema": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "pattern": "^[a-zA-Z0-9_.-]+$", "minLength": 3, "maxLength": 255},
+        "attribute": {"type": "string"},
+        "dimensions": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "distance": {"type": "string", "enum": ["COSINE", "EUCLIDEAN", "DOT_PRODUCT"]},
+        "hash": {"type": "string"},
+        "filters": {"type": "array", "items": {"type": "string"}, "maxItems": 18}
+      },
+      "required": ["name", "attribute", "dimensions", "distance"],
+      "dependencies": {"filters": ["hash"]},
+      "additionalProperties": false
+    },
     "table_trigger_schema": {
       "oneOf": [
         {
@@ -583,6 +597,13 @@
               "attributes"
             ],
             "additionalProperties": false
+          }
+        },
+        "vectorindices": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/definitions/vector_index_schema"
           }
         },
         "trigger": {

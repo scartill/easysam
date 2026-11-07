@@ -197,3 +197,48 @@ easysam --environment dev generate .
 easysam --environment dev local .                    # test locally before deploying
 easysam --environment dev --aws-profile my-profile deploy . --tag project=myapp
 ```
+
+## Table resource notes
+
+### `vectorindices`
+
+Tables may declare a `vectorindices` array to provision DynamoDB vector indices
+for similarity search:
+
+```yaml
+tables:
+  Product:
+    attributes:
+      - name: ProductId
+        hash: true
+    vectorindices:
+      - name: by-embedding
+        attribute: Embedding       # the vector (embedding) attribute
+        dimensions: 1536           # 1..4096
+        distance: COSINE           # COSINE | EUCLIDEAN | DOT_PRODUCT
+        hash: Category             # optional; required if `filters` is set
+        filters:                   # optional; requires `hash`
+          - Brand
+```
+
+Generated behaviour:
+
+- A native `VectorIndexes` block is emitted on the `AWS::DynamoDB::Table`.
+- Each `hash`/`filter` attribute is added to `AttributeDefinitions` if missing
+  (default type `S`; pre-declare the attribute with `type: N`/`B` for numeric or
+  binary filter keys).
+- Any Lambda referencing the table receives a `dynamodb:SearchVectors` IAM
+  statement scoped to the index ARN.
+- Vector indices require on-demand billing (`BillingMode: PAY_PER_REQUEST`),
+  which EasySAM always emits.
+
+Limits: up to 5 vector indices per table, `dimensions` 1–4096, up to 18
+`filters` per index.
+
+### One index per stack operation (migration caveat)
+
+DynamoDB allows multiple secondary indices (GSIs and vector indices) to be
+created at once only on the initial `CreateTable`. On an **existing** stack, you
+can add or remove only **one** index (GSI or vector index) per `deploy`
+operation. When introducing several indices to a live table, add them one at a
+time across successive deploys.
