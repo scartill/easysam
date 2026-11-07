@@ -1,7 +1,7 @@
 ---
 generated-by: "Brainstorm"
 generated-at: 2026-11-07T12:00:00+02:00
-status: drafting
+status: recommended
 ---
 
 # Technical Brainstorm: EasySAM CloudFormation Support for DynamoDB Vector Indexes
@@ -236,22 +236,163 @@ itself.
 
 ---
 
+## Resolved Decisions (from user answers)
+
+| Q | Decision |
+|---|----------|
+| Q1 | EasySAM accepts Prismarine's lowercase keys (`name`, `attribute`, `dimensions`, `distance`, `hash`, `filters`) and maps to CloudFormation casing inside `template.j2`. |
+| Q2 | Option (a): inject `hash`/`filters` attributes into `AttributeDefinitions` as `AttributeType: S` when not already present; string-only limitation documented. |
+| Q3 | Document the CloudFormation "one index change per stack operation" caveat; no blocking validation. |
+| Q4 | **IAM in scope.** A function that references a vector-indexed table must receive `dynamodb:SearchVectors` on the index ARN. This pass must ship a working single-function vector-index access example. |
+| Q5 | Hardcode `Projection: ProjectionType: ALL` for vector indexes (matches GSI behavior). |
+| Q6 | Ship EasySAM + Prismarine together when ready; during development this EasySAM branch tracks the corresponding Prismarine `vector-indices` branch. No standalone version floor; coordinate at publish time. |
+
 ## Architectural Approaches Evaluated
 
-_(Phase 3 — to be completed after the questions above are answered.)_
+All approaches share the same skeleton (the only realistic CloudFormation target is the
+native `AWS::DynamoDB::Table` `VectorIndexes` property). They differ in **where the
+attribute-injection and IAM cross-referencing logic lives** — in the Jinja template vs. in
+Python preprocessing (`load.py`). This is the real design axis, because EasySAM's philosophy
+is "plain dict in, Jinja out," and the vector feature needs two derived facts the raw
+Prismarine block does not contain: (1) the `AttributeDefinitions` entries for `hash`/`filters`,
+and (2) which functions reference a vector-indexed table.
+
+### Approach A: Template-centric (all logic in `template.j2`)
+
+- **Concept:** Add `vectorindices` to the schema as-is. Do everything else in Jinja: render
+  `VectorIndexes` from `table.vectorindices`; in the `AttributeDefinitions` loop, additionally
+  emit `hash`/`filters` names (deduped against existing attributes via a Jinja `namespace`);
+  in the function `Policies:` loop, cross-reference `tables.items()` to find vector-indexed
+  tables the function lists in `function.tables` and emit a `SearchVectors` inline statement.
+- **Component Changes:** `schemas.json` + `local_schemas.json` (`vectorindices` property +
+  `vector_index_schema`); `template.j2` (VectorIndexes block, AttributeDefinitions dedup,
+  SearchVectors policy); new `example/` app; `tests/test_vectorindices.py`; docs.
+- **Dependencies Introduced:** None.
+
+### Approach B: Preprocess-centric (derive in `load.py`, thin template)
+
+- **Concept:** Keep Jinja dumb. In `load.py` preprocessing, after tables are assembled
+  (covering both the Prismarine path and literal `tables:`), (1) merge each vector index's
+  `hash`/`filters` into the table's `attributes` list as `{name, type: 'S'}` when absent, so
+  the existing `AttributeDefinitions` loop renders them with zero template change; and (2)
+  compute a per-function derived list (e.g. `function._vector_access = [{table, index}, ...]`)
+  by cross-referencing `function.tables` against vector-indexed tables. The template then only
+  adds a straightforward `VectorIndexes` block and a simple `SearchVectors` loop over the
+  precomputed list.
+- **Component Changes:** `schemas.json` + `local_schemas.json`; `load.py` (new
+  `process_default_vectorindices` / attribute-merge + function-access derivation step wired
+  into `preprocess_defaults`); `template.j2` (VectorIndexes block + simple SearchVectors loop);
+  new `example/` app; tests (both `load`-level unit tests and end-to-end generation); docs.
+- **Dependencies Introduced:** None.
+
+### Approach C: Hybrid — attributes in preprocessing, IAM + VectorIndexes in template
+
+- **Concept:** Do the one genuinely awkward-in-Jinja thing (injecting `AttributeDefinitions`
+  entries without duplicates, respecting the existing `attributes` list) in `load.py`, where
+  Python set logic is natural and testable. Leave the two things that are natural in Jinja —
+  rendering the `VectorIndexes` block and the `SearchVectors` policy cross-reference (the
+  template already does exactly this kind of `tables.items()` cross-reference for stream
+  triggers) — in `template.j2`.
+- **Component Changes:** `schemas.json` + `local_schemas.json`; `load.py` (small, focused
+  attribute-merge preprocessing step with unit tests); `template.j2` (VectorIndexes block +
+  SearchVectors policy loop mirroring the stream-trigger precedent); new `example/` app;
+  tests; docs.
+- **Dependencies Introduced:** None.
 
 ## Structured Comparison & Methodology
 
-_(Phase 3.)_
+### SWOT Matrix
+
+| Approach | Strengths | Weaknesses | Opportunities | Threats/Risks |
+|---|---|---|---|---|
+| **A: Template-centric** | One file to change; no new Python path; matches "dict in, Jinja out" purity | AttributeDefinitions dedup in Jinja is fiddly (`namespace` + nested loops), hard to unit-test, easy to break byte-identical output; whitespace risk | Keeps load.py untouched | Dedup bugs surface only in rendered YAML; low testability of the trickiest logic |
+| **B: Preprocess-centric** | Highly testable (pure-dict unit tests at load level); template stays trivial; reuses existing `attributes` rendering untouched | Mutating `attributes` in preprocessing blurs the Prismarine contract (EasySAM now edits the table dict); two-place reasoning; slightly more code | Establishes a clean pattern for future derived table facts | Mutating shared table dict could interact with other preprocessing/sorting; must preserve byte-identical output for non-vector tables |
+| **C: Hybrid** | Python handles the one hard thing (attribute dedup) with real unit tests; IAM cross-ref stays in Jinja where an identical precedent (stream trigger) already exists; minimal, legible template diff | Logic in two places (but each where it's most natural) | Mirrors existing EasySAM idioms on both sides; easiest to review against precedent | Must still guard non-vector output byte-identically (shared by all approaches) |
 
 ## Recommendation
 
-_(Phase 4.)_
+**Adopt Approach C (Hybrid).**
+
+The decisive factors:
+
+1. **Attribute injection belongs in Python.** CloudFormation requires every `SearchSchema`
+   attribute to also be in `AttributeDefinitions`, deduplicated against the table's existing
+   key/GSI attributes. Expressing "add these names if not already present" in Jinja needs a
+   `namespace` accumulator and nested loops that are brittle and nearly untestable; the same
+   logic in `load.py` is a few lines of set arithmetic with direct unit tests. This is exactly
+   the kind of derived fact preprocessing exists for (`process_default_tables` already
+   normalizes triggers there).
+
+2. **IAM cross-referencing belongs in the template.** EasySAM *already* emits a per-function
+   DynamoDB inline policy by iterating `tables.items()` and matching `table.trigger.function ==
+   function_name` (the stream-trigger block). The `SearchVectors` permission is the same shape:
+   iterate tables, keep those with `vectorindices` that the function lists in `function.tables`,
+   emit a statement scoped to `!Sub "${TableLogicalId.Arn}/index/<name>"`. Reusing an existing,
+   reviewed idiom minimizes risk and reviewer surprise, and keeps the derived-state surface in
+   `load.py` small.
+
+3. **The `VectorIndexes` block itself is pure, guarded rendering** — trivially Jinja, fully
+   guarded by `{% if table.vectorindices %}`, preserving byte-identical output for every
+   existing table.
+
+Approach A loses on testability of its hardest part; Approach B is clean but pushes the
+easy-and-precedented IAM logic into Python for no benefit and does *all* attribute mutation in
+preprocessing. C splits along the natural grain.
 
 ### Key Risks & Mitigations
 
-_(Phase 4.)_
+| Risk | Mitigation |
+|------|------------|
+| **Byte-identical regression** for non-vector tables (Jinja whitespace + `write_result` blank-line strip). | Fully guard every new block with `{% if table.vectorindices %}` / `{% if ... %}`; add a test asserting an existing example's `template.yml` is unchanged, and assert on parsed-dict equality for a no-vector table. |
+| **`AttributeDefinitions` duplication** (a `hash`/`filter` attr that is already a table/GSI key) → CloudFormation rejects duplicate AttributeName. | Dedup in `load.py` against the union of existing table + GSI attribute names before injecting; unit-test the dedup (attr already present → not re-added; type preserved). |
+| **Wrong attribute type** (numeric filter emitted as `S`). | Per Q2(a), default `S` and document the string-only limitation; leave a seam to extend the contract later (Prismarine could emit types). |
+| **CloudFormation "one index per stack operation"** → deploy fails when adding a GSI and a vector index together, or two indexes at once. | Per Q3, document the caveat prominently in README/CLI reference; note it's a CloudFormation/service limit, not EasySAM. |
+| **Vacuous/partial Prismarine contract** (a `vectorindices` entry missing `attribute`/`dimensions`). | Schema `required: [name, attribute, dimensions, distance]` on `vector_index_schema` catches it at validation time with a clear error. |
+| **Stale Prismarine branch coupling** (Q6: develop against a branch, publish together). | Pin the dev dependency to the Prismarine `vector-indices` branch during development; add a CHANGELOG entry noting the coordinated release; verify the end-to-end example regenerates against that branch. |
+| **SAM CLI / CloudFormation not recognizing `VectorIndexes`** at validate time. | Verify the installed `aws-sam-cli` accepts the property during the example test (generation + optional `sam validate`); document a minimum toolchain if a problem surfaces. |
+| **IAM ARN construction wrong** (index sub-resource ARN). | Scope via `!Sub "${{TableLogicalId}.Arn}/index/<name>"`; validate the rendered ARN shape in the example test (parse `template.yml`, assert the `Resource` string/intrinsic). |
+
+### Phased Execution Plan
+
+1. **Schema** — Add `vector_index_schema` (`name`, `attribute`, `dimensions`, `distance`
+   required; optional `hash` string, `filters` string array) and a `vectorindices` array
+   property to `tables_schema` in **both** `schemas.json` and `local_schemas.json`. Unit-test
+   accept/reject via `validate(...)` (mirror `test_fifoqueue.py`).
+2. **Preprocessing (attribute injection)** — Add a focused step in `load.py` (wired into
+   `preprocess_defaults`) that, for each table with `vectorindices`, merges each `hash` and
+   each `filters` entry into the table's `attributes` as `{name, type: 'S'}` when not already
+   present (dedup against existing attribute names). Pure-dict unit tests.
+3. **Template (provisioning)** — In `template.j2`, after the GSI block, add
+   `{% if table.vectorindices %}VectorIndexes: ...{% endif %}` mapping lowercase→CFN casing:
+   `name`→`IndexName`, `attribute`→`VectorAttribute.AttributeName`, `dimensions`→`Dimensions`,
+   `distance`→`DistanceFunction`, `Projection: ProjectionType: ALL`, and a `SearchSchema` built
+   from `hash` (`HASH`) + each `filters` (`INLINE_FILTER`).
+4. **Template (IAM)** — In the function `Policies:` loop, after the `DynamoDBCrudPolicy` block,
+   add a `SearchVectors` inline statement by cross-referencing `tables.items()` (mirroring the
+   stream-trigger block): for each vector-indexed table the function references, emit
+   `Action: dynamodb:SearchVectors`, `Resource: !Sub "${{ "{" }}{{ prefix }}{{ table_name }}.Arn}/index/<index_name>"`.
+5. **Example** — Add `example/vectorindices/` (model on `example/aoss/`): a vector-indexed
+   table (ideally via the Prismarine `vector-indices` branch, per Q6, or a literal `tables:`
+   block as a fallback) plus a single function referencing it, demonstrating end-to-end vector
+   index provisioning + `SearchVectors` access.
+6. **Tests** — `tests/test_vectorindices.py`: end-to-end `generate(...)` on the example,
+   asserting the parsed `VectorIndexes`, the injected `AttributeDefinitions`, the
+   `SearchVectors` policy + ARN shape, and a byte-identical/no-vector-key guard for a
+   non-vector table. Run `uv run pytest` + `ruff`.
+7. **Docs** — README + `docs/CLI_REFERENCE.md`: the `vectorindices` block, the on-demand
+   requirement, the string-only filter-type limitation (Q2), the one-index-per-stack-operation
+   caveat (Q3), and the coordinated Prismarine release note (Q6). CHANGELOG entry.
 
 ### Summary Table
 
-_(Phase 4.)_
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| CloudFormation target | Native `AWS::DynamoDB::Table` `VectorIndexes` | Official, GA; no GSI hack needed |
+| Architecture | Hybrid (C): attribute injection in `load.py`, VectorIndexes + IAM in `template.j2` | Each piece lives where it's most natural and testable; IAM reuses the stream-trigger precedent |
+| Key field mapping | Consume Prismarine lowercase keys, map to CFN casing in template | Q1; EasySAM owns the CFN vocabulary |
+| `AttributeDefinitions` for schema attrs | Inject, dedup, default `AttributeType: S` | Q2(a); CFN requires them (overturns Prismarine E5 at the CFN layer) |
+| Projection | Hardcode `ProjectionType: ALL` | Q5; consistent with GSI behavior |
+| IAM | Emit `dynamodb:SearchVectors` on index ARN for referencing functions + ship a working example | Q4; scoped via `!Sub` over the table `.Arn` |
+| One-index-per-op limit | Document only | Q3; CloudFormation service limit, EasySAM can't see deployed state |
+| Release coordination | Track Prismarine `vector-indices` branch; publish together | Q6 |
+| Billing | Rely on existing hardcoded `PAY_PER_REQUEST` | Vector indexes require on-demand; invariant already holds |
