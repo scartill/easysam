@@ -45,21 +45,9 @@ def isolated_import_context(project_root: Path, lambda_dir: Path):
     lambda_dir_abs = str(lambda_dir.resolve())
 
     # Remove stale local modules (including common.*) before import
-    # This handles cross-test pollution where common.utils from another project is cached
     for name in list(sys.modules.keys()):
-        if name.startswith('common'):
-            mod = sys.modules[name]
-            if mod is None:
-                del sys.modules[name]
-                continue
-            mod_file = getattr(mod, '__file__', None)
-            if mod_file:
-                mod_file_resolved = str(Path(mod_file).resolve())
-                if mod_file_resolved.startswith(project_root_abs):
-                    del sys.modules[name]
-                else:
-                    # Stale common module from a different project — remove it
-                    del sys.modules[name]
+        if name == 'common' or name.startswith('common.'):
+            del sys.modules[name]
 
     original_path = sys.path.copy()
     sys.path = [lambda_dir_abs, project_root_abs] + sys.path
