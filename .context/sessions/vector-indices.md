@@ -13,56 +13,79 @@
 
 ## Environment
 - Shell: PowerShell on Windows (use `;` to chain, not `&&`).
-- Build/generate example: `uv run easysam --environment vecdev --target-region us-east-1 generate "example\vectorindices\"`
-- Test (feature): `uv run pytest tests/test_vectorindices.py -q`  (30 tests, all pass)
+- Generate hermetic example: `uv run easysam --environment vecdev --target-region us-east-1 generate "example\vectorindices\"`
+- Generate reacher example: `uv run easysam --environment reacherdev --target-region us-east-1 generate "example\reacher\"`
+- Test (feature): `uv run pytest tests/test_vectorindices.py -q`  (33 tests, all pass)
 - Test (full suite): `uv run pytest -q`
+- Examples harness: `uv run python scripts/test_examples_generation.py`  (22/22 pass)
 - Lint/format: `uv run ruff check src/easysam/load.py tests/test_vectorindices.py` ; `uv run ruff format <files>`
-- Branch: `vector-indices` (PR #41 open). Nothing pushed by the agent.
+- EasySAM branch: `vector-indices` — **pushed** to origin (PR #41). Prismarine source pinned
+  to its `vector-indices` git branch via `[tool.uv.sources]`.
+- Prismarine checkout: `c:\Users\boris\projects\var\prismarine` on branch `vector-indices`,
+  **pushed** (HEAD `f957948`). After editing Prismarine, rebuild the vendored lambda wheel:
+  `uv run python -m pip wheel "prismarine[vectors] @ git+https://github.com/scartill/prismarine.git@vector-indices" --no-deps -w example/reacher/thirdparty/wheels`
+- AWS: profile `easysam-a` (account 849099337443), region us-east-1. Live stacks still up:
+  `vecidxtest` (hermetic example) and `reacherdev` (reacher). Delete when done:
+  `uv run easysam --aws-profile easysam-a --environment <env> delete --await`
+- Lambda invoke pattern: `aws lambda invoke --function-name reacher-reacherdev --cli-binary-format raw-in-base64-out --payload file://<json> --profile easysam-a --region us-east-1 <out.json>`
 - Orca orchestration run: `run_1f8b875c9c6b` — all Antigravity workers settled/released.
 
 ## Key Changes
+### EasySAM (branch vector-indices, pushed)
 - `src/easysam/schemas.json` + `src/easysam/local_schemas.json`: new `vector_index_schema`
   (name pattern/len, dimensions 1–4096, distance enum, `dependencies: {filters: [hash]}`,
   `filters` `maxItems:18`+`uniqueItems`) and a `vectorindices` array (`maxItems:5`) on
   `tables_schema`.
 - `src/easysam/load.py`: `process_default_vectorindices` (wired into `preprocess_defaults`) —
-  injects `hash`/`filters` into `table['attributes']` (default `S`), dedup strictly against
-  `table.attributes`, cross-index dedup; defensive against null/empty tables/attributes;
-  records errors for duplicate index names and hash-in-filters collisions.
-- `src/easysam/template.j2`: renders `VectorIndexes` in the Tables section (SearchSchema only
-  when `hash` present, HASH before INLINE_FILTER) and an index-scoped
-  `dynamodb:SearchVectors` inline policy in the function Policies block
-  (`!Sub "${<Prefix><Table>.Arn}/index/<name>"`, guarded by `{% if tables %}` and
-  `function.tables and ...`).
-- `tests/test_vectorindices.py`: 30 tests (schema accept/reject, preprocess units,
-  end-to-end VectorIndexes/AttributeDefinitions/IAM, null-guard, byte-identical guard,
-  validate_local parity, flat index, duplicate/collision rejection).
-- `example/vectorindices/`: hermetic imported-backend fixture (vector-indexed `Product`
-  table + `searcher` and `plain` functions).
-- Docs: `README.md`, `docs/CLI_REFERENCE.md`, `CHANGELOG.md`, `example/README.md`.
-- SDD artifacts: `docs/brainstorms/VECTOR_INDICES.md`, `docs/seed/vector-indices.md`,
-  `docs/plans/vector-indices.questions.md`, `docs/specs/vector-indices.md` (status:
-  finalized), `docs/tasks/vector-indices/` (7 tasks + summary, all done),
-  `docs/critiques/vector-indices.md` + `-tasks.md`, `docs/codereviews/vector-indices-review.md`,
-  `docs/feedback/2026-11-07-vector-indices.md`.
-- Commits on branch (not pushed): `ac43149` plan spec, `acf5c49` spec critique,
-  `bbab334` split tasks, `12bf545` task-level critique, `2a7f60e` implement,
-  `65d1dcf` code review, `2f1e87d` finalize.
+  injects `hash`/`filters` into `table['attributes']` (default `S`), dedup vs `table.attributes`,
+  cross-index dedup; defensive vs null tables/attributes; records duplicate-index-name and
+  hash-in-filters errors.
+- `src/easysam/template.j2`: renders `VectorIndexes` (SearchSchema only when `hash`, HASH
+  before INLINE_FILTER) + index-scoped `dynamodb:SearchVectors` policy
+  (`!Sub "${<Prefix><Table>.Arn}/index/<name>"`, guarded by `{% if tables %}`).
+- `tests/test_vectorindices.py`: 33 tests (incl. imported-local path, flat index, dedup,
+  collision rejection, null guard, byte-identical guard).
+- `example/vectorindices/`: hermetic fixture (central `Product` + imported `Review` tables,
+  `searcher`/`reviewsearcher`/`plain` functions).
+- `example/reacher/`: **full Prismarine + Bedrock example** — a `@c.vector_index` Product
+  model, a lambda that embeds via Bedrock Titan (`services: - bedrock`) and indexes/searches
+  through the generated `ProductModel.ByEmbedding.search()`. Vendored prismarine wheel in
+  `thirdparty/wheels/` (SAM can't resolve git VCS URLs), tracked via scoped `.gitignore`.
+- `pyproject.toml`: `[tool.uv.sources]` pins prismarine to the git branch; `boto3>=1.43.89`;
+  `numpy` dev dep.
+- Docs + SDD artifacts: brainstorm, seed, questionnaire, spec (finalized), 7 tasks + summary,
+  2 critiques, code review, feedback.
+- Key EasySAM commits: `ac43149` plan, `acf5c49` spec critique, `bbab334` split,
+  `12bf545` task critique, `2a7f60e` implement, `65d1dcf` code review, `2f1e87d` finalize,
+  `c5825ba` imported-path test, `24964ad` reacher example, `80ebe15` reacher finalize.
+
+### Prismarine (branch vector-indices, pushed — THREE runtime fixes found via live testing)
+- `runtime/dynamo_vectors.py` `_format_vector`: emit plain decimal (`Decimal(repr(x))`,
+  `format 'f'`) not `str(x)` — scientific notation was rejected by SearchVectors.
+- `runtime/dynamo_access.py` `get_client()`: return a standalone low-level dynamodb client,
+  NOT `resource.meta.client` (whose `copy_dynamodb_params` handler corrupted the SearchVector).
+- `runtime/dynamo_vectors.py` `_search_vectors`: resolve the PHYSICAL table name via
+  `get_table(table).name` (like CRUD) instead of the logical model name.
+- Prismarine commits: `dcbc24e` decimal format, `f957948` get_client + physical-name.
 
 ## Blockers / Open Questions
-- None blocking. Two pre-existing, unrelated full-suite failures (confirmed on baseline):
-  `example/prismapydantic/tests/test_item_crud.py` (boto3 `NoRegionError`, needs AWS creds)
-  and `scripts/test_examples_generation.py` (harness `sys.exit(0)` → pytest `SystemExit`;
-  all 21 examples PASS, including `vectorindices`).
-- Deferred items recorded in `docs/feedback/2026-11-07-vector-indices.md` (notably D5:
-  Prismarine→EasySAM joint-release integration check; D2: embedding-attribute-disjoint
-  validation).
-- Release coordination: EasySAM + Prismarine ship together; this branch tracks the Prismarine
-  `vector-indices` branch during development (seed Q6).
+- None blocking. Both branches pushed; vector search validated live (Bedrock → Prismarine
+  search → correct semantic ranking on two queries in the deployed reacher lambda).
+- Two pre-existing, unrelated EasySAM full-suite failures (confirmed on baseline):
+  `example/prismapydantic/.../test_item_crud.py` (boto3 NoRegionError, needs creds) and
+  `scripts/test_examples_generation.py` (harness `sys.exit(0)` → pytest SystemExit; all
+  examples PASS).
+- Deferred items in `docs/feedback/2026-11-07-vector-indices.md` (D5 Prismarine→EasySAM
+  joint-release integration check; D2 embedding-attribute-disjoint validation).
+- Release/versioning deferred: both repos stay on `vector-indices` branches for external
+  testing; releases decided later (user to test more first).
 
 ## Immediate Next Step
-- User review of branch `vector-indices` / PR #41, then push when satisfied:
-  `git push -u origin vector-indices`
+- User performs external testing against the live `reacherdev` / `vecidxtest` stacks, then
+  decides on Prismarine + EasySAM releases/versions.
+- When testing is done, tear down the stacks:
+  `uv run easysam --aws-profile easysam-a --environment reacherdev delete --await` ;
+  `uv run easysam --aws-profile easysam-a --environment vecidxtest delete --await`
 
 ## Log
 - 2026-11-07 20:30: Session captured from ongoing CLI session. Autoflow pipeline for the
@@ -70,3 +93,13 @@
   task-level critique → implement → code review → finalize), 7 commits on branch
   `vector-indices`, 30 feature tests passing, product guidance posted to PR #41, all Orca
   workers settled.
+- 2026-11-07 22:18: Added imported-local-path test coverage (33 tests). Built the full
+  `example/reacher/` Prismarine+Bedrock example (vector index declared via `@c.vector_index`,
+  lambda embeds via Bedrock Titan and indexes/searches through the generated client).
+  Deployed both `vecidxtest` and `reacherdev` to `easysam-a` and validated live: index +
+  vector search work, semantic ranking correct. Found & fixed THREE Prismarine runtime bugs
+  (scientific-notation vector formatting; resource-bound get_client corrupting the vector;
+  logical-vs-physical table name) with regression tests — Prismarine suite 57 pass. Pinned
+  EasySAM to the Prismarine git branch, vendored the fixed wheel for the lambda layer.
+  **Pushed both branches** (easysam `80ebe15`, prismarine `f957948`). Releases/versions
+  deferred pending further external testing by the user.
