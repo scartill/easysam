@@ -11,7 +11,7 @@ status: not-started
 
 - [ ] **Completion**
 - **Source spec**: `docs/specs/vector-indices.md`
-- **Depends on**: `task-01-schema.md`
+- **Depends on**: `task-01-schema.md`, `task-03-template-vectorindexes.md`
 - **Blocks**: `task-05-example-app.md`, `task-06-tests.md`
 - **Parallelism**: `Same file as task-03 (template.j2) — sequence after task-03`
 
@@ -29,22 +29,25 @@ scoped to each vector index ARN (R4), without crashing when a function has no `t
 ## Implementation Guidance
 - **Files to create or modify**:
   - `src/easysam/template.j2`, function `Policies:` block: **after** the
-    `{% for table in function.tables %}- DynamoDBCrudPolicy:...{% endfor %}` loop, add:
+    `{% for table in function.tables %}- DynamoDBCrudPolicy:...{% endfor %}` loop, add the
+    snippet below. Match the surrounding indentation: `Policies:` is at 6 spaces, so policy
+    entries sit at **8 spaces**, `Statement:` at 10, `- Effect:` at 12, `Action:` at 14, and
+    the action item at 16 (Critique T1):
     ```jinja
-    {% if tables is defined %}
-    {% for table_name, table in tables.items() %}
-    {% if function.tables and table.vectorindices and table_name in function.tables %}
-    {% for vindex in table.vectorindices %}
-    - Version: "2012-10-17"
-      Statement:
-        - Effect: Allow
-          Action:
-            - dynamodb:SearchVectors
-          Resource: !Sub "${{ '{' }}{{ prefix }}{{ table_name }}.Arn}/index/{{ vindex.name }}"
-    {% endfor %}
-    {% endif %}
-    {% endfor %}
-    {% endif %}
+            {% if tables is defined %}
+            {% for table_name, table in tables.items() %}
+            {% if function.tables and table.vectorindices and table_name in function.tables %}
+            {% for vindex in table.vectorindices %}
+            - Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:SearchVectors
+                  Resource: !Sub "${{ '{' }}{{ prefix }}{{ table_name }}.Arn}/index/{{ vindex.name }}"
+            {% endfor %}
+            {% endif %}
+            {% endfor %}
+            {% endif %}
     ```
 - **Data/API/UI behaviour**: the `{% if function.tables and ... %}` guard is MANDATORY —
   functions need not declare `tables`, and `tables: null` is a common YAML idiom; an unguarded

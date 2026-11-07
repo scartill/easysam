@@ -20,6 +20,14 @@ Also folded E4's schema bounds (name pattern/length, `maxItems` on `vectorindice
 💡 Recommendations (P1, E5, E6, P2, E7) and 🤔 Questions (P3) are retained in the critique
 report for human review._
 
+_Pass-2 task-level critique (`docs/critiques/vector-indices-tasks.md`) applied: T1 (correct
+Jinja snippet indentation under `Properties:`/`Policies:` in §3/§4 and the task files), T2
+(example uses the imported-backend layout, not an invalid central `functions:` block), T3
+(example never uses schema-invalid `tables: null`; the null-guard is a template unit test on a
+synthetic dict). Also folded T7 (test fixtures include required `prefix`/`attributes`), T8
+(task-04 depends on task-03), T9 (example `.gitignore`). 💡 T4/T5/T6/T10 retained in the
+task-level report for human review._
+
 ## Problem Statement
 
 Prismarine (PR #4, "Vector Indices") emits a `vectorindices` block into the EasySAM table
@@ -204,7 +212,9 @@ precedent.
    and dedup-safe; no change when `vectorindices` is absent.
 
 3. **Template — `VectorIndexes` (`template.j2`).** After the GSI block and before
-   `BillingMode`, add:
+   `BillingMode`, add a `{% if table.vectorindices %}` block. It must match the surrounding
+   indentation in `template.j2` (table properties at 6 spaces under `Properties:`, list items
+   at 8; Critique T1). Shape (indentation shown relative; see `task-03` for the exact spacing):
 
    ```jinja
    {% if table.vectorindices %}
@@ -234,10 +244,10 @@ precedent.
 
 4. **Template — `SearchVectors` IAM (`template.j2`).** In the function `Policies:` block,
    after the `DynamoDBCrudPolicy` loop, cross-reference the global `tables` map (mirroring the
-   stream-trigger block) and, for each table the function references that has `vectorindices`,
-   emit one statement per vector index. The membership check is **guarded against a missing or
-   null `function.tables`** (functions need not declare `tables`, and `tables: null` is a
-   common YAML idiom — an unguarded `in` raises `TypeError` in Jinja; Critique E2):
+   stream-trigger block). Match the `Policies:` indentation (policy entries at 8 spaces;
+   Critique T1). The membership check is **guarded against a missing or null `function.tables`**
+   (functions need not declare `tables`, and `tables: null` is a common YAML idiom — an
+   unguarded `in` raises `TypeError` in Jinja; Critique E2):
 
    ```jinja
    {% if tables is defined %}
@@ -255,11 +265,17 @@ precedent.
    {% endfor %}
    {% endif %}
    ```
-   (The `${{ '{' }}...}` escaping yields a literal `!Sub "${Prefix<Table>.Arn}/index/<name>"`.)
+   (The `${{ '{' }}...}` escaping yields a literal `!Sub "${Prefix<Table>.Arn}/index/<name>"`.
+   See `task-04` for exact indentation.)
 
-5. **Example `example/vectorindices/`.** Self-contained (hermetic) literal `tables:` block
-   with one vector-indexed table plus a function referencing it, modeled on `example/aoss/`
-   structure. Generates without a Prismarine dependency so EasySAM's own tests stay hermetic.
+5. **Example `example/vectorindices/`.** Self-contained (hermetic) **imported-backend**
+   layout matching `example/fifoqueue/`: `resources.yaml` with `import: [backend]` and a
+   literal `tables:` block carrying the vector-indexed table, plus
+   `backend/function/searcher/easysam.yaml` (`lambda.resources.tables: [Product]`) and a
+   second `plain` function with `resources: {}` (no tables). Generates without a Prismarine
+   dependency. Do NOT use a central `functions:` block without `uri`, and NEVER `tables: null`
+   (both are schema-invalid and would fail `scripts/test_examples_generation.py`; Critique
+   T2, T3). See `task-05` for exact files.
 
 6. **Docs.** README + `docs/CLI_REFERENCE.md`: the `vectorindices` block, on-demand
    requirement, string-only filter-type limitation, one-index-per-stack-operation caveat, and

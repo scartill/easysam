@@ -25,12 +25,15 @@ Provide a self-contained (hermetic) example app that exercises vector-index prov
 - **Out of scope**: Prismarine-sourced generation (verified out of band per seed Q6).
 
 ## Implementation Guidance
-- **Files to create or modify** (model structure on `example/aoss/` and `example/myapp/`):
-  - `example/vectorindices/resources.yaml`: top-level `prefix:` (e.g. `VecExample`) plus a
-    literal `tables:` block and a `functions:` block (central form, like
-    `example/appwitherrors/resources.yaml`). Define one vector-indexed table, e.g.:
+- **Files to create or modify** (use the **imported-backend layout**, matching
+  `example/fifoqueue/` — NOT a central `functions:` block, and NOT `example/appwitherrors`,
+  which is an intentional-failure fixture; Critique T2):
+  - `example/vectorindices/resources.yaml`: top-level `prefix:`, `import: [backend]`, and a
+    literal `tables:` block with one vector-indexed table:
     ```yaml
     prefix: VecExample
+    import:
+      - backend
     tables:
       Product:
         attributes:
@@ -44,24 +47,54 @@ Provide a self-contained (hermetic) example app that exercises vector-index prov
             hash: Category
             filters:
               - Brand
-    functions:
-      searcher:
-        resources:
-          tables:
-            - Product
     ```
-    Include a second function that references no vector table (or declares no `tables`) to
-    prove the negative/guard cases (Critique E2, R4) — e.g. `plain:` with `resources: {}` or
-    `tables: null`.
-  - Minimal Lambda source so generation succeeds — mirror `example/myapp/backend/function/
-    myfunction/` layout (an `index.py`/handler + any `easysam.yaml`/`uri` EasySAM expects).
-    Check how `example/appwitherrors` or `example/myapp` satisfy the `uri`/handler requirement
-    and replicate the lightest working form.
+  - `example/vectorindices/backend/function/searcher/easysam.yaml` — a function that
+    references the vector table (the imported form flattens `lambda.resources` into
+    `functions['searcher']`, so `function.tables` is populated and both `DynamoDBCrudPolicy`
+    and `SearchVectors` are emitted; Critique T2):
+    ```yaml
+    lambda:
+      name: searcher
+      resources:
+        tables:
+          - Product
+    ```
+  - `example/vectorindices/backend/function/searcher/index.py`:
+    ```python
+    def handler(event, context):
+        return {'statusCode': 200, 'body': 'ok'}
+    ```
+  - `example/vectorindices/backend/function/plain/easysam.yaml` — a second function that
+    references **no** tables (proves the negative/guard case for R4/E2). Use `resources: {}`,
+    **NOT `tables: null`** — `schemas.json` declares `tables` as `type: array`, so `null`
+    fails validation and `scripts/test_examples_generation.py` would fail the whole suite
+    (Critique T3):
+    ```yaml
+    lambda:
+      name: plain
+      resources: {}
+    ```
+  - `example/vectorindices/backend/function/plain/index.py`:
+    ```python
+    def handler(event, context):
+        return {'statusCode': 200, 'body': 'ok'}
+    ```
+  - `example/vectorindices/.gitignore` (so local generation does not dirty the repo; matches
+    `example/fifoqueue/.gitignore`, Critique T9):
+    ```gitignore
+    build
+    template.yml
+    .aws-sam
+    ```
+  - The `tables: null` / missing-`tables` Jinja guard (E2) is exercised as a **template unit
+    test** on a synthetic dict in Task 6 (bypassing schema validation), not via an example
+    fixture (Critique T3).
 - **Data/API/UI behaviour**: must `generate(...)` cleanly with a deploy context like
   `{'environment': 'vecdev', 'target_region': 'us-east-1'}` (match the pattern in
   `tests/test_fifoqueue.py` / `tests/test_dynamottl.py`).
-- **Established patterns to follow**: `example/aoss/` (function + table + a search capability)
-  and `example/myapp/` (minimal function/table). Keep it as small as possible.
+- **Established patterns to follow**: `example/fifoqueue/` (imported-backend layout:
+  `resources.yaml` with `import: [backend]` + `backend/function/<name>/easysam.yaml`). Keep it
+  as small as possible. Do NOT model on `example/appwitherrors` (intentional-failure fixture).
 - **Constraints and non-goals**: no Prismarine import; no `thirdparty/` layer unless required.
   Self-contained so `uv run pytest` needs no external services.
 
@@ -76,6 +109,8 @@ Provide a self-contained (hermetic) example app that exercises vector-index prov
   `SearchVectors` policy; no errors.
 
 ## Handoff Notes
-The generated `example/vectorindices/template.yml` (and any `build/`) is a generation
-artifact; follow repo convention (other examples commit `template.yml`? check `.gitignore`
-and existing examples) when deciding what to commit.
+The generated `example/vectorindices/template.yml` (and `build/`, `.aws-sam/`) are generation
+artifacts ignored by the example's `.gitignore` (mirroring `example/fifoqueue/.gitignore`).
+`scripts/test_examples_generation.py` runs `easysam generate` across **every** `example/`
+subdir and fails CI if any (except `appwitherrors`) fails — so this fixture MUST validate and
+generate cleanly. Do not use `tables: null` anywhere in it (Critique T3).

@@ -29,29 +29,31 @@ Emit the native `AWS::DynamoDB::Table` `VectorIndexes` property for any table ca
 - **Files to create or modify**:
   - `src/easysam/template.j2`, `# Tables` section: insert a `VectorIndexes` block **after**
     the `{% if table.indices %}...{% endif %}` GSI block and **before** `BillingMode:
-    PAY_PER_REQUEST` (keeps billing/PITR/stream/ttl ordering intact). Exact Jinja:
+    PAY_PER_REQUEST` (keeps billing/PITR/stream/ttl ordering intact). Match the surrounding
+    indentation: under `Properties:` (4 spaces), table properties sit at **6 spaces** and
+    nested list items at **8 spaces** (Critique T1). Exact Jinja:
     ```jinja
-    {% if table.vectorindices %}
-    VectorIndexes:
-      {% for vindex in table.vectorindices %}
-      - IndexName: {{ vindex.name }}
-        Dimensions: {{ vindex.dimensions }}
-        DistanceFunction: {{ vindex.distance }}
-        VectorAttribute:
-          AttributeName: {{ vindex.attribute }}
-        Projection:
-          ProjectionType: ALL
-        {% if vindex.hash %}
-        SearchSchema:
-          - AttributeName: {{ vindex.hash }}
-            SearchSchemaElementType: HASH
-          {% for f in vindex.filters %}
-          - AttributeName: {{ f }}
-            SearchSchemaElementType: INLINE_FILTER
-          {% endfor %}
-        {% endif %}
-      {% endfor %}
-    {% endif %}
+          {% if table.vectorindices %}
+          VectorIndexes:
+            {% for vindex in table.vectorindices %}
+            - IndexName: {{ vindex.name }}
+              Dimensions: {{ vindex.dimensions }}
+              DistanceFunction: {{ vindex.distance }}
+              VectorAttribute:
+                AttributeName: {{ vindex.attribute }}
+              Projection:
+                ProjectionType: ALL
+              {% if vindex.hash %}
+              SearchSchema:
+                - AttributeName: {{ vindex.hash }}
+                  SearchSchemaElementType: HASH
+                {% for f in vindex.filters %}
+                - AttributeName: {{ f }}
+                  SearchSchemaElementType: INLINE_FILTER
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
     ```
 - **Data/API/UI behaviour**: `SearchSchema` guarded by `{% if vindex.hash %}` only — never
   rendered for `filters` alone (Critique E1; also schema-blocked by Task 1). HASH precedes

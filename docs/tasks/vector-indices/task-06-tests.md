@@ -33,7 +33,10 @@ preprocessing unit tests, and end-to-end generation assertions.
     `not errors`, `yaml.safe_load` the `template.yml`, and assert on the parsed dict.
 - **Automated tests** (cases):
   1. **Schema accept** (R1): `validate(Path('.'), <data with valid vectorindices>, errors)` →
-     no "Invalid resources data" errors.
+     no "Invalid resources data" errors. The fixture dict MUST include the schema-required
+     root `prefix` and a table `attributes` list (e.g. `{'prefix': 'App', 'tables':
+     {'Product': {'attributes': [{'name': 'ProductId', 'hash': True}], 'vectorindices':
+     [...]}}}`) or unrelated "required" errors mask the result (Critique T7).
   2. **Schema reject** (R1, E1, E4): separate cases for `filters` without `hash`; bad
      `distance`; `dimensions` 0 and 5000; `name` with a space and `name` length 2; 6 vector
      indexes (`maxItems`). Each yields a schema error.
@@ -51,8 +54,13 @@ preprocessing unit tests, and end-to-end generation assertions.
   6. **End-to-end IAM** (R4): the `searcher` function role `Policies` contains a statement with
      `Action == ['dynamodb:SearchVectors']` and `Resource` resolving (via the `!Sub`
      constructor) to a dict `{'Fn::Sub': '${VecExampleProduct.Arn}/index/by-embedding'}`.
-  7. **IAM negative / E2**: the second function (no `tables` / `tables: null`) generates with
-     no errors and has NO `SearchVectors` statement.
+  7. **IAM negative / E2**: the second function (`plain`, `resources: {}` → no `tables`)
+     generates with no errors and has NO `SearchVectors` statement. Additionally, verify the
+     Jinja null-guard directly with a **template unit test on a synthetic dict** where a
+     function has `tables: None` alongside a vector table (render via the Jinja environment,
+     bypassing schema validation — `tables: null` is schema-invalid so it must NOT appear in
+     any `example/` fixture; Critique T3, E2): rendering must not raise and must emit no
+     `SearchVectors` statement.
   8. **Byte-identical guard** (R5): generate an existing non-vector example (e.g.
      `example/dynamottl` or `example/myapp`) and assert its table has NO `VectorIndexes` key and
      its functions have no `SearchVectors` statement. (Dict-level guard; a stricter string
