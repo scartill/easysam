@@ -19,6 +19,7 @@ import json
 import os
 
 import boto3
+import numpy as np
 
 from common.catalog.db import ProductModel
 from common.catalog.models import Product
@@ -38,14 +39,20 @@ def _bedrock_client():
     return _bedrock
 
 
-def embed(text: str) -> list[float]:
-    """Return a 1024-dim embedding for ``text`` using Amazon Titan via Bedrock."""
+def embed(text: str) -> np.ndarray:
+    """Return a 1024-dim fp32 embedding for ``text`` using Amazon Titan via Bedrock.
+
+    DynamoDB vector search requires 32-bit floats, but Bedrock returns 64-bit
+    Python floats. We cast to ``np.float32`` so the values round-trip as fp32
+    (Prismarine's vector helper calls ``.tolist()`` on the array). This is why
+    the ``[vectors]`` extra / numpy is a runtime dependency.
+    """
     response = _bedrock_client().invoke_model(
         modelId=EMBED_MODEL_ID,
         body=json.dumps({'inputText': text, 'dimensions': 1024, 'normalize': True}),
     )
     payload = json.loads(response['body'].read())
-    return payload['embedding']
+    return np.asarray(payload['embedding'], dtype=np.float32)
 
 
 def do_index(event: dict) -> dict:
@@ -55,14 +62,16 @@ def do_index(event: dict) -> dict:
         'Category': event['category'],
         'Brand': event['brand'],
         'Description': event['description'],
-        'Embedding': vector,
+        # Store as plain Python floats (DynamoDB item attribute); the fp32 cast
+        # matters for the SearchVectors *query* vector, handled in do_search.
+        'Embedding': vector.tolist(),
     }
     ProductModel.put(product)
     return {'indexed': event['product_id']}
 
 
 def do_search(event: dict) -> dict:
-    query_vector = embed(event['text'])
+    query_vector = embed(event['text'])  # np.float32 array -> fp32 SearchVector
     results = ProductModel.ByEmbedding.search(
         vector=query_vector,
         category=event['category'],          # HASH — required by the search schema
