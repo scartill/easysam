@@ -2,7 +2,7 @@
 generated-by: "Plan Spec"
 source: docs/seed/vector-indices.md
 generated-at: 2026-11-07T13:05:00+02:00
-status: draft
+status: critiqued
 critiqued-revision:
 ---
 
@@ -11,6 +11,14 @@ critiqued-revision:
 _Derived from `docs/seed/vector-indices.md` (brainstorm recommended Approach C, hybrid).
 Planning decisions in `docs/plans/vector-indices.questions.md` (all defaults applied,
 non-interactive Autoflow run)._
+
+_Pass-1 critique (`docs/critiques/vector-indices.md`) applied: E1 (schema `dependencies`
+forbidding `filters` without `hash`; `SearchSchema` rendered only when `hash` present),
+E2 (guard `function.tables` null/undefined in the IAM membership check), E3 (deduplicate
+injected attributes strictly against `table['attributes']`, updating the set across indices).
+Also folded E4's schema bounds (name pattern/length, `maxItems` on `vectorindices`/`filters`).
+💡 Recommendations (P1, E5, E6, P2, E7) and 🤔 Questions (P3) are retained in the critique
+report for human review._
 
 ## Problem Statement
 
@@ -33,22 +41,29 @@ User-observable acceptance criteria:
   imported `easysam.yaml`, or a Prismarine-synthesized table) may carry a `vectorindices`
   array. Each entry requires `name`, `attribute`, `dimensions`, `distance`; optional `hash`
   (string) and `filters` (array of strings). `distance` ∈ {`COSINE`, `EUCLIDEAN`,
-  `DOT_PRODUCT`}; `dimensions` is an integer in `[1, 4096]`. The key is accepted in **both**
+  `DOT_PRODUCT`}; `dimensions` is an integer in `[1, 4096]`. **`filters` requires `hash`**
+  (a `SearchSchema` with inline filters is invalid without a `HASH` partition key — DynamoDB
+  rejects it), enforced via JSON Schema `"dependencies": {"filters": ["hash"]}`. The `name`
+  matches `^[a-zA-Z0-9_.-]+$` (length 3..255); at most 5 `vectorindices` per table; at most
+  18 `filters` per index (CloudFormation quotas). The key is accepted in **both**
   `schemas.json` and `local_schemas.json`. A table without `vectorindices` is unaffected.
+  (Critique E1, E4)
 - **R2 — `VectorIndexes` rendered.** For a table with `vectorindices`, the generated
   `AWS::DynamoDB::Table` `Properties` includes a `VectorIndexes` list. Each entry maps:
   `name`→`IndexName`, `dimensions`→`Dimensions`, `distance`→`DistanceFunction`,
-  `attribute`→`VectorAttribute.AttributeName`, plus `Projection: {ProjectionType: ALL}`. When
-  `hash` and/or `filters` are present, a `SearchSchema` list is emitted:
-  `hash`→`{AttributeName, SearchSchemaElementType: HASH}` and each `filters` entry →
-  `{AttributeName, SearchSchemaElementType: INLINE_FILTER}`. The HASH element (when present)
-  precedes the INLINE_FILTER elements.
+  `attribute`→`VectorAttribute.AttributeName`, plus `Projection: {ProjectionType: ALL}`. A
+  `SearchSchema` list is emitted **only when `hash` is present** (never for `filters` alone):
+  `hash`→`{AttributeName, SearchSchemaElementType: HASH}` followed by each `filters` entry →
+  `{AttributeName, SearchSchemaElementType: INLINE_FILTER}`. The HASH element precedes the
+  INLINE_FILTER elements. (Critique E1)
 - **R3 — SearchSchema attributes appear in `AttributeDefinitions`.** Every `hash` and
   `filters` attribute name is present in the table's `AttributeDefinitions` with
-  `AttributeType: S`, deduplicated against existing table/GSI attributes (an attribute that
-  is already a key keeps its existing definition and is not duplicated). The vector
-  `attribute` itself is **not** added to `AttributeDefinitions` (the embedding is not a key
-  attribute).
+  `AttributeType: S`, deduplicated **strictly against `table['attributes']`** (the only list
+  the template renders into `AttributeDefinitions`) — not against GSI `indices` attributes —
+  and against attributes already injected for earlier vector indexes on the same table. An
+  attribute already in `table['attributes']` keeps its existing definition and is not
+  duplicated. The vector `attribute` itself is **not** added to `AttributeDefinitions` (the
+  embedding is not a key attribute). (Critique E3)
 - **R4 — `SearchVectors` IAM.** A function whose `resources.tables` list includes a
   vector-indexed table receives an inline IAM statement granting `dynamodb:SearchVectors`,
   scoped to each vector index ARN of that table
@@ -159,27 +174,34 @@ precedent.
    "vector_index_schema": {
      "type": "object",
      "properties": {
-       "name": {"type": "string"},
+       "name": {"type": "string", "pattern": "^[a-zA-Z0-9_.-]+$", "minLength": 3, "maxLength": 255},
        "attribute": {"type": "string"},
        "dimensions": {"type": "integer", "minimum": 1, "maximum": 4096},
        "distance": {"type": "string", "enum": ["COSINE", "EUCLIDEAN", "DOT_PRODUCT"]},
        "hash": {"type": "string"},
-       "filters": {"type": "array", "items": {"type": "string"}}
+       "filters": {"type": "array", "items": {"type": "string"}, "maxItems": 18}
      },
      "required": ["name", "attribute", "dimensions", "distance"],
+     "dependencies": {"filters": ["hash"]},
      "additionalProperties": false
    }
    ```
    and inside `tables_schema.properties`:
-   `"vectorindices": {"type": "array", "items": {"$ref": "#/definitions/vector_index_schema"}}`.
+   `"vectorindices": {"type": "array", "maxItems": 5, "items": {"$ref": "#/definitions/vector_index_schema"}}`.
+   The `dependencies` keyword enforces that `filters` cannot appear without `hash` (Critique
+   E1); the `name` pattern/length and `maxItems` bounds catch malformed names and quota
+   overruns at validation time rather than deploy time (Critique E4).
 
 2. **Preprocessing (`load.py`).** Add `process_default_vectorindices(resources_data, errors)`
    and call it from `preprocess_defaults` (after `process_default_tables`). For each table
-   with a non-empty `vectorindices`: collect existing attribute names (`table['attributes']`
-   plus any GSI `indices[].attributes[].name`); for each index's `hash` and each `filters`
-   entry, if the name is not already present, append `{'name': <attr>}` to `table['attributes']`
-   (the template defaults missing `type` to `S`). Idempotent and dedup-safe; no change when
-   `vectorindices` is absent.
+   with a non-empty `vectorindices`: seed a `seen` set from the **existing
+   `table.get('attributes', [])` names only** (NOT GSI `indices` attributes — the template
+   renders `AttributeDefinitions` solely from `table.attributes`, so an attribute present only
+   in a GSI block must still be injected; Critique E3). Then, iterating indices in order, for
+   each index's `hash` and each `filters` entry: if the name is not in `seen`, append
+   `{'name': <attr>}` to `table['attributes']` **and add it to `seen`** so a filter attribute
+   shared across multiple vector indexes on the same table is injected exactly once. Idempotent
+   and dedup-safe; no change when `vectorindices` is absent.
 
 3. **Template — `VectorIndexes` (`template.j2`).** After the GSI block and before
    `BillingMode`, add:
@@ -195,12 +217,10 @@ precedent.
          AttributeName: {{ vindex.attribute }}
        Projection:
          ProjectionType: ALL
-       {% if vindex.hash or vindex.filters %}
+       {% if vindex.hash %}
        SearchSchema:
-         {% if vindex.hash %}
          - AttributeName: {{ vindex.hash }}
            SearchSchemaElementType: HASH
-         {% endif %}
          {% for f in vindex.filters %}
          - AttributeName: {{ f }}
            SearchSchemaElementType: INLINE_FILTER
@@ -209,16 +229,20 @@ precedent.
      {% endfor %}
    {% endif %}
    ```
+   `SearchSchema` is guarded by `{% if vindex.hash %}` only (never `filters` alone) so an
+   invalid filter-without-hash schema can never be emitted (Critique E1; also schema-blocked).
 
 4. **Template — `SearchVectors` IAM (`template.j2`).** In the function `Policies:` block,
    after the `DynamoDBCrudPolicy` loop, cross-reference the global `tables` map (mirroring the
    stream-trigger block) and, for each table the function references that has `vectorindices`,
-   emit one statement per vector index:
+   emit one statement per vector index. The membership check is **guarded against a missing or
+   null `function.tables`** (functions need not declare `tables`, and `tables: null` is a
+   common YAML idiom — an unguarded `in` raises `TypeError` in Jinja; Critique E2):
 
    ```jinja
    {% if tables is defined %}
    {% for table_name, table in tables.items() %}
-   {% if table.vectorindices and table_name in function.tables %}
+   {% if function.tables and table.vectorindices and table_name in function.tables %}
    {% for vindex in table.vectorindices %}
    - Version: "2012-10-17"
      Statement:
@@ -258,8 +282,13 @@ precedent.
 
 **Edge/failure cases:** a vector index with no `hash`/`filters` (no `SearchSchema` emitted);
 a `hash`/`filter` attribute that is also a table key (dedup — not duplicated); multiple vector
-indexes on one table (multiple `SearchVectors` statements); a function referencing both a
-vector and a non-vector table (statement only for the vector table).
+indexes on one table (multiple `SearchVectors` statements). Must-Address regression cases:
+a function with **no `tables` / `tables: null`** alongside a vector table generates without a
+Jinja crash (Critique E2); **two vector indexes on one table sharing a filter attribute** inject
+that attribute into `AttributeDefinitions` exactly once (Critique E3); a `vectorindices` entry
+with **`filters` but no `hash`** is **rejected at schema validation** (Critique E1); a function
+referencing both a vector and a non-vector table gets a `SearchVectors` statement only for the
+vector table.
 
 **Test levels:** `load`-level unit tests for `process_default_vectorindices` (dedup, type
 default, no-op without `vectorindices`); schema unit tests; end-to-end generation tests.
