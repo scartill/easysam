@@ -621,3 +621,62 @@ def test_flat_vector_index_renders_without_search_schema():
         },
     }
     assert not _schema_validate(data)
+
+
+# ------------------------------------------------------------------
+# Imported-local path: a vectorindices table defined in an imported
+# backend/database/easysam.yaml (validated against local_schemas.json),
+# with a function that references it from its own imported easysam.yaml.
+# ------------------------------------------------------------------
+
+
+def test_example_imported_table_vectorindexes_rendered():
+    # The `Review` table is defined in example/vectorindices/backend/database/
+    # easysam.yaml (imported-local), not in the central resources.yaml.
+    template = _generate_example()
+    props = template['Resources']['VecExampleReview']['Properties']
+
+    vindexes = props['VectorIndexes']
+    assert len(vindexes) == 1
+    vindex = vindexes[0]
+    assert vindex['IndexName'] == 'by-text'
+    assert vindex['Dimensions'] == 768
+    assert vindex['DistanceFunction'] == 'EUCLIDEAN'
+    assert vindex['VectorAttribute']['AttributeName'] == 'TextEmbedding'
+    assert vindex['Projection']['ProjectionType'] == 'ALL'
+
+    search_schema = vindex['SearchSchema']
+    assert search_schema[0]['AttributeName'] == 'ProductId'
+    assert search_schema[0]['SearchSchemaElementType'] == 'HASH'
+    assert search_schema[1]['AttributeName'] == 'Rating'
+    assert search_schema[1]['SearchSchemaElementType'] == 'INLINE_FILTER'
+
+
+def test_example_imported_table_attribute_definitions():
+    # hash/filters of an imported-local vector table are injected into
+    # AttributeDefinitions by process_default_vectorindices, which runs over
+    # the merged tables map after imports — so the imported path behaves
+    # identically to the central one.
+    template = _generate_example()
+    props = template['Resources']['VecExampleReview']['Properties']
+    by_name = {a['AttributeName']: a['AttributeType'] for a in props['AttributeDefinitions']}
+    assert by_name.get('ProductId') == 'S'
+    assert by_name.get('Rating') == 'S'
+    # The vector attribute is NOT an AttributeDefinition.
+    assert 'TextEmbedding' not in by_name
+
+
+def test_example_imported_function_searchvectors_iam():
+    # reviewsearcher (imported easysam.yaml) references the imported Review
+    # table and must receive an index-scoped SearchVectors statement.
+    template = _generate_example()
+    policies = template['Resources']['reviewsearcherFunction']['Properties']['Policies']
+
+    statements = []
+    for policy in policies:
+        if isinstance(policy, dict) and 'Statement' in policy:
+            statements.extend(policy['Statement'])
+
+    search_stmts = [s for s in statements if s.get('Action') == ['dynamodb:SearchVectors']]
+    assert len(search_stmts) == 1
+    assert search_stmts[0]['Resource'] == {'Fn::Sub': '${VecExampleReview.Arn}/index/by-text'}
