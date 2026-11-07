@@ -1,12 +1,4 @@
 {
   "version": 1,
-  "skills": {
-    "scartill-sdd-lite": {
-      "source": "git@github.com:scartill/scartill-sdd-lite",
-      "sourceUrl": "git@github.com:scartill/scartill-sdd-lite",
-      "sourceType": "git",
-      "skillPath": "skills/scartill-sdd-lite/SKILL.md",
-      "computedHash": "afdadd5f578c0ec186097e92191e4f57056838b9e1670a61469e569e0b05d7ce"
-    }
-  }
+  "skills": {}
 }
