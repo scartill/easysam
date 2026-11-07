@@ -2,8 +2,8 @@
 generated-by: "Plan Spec"
 source: docs/seed/vector-indices.md
 generated-at: 2026-11-07T13:05:00+02:00
-status: critiqued
-critiqued-revision:
+status: split
+critiqued-revision: acf5c49
 ---
 
 # Spec: EasySAM CloudFormation Support for DynamoDB Vector Indexes
