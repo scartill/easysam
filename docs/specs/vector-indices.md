@@ -2,7 +2,7 @@
 generated-by: "Plan Spec"
 source: docs/seed/vector-indices.md
 generated-at: 2026-11-07T13:05:00+02:00
-status: implemented
+status: finalized
 critiqued-revision: acf5c49
 ---
 
