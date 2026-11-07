@@ -1,9 +1,8 @@
 boto3
-# During vector-search development, the lambda layer installs Prismarine from a
-# locally built wheel of the vector-indices branch (SAM's pip layer builder can't
-# resolve a git VCS URL). The wheel carries runtime.dynamo_vectors + the [vectors]
-# extra and the vector-search fixes. Rebuild it after branch updates with:
-#   uv run python -m pip wheel "prismarine[vectors] @ git+https://github.com/scartill/prismarine.git@vector-indices" --no-deps -w thirdparty/wheels
-# Switch back to `prismarine[vectors]>=<released>` once the feature ships to PyPI.
-./thirdparty/wheels/prismarine-1.6.1-py3-none-any.whl
+# During vector-search development, install Prismarine from the local checkout of
+# the vector-indices branch (it carries runtime.dynamo_vectors + the [vectors] extra
+# and the vector-search fixes). This mirrors how a sibling package is referenced
+# locally, e.g. `botobuddy @ file:///C:/Users/boris/projects/var/botobuddy`.
+# Switch to `prismarine[vectors]>=<released>` once the feature ships to PyPI.
+prismarine[vectors] @ file:///C:/Users/boris/projects/var/prismarine
 numpy

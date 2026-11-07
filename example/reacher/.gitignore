@@ -1,9 +1,3 @@
 build
 template.yml
 .aws-sam
-
-# The vendored Prismarine wheel is intentionally tracked (overriding the repo-root
-# `wheels/` ignore) so this example is self-contained and deployable while the
-# vector-search feature is unreleased. Remove once prismarine[vectors] is on PyPI.
-!thirdparty/wheels/
-!thirdparty/wheels/*.whl
