@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 
 dependencies = [
     "aws-sam-cli>=1.155.2",
-    "boto3>=1.40.6",
+    "boto3>=1.43.89",
     "click==8.1.8",
     "fastapi>=0.115.0",
     "jinja2-cli[yaml]>=0.8.2",
@@ -19,6 +19,13 @@ dependencies = [
     "rich>=13.9.4",
     "uvicorn[standard]>=0.30.0",
 ]
+
+# During vector-search development EasySAM tracks the Prismarine `vector-indices`
+# branch (PR #4), which adds @c.vector_index, the generated search() method, and
+# runtime/dynamo_vectors. Remove this pin once that feature is released to PyPI and
+# raise the prismarine floor to the published version (coordinated joint release).
+[tool.uv.sources]
+prismarine = { git = "https://github.com/scartill/prismarine.git", branch = "vector-indices" }
 
 [project.urls]
 Homepage = "https://github.com/scartill/easysam"

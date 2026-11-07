@@ -1,0 +1,8 @@
+lambda:
+  name: reacher
+  timeout: 30
+  resources:
+    tables:
+      - Product        # grants DynamoDBCrudPolicy + dynamodb:SearchVectors on the index
+    services:
+      - bedrock        # grants bedrock:InvokeModel for embedding generation

@@ -1,0 +1,14 @@
+prefix: Reacher
+
+import:
+  - backend
+
+# Prismarine supplies the typed model + generated client (including the vector
+# search() method). The Product model declares a @c.vector_index, which Prismarine
+# materializes into an EasySAM `vectorindices` table block, which EasySAM renders as
+# a native AWS::DynamoDB::Table VectorIndexes property.
+prismarine:
+  default-base: common
+  access-module: common.dynamo_access
+  tables:
+    - package: catalog
