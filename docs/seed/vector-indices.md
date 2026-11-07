@@ -2,9 +2,9 @@
 generated-by: "Seed"
 source: docs/brainstorms/VECTOR_INDICES.md
 generated-at: 2026-11-07T12:30:00+02:00
-draft: true
-consumed: false
-consumed-at:
+draft: false
+consumed: true
+consumed-at: 2026-11-07T13:05:00+02:00
 ---
 
 # Seed: EasySAM CloudFormation Support for DynamoDB Vector Indexes
