@@ -149,7 +149,7 @@ itself.
   CloudFormation-cased hand-written form.
 - **User Input:**
     <!-- USER_INPUT_START:Q1 -->
-    [REPLACE THIS TEXT WITH YOUR ANSWER / PREFERENCE]
+    accept Prismarine style and map
     <!-- USER_INPUT_END:Q1 -->
 
 #### Q2: AttributeDefinitions for `hash` / `filters` (resolve the E5 contradiction)
@@ -168,7 +168,7 @@ itself.
   attributes to `S`. Confirm the default type and whether numeric filters are needed now.
 - **User Input:**
     <!-- USER_INPUT_START:Q2 -->
-    [REPLACE THIS TEXT WITH YOUR ANSWER / PREFERENCE]
+    (a)
     <!-- USER_INPUT_END:Q2 -->
 
 #### Q3: The CloudFormation "one index per stack operation" caveat
@@ -183,7 +183,7 @@ itself.
   EasySAM is declarative and can't see deployed state. Confirm.
 - **User Input:**
     <!-- USER_INPUT_START:Q3 -->
-    [REPLACE THIS TEXT WITH YOUR ANSWER / PREFERENCE]
+    (a)
     <!-- USER_INPUT_END:Q3 -->
 
 #### Q4: IAM permissions for `dynamodb:SearchVectors`
@@ -197,7 +197,7 @@ itself.
   Confirm.
 - **User Input:**
     <!-- USER_INPUT_START:Q4 -->
-    [REPLACE THIS TEXT WITH YOUR ANSWER / PREFERENCE]
+    No, if function definitions reference tables with vertor indices, the functins shall be able to use them. This pass shall yield a simple one-function vector index access working example.
     <!-- USER_INPUT_END:Q4 -->
 
 #### Q5: Projection type
@@ -207,7 +207,7 @@ itself.
   Confirm, or specify if KEYS_ONLY/INCLUDE must be configurable now.
 - **User Input:**
     <!-- USER_INPUT_START:Q5 -->
-    [REPLACE THIS TEXT WITH YOUR ANSWER / PREFERENCE]
+    accept
     <!-- USER_INPUT_END:Q5 -->
 
 #### Q6: Version floor / coordination with Prismarine
@@ -218,7 +218,7 @@ itself.
   installed `aws-sam-cli` version if helpful.
 - **User Input:**
     <!-- USER_INPUT_START:Q6 -->
-    [REPLACE THIS TEXT WITH YOUR ANSWER / PREFERENCE]
+    We will publish Prismarine/EasySAM simultaneously when the feature is ready. This branch shall use corresponding Prismarine branch while the feature is in development.
     <!-- USER_INPUT_END:Q6 -->
 
 ### Baseline assumptions if questions are left at defaults
