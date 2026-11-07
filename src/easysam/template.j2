@@ -620,7 +620,7 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref {{ prefix }}{{ table }}
         {% endfor %}
-        {% if tables is defined %}
+        {% if tables %}
         {% for table_name, table in tables.items() %}
         {% if function.tables and table.vectorindices and table_name in function.tables %}
         {% for vindex in table.vectorindices %}

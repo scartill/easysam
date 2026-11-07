@@ -302,6 +302,11 @@ tables:
 Limits: up to 5 vector indices per table, `dimensions` in the range 1–4096, and
 up to 18 `filters` per index.
 
+> **Operational note:** CloudFormation permits only one index change (a GSI *or* a
+> vector index) per stack operation on an existing table. Adding a vector index
+> alongside a GSI change, or multiple indexes at once, on an active stack will roll
+> back. See `docs/CLI_REFERENCE.md` for migration guidance.
+
 ### SQS queues (standard and FIFO)
 
 Declare standard queues as null-valued keys, or FIFO queues with `fifo: true`:

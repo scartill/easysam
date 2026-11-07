@@ -521,7 +521,7 @@
         "dimensions": {"type": "integer", "minimum": 1, "maximum": 4096},
         "distance": {"type": "string", "enum": ["COSINE", "EUCLIDEAN", "DOT_PRODUCT"]},
         "hash": {"type": "string"},
-        "filters": {"type": "array", "items": {"type": "string"}, "maxItems": 18}
+        "filters": {"type": "array", "items": {"type": "string"}, "maxItems": 18, "uniqueItems": true}
       },
       "required": ["name", "attribute", "dimensions", "distance"],
       "dependencies": {"filters": ["hash"]},

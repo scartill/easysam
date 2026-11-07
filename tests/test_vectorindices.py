@@ -6,7 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 import easysam.generate as generate_mod
 from easysam.generate import generate
 from easysam.load import process_default_vectorindices
-from easysam.validate_schema import validate
+from easysam.validate_schema import validate, validate_local
 
 
 # --- SAM tag constructors for parsing generated templates ---
@@ -354,19 +354,20 @@ def test_example_plain_function_has_no_searchvectors():
     assert not _has_searchvectors(policies)
 
 
-def test_template_null_tables_guard_does_not_crash():
-    # Render the template directly with a function that has `tables: None`
-    # alongside a vector table. `tables: null` is schema-invalid, so it must
-    # never appear in an example fixture — verify the new SearchVectors Jinja
-    # guard here on a synthetic dict (Critique T3, E2).
+def test_template_empty_tables_guard_does_not_crash():
+    # Render the template directly with a function whose `tables` is empty
+    # alongside a vector table, verifying the new SearchVectors guard emits
+    # nothing and does not crash.
     #
-    # Note: the pre-existing DynamoDBCrudPolicy loop (`{% for table in
-    # function.tables %}`) iterates `function.tables` directly, so a literal
-    # None would crash that unrelated legacy loop before reaching the new
-    # block. We set `function.tables = []` (the semantically equivalent "no
-    # referenced tables" case that flattening also produces) so the test
-    # isolates the new SearchVectors guard: its `function.tables and ...`
-    # condition must short-circuit and emit nothing.
+    # Scope note (review #7): a literal `function.tables = None` would crash
+    # the PRE-EXISTING `{% for table in function.tables %}` DynamoDBCrudPolicy
+    # loop — unrelated legacy behavior this feature does not touch. In practice
+    # `tables: null` is schema-invalid and `resources: {}` flattens to an absent
+    # `tables` key, so the real cases are "key absent" or "empty list". We use
+    # `tables: []` here to isolate the new `function.tables and ...` guard: it
+    # must short-circuit and emit no SearchVectors statement. The table-level
+    # `tables: None` guard (`{% if tables %}`) is covered by
+    # test_preprocess_handles_null_tables and the template-level change.
     searchpath = [str(Path(generate_mod.__file__).parent.resolve())]
     jenv = Environment(loader=FileSystemLoader(searchpath=searchpath))
     template = jenv.get_template('template.j2')
@@ -425,3 +426,198 @@ def test_non_vector_example_has_no_vector_artifacts():
             assert 'VectorIndexes' not in props
         if resource.get('Type') == 'AWS::Serverless::Function':
             assert not _has_searchvectors(props.get('Policies', []))
+
+
+# ------------------------------------------------------------------
+# Code-review follow-ups (pass 1): schema + preprocess hardening
+# ------------------------------------------------------------------
+
+
+def test_schema_rejects_duplicate_filters():
+    # uniqueItems on `filters` (review MEDIUM #2): duplicate filter names
+    # would emit duplicate SearchSchema entries and be rejected by CloudFormation.
+    data = _valid_vector_table(filters=['Brand', 'Brand'])
+    assert _schema_validate(data)
+
+
+def test_local_schema_accepts_valid_vectorindices():
+    # local_schemas.json parity (review LOW #6): imported easysam.yaml tables
+    # must also accept vectorindices.
+    entry_data = {
+        'tables': {
+            'Product': {
+                'attributes': [{'name': 'ProductId', 'hash': True}],
+                'vectorindices': [
+                    {
+                        'name': 'by-embedding',
+                        'attribute': 'Embedding',
+                        'dimensions': 1536,
+                        'distance': 'COSINE',
+                        'hash': 'Category',
+                        'filters': ['Brand'],
+                    }
+                ],
+            }
+        }
+    }
+    errors = []
+    validate_local(Path('easysam.yaml'), entry_data, errors)
+    assert not errors, errors
+
+
+def test_local_schema_rejects_filters_without_hash():
+    entry_data = {
+        'tables': {
+            'Product': {
+                'attributes': [{'name': 'ProductId', 'hash': True}],
+                'vectorindices': [
+                    {
+                        'name': 'by-embedding',
+                        'attribute': 'Embedding',
+                        'dimensions': 1536,
+                        'distance': 'COSINE',
+                        'filters': ['Brand'],
+                    }
+                ],
+            }
+        }
+    }
+    errors = []
+    validate_local(Path('easysam.yaml'), entry_data, errors)
+    assert errors
+
+
+def test_preprocess_rejects_hash_in_filters():
+    # review MEDIUM #3: an attribute cannot be both HASH and INLINE_FILTER.
+    resources_data = {
+        'tables': {
+            'Product': {
+                'attributes': [{'name': 'ProductId', 'hash': True}],
+                'vectorindices': [
+                    {
+                        'name': 'by-embedding',
+                        'attribute': 'Embedding',
+                        'dimensions': 8,
+                        'distance': 'COSINE',
+                        'hash': 'Category',
+                        'filters': ['Category'],
+                    }
+                ],
+            }
+        }
+    }
+    errors = []
+    process_default_vectorindices(resources_data, errors)
+    assert any('must not also appear in filters' in e for e in errors), errors
+
+
+def test_preprocess_rejects_duplicate_index_names():
+    # review MEDIUM #4: vector index names must be unique within a table.
+    resources_data = {
+        'tables': {
+            'Product': {
+                'attributes': [{'name': 'ProductId', 'hash': True}],
+                'vectorindices': [
+                    {
+                        'name': 'dup',
+                        'attribute': 'EmbeddingA',
+                        'dimensions': 8,
+                        'distance': 'COSINE',
+                        'hash': 'Category',
+                    },
+                    {
+                        'name': 'dup',
+                        'attribute': 'EmbeddingB',
+                        'dimensions': 8,
+                        'distance': 'COSINE',
+                        'hash': 'Brand',
+                    },
+                ],
+            }
+        }
+    }
+    errors = []
+    process_default_vectorindices(resources_data, errors)
+    assert any('Duplicate vector index name' in e for e in errors), errors
+
+
+def test_preprocess_handles_null_attributes():
+    # review HIGH #1: a table with `attributes: null` must not crash.
+    resources_data = {
+        'tables': {
+            'Product': {
+                'attributes': None,
+                'vectorindices': [
+                    {
+                        'name': 'by-embedding',
+                        'attribute': 'Embedding',
+                        'dimensions': 8,
+                        'distance': 'COSINE',
+                        'hash': 'Category',
+                    }
+                ],
+            }
+        }
+    }
+    process_default_vectorindices(resources_data, [])  # must not raise
+    names = [a['name'] for a in resources_data['tables']['Product']['attributes']]
+    assert names == ['Category']
+
+
+def test_preprocess_handles_empty_table_dict():
+    # review HIGH #1: a table entry that is None (empty `Product:` in YAML) must not crash.
+    resources_data = {'tables': {'Product': None}}
+    process_default_vectorindices(resources_data, [])  # must not raise
+
+
+def test_preprocess_handles_null_tables():
+    # review HIGH #1: `tables: null` must not crash preprocessing.
+    resources_data = {'tables': None}
+    process_default_vectorindices(resources_data, [])  # must not raise
+
+
+def test_flat_vector_index_renders_without_search_schema():
+    # review LOW #6: a vector index with no `hash` (flat index) is valid and
+    # renders VectorIndexes without a SearchSchema, injecting no extra attrs.
+    _register_sam_constructors()
+    searchpath = [str(Path(generate_mod.__file__).parent.resolve())]
+    jenv = Environment(loader=FileSystemLoader(searchpath=searchpath))
+    tmpl = jenv.get_template('template.j2')
+    resources_data = {
+        'prefix': 'App',
+        'tables': {
+            'Product': {
+                'attributes': [{'name': 'ProductId', 'hash': True}],
+                'vectorindices': [
+                    {
+                        'name': 'by-embedding',
+                        'attribute': 'Embedding',
+                        'dimensions': 8,
+                        'distance': 'COSINE',
+                    }
+                ],
+            }
+        },
+    }
+    output = tmpl.render(resources_data)
+    assert 'VectorIndexes:' in output
+    assert 'SearchSchema:' not in output
+
+    # Flat index also passes schema validation.
+    data = {
+        'prefix': 'App',
+        'tables': {
+            'Product': {
+                'attributes': [{'name': 'ProductId', 'hash': True}],
+                'vectorindices': [
+                    {
+                        'name': 'by-embedding',
+                        'attribute': 'Embedding',
+                        'dimensions': 8,
+                        'distance': 'COSINE',
+                    }
+                ],
+            }
+        },
+    }
+    assert not _schema_validate(data)
