@@ -14,6 +14,7 @@ It helps you define Lambda functions, API Gateway routes, DynamoDB tables, S3 bu
   - Environment variable expansion and `.env` loading
   - DynamoDB stream triggers from table definitions
   - DynamoDB TTL
+  - DynamoDB vector indices (`SearchVectors`)
   - Lambda Function URLs
   - Prismarine model-driven tables
   - OpenSearch Serverless search collections
@@ -246,6 +247,66 @@ tables:
       startingposition: latest
 ```
 
+### Vector indices
+
+Add one or more DynamoDB vector indices to a table for similarity search. Each
+index declares the vector `attribute` (the embedding), its `dimensions`, a
+`distance` function, and an optional `hash` key with optional `filters`:
+
+```yaml
+tables:
+  Product:
+    attributes:
+      - name: ProductId
+        hash: true
+    vectorindices:
+      - name: by-embedding
+        attribute: Embedding
+        dimensions: 1536
+        distance: COSINE       # COSINE | EUCLIDEAN | DOT_PRODUCT
+        hash: Category         # optional; required if `filters` is set
+        filters:               # optional; requires `hash`
+          - Brand
+```
+
+For every table carrying `vectorindices`, EasySAM renders a native
+`VectorIndexes` block on the `AWS::DynamoDB::Table` and grants any Lambda that
+references the table a `dynamodb:SearchVectors` IAM statement scoped to each
+index ARN. Vector indices require on-demand billing, which EasySAM already emits
+(`BillingMode: PAY_PER_REQUEST`).
+
+Each `hash`/`filters` attribute is injected into the table's
+`AttributeDefinitions` automatically if not already present; the vector
+`attribute` itself is not. Injected attributes default to string type (`S`).
+If a `hash`/`filter` attribute must be numeric or binary, pre-declare it in the
+table's `attributes` with an explicit `type: N` or `type: B`:
+
+```yaml
+tables:
+  Product:
+    attributes:
+      - name: ProductId
+        hash: true
+      - name: Rank
+        type: N          # pre-declared so the vector filter uses N, not S
+    vectorindices:
+      - name: by-embedding
+        attribute: Embedding
+        dimensions: 1536
+        distance: COSINE
+        hash: Category
+        filters:
+          - Rank
+```
+
+Limits: up to 5 vector indices per table, `dimensions` in the range 1–4096, and
+up to 18 `filters` per index.
+
+> **Operational note:** CloudFormation permits only one index change (a GSI *or* a
+> vector index) per stack operation on an existing table. Adding a vector index
+> alongside a GSI change, or multiple indexes at once, on an active stack will roll
+> back. See `docs/CLI_REFERENCE.md` for migration guidance.
+
 ### SQS queues (standard and FIFO)
 
 Declare standard queues as null-valued keys, or FIFO queues with `fifo: true`:
@@ -339,6 +400,7 @@ All examples live under `example/` and include focused scenarios such as:
 - custom Lambda layers
 - global and local env vars (with `.env` file support) and plugins
 - DynamoDB TTL (plain + Prismarine)
+- DynamoDB vector indices (similarity search + `SearchVectors` IAM)
 - Prismarine TypedDict and Pydantic modelling
 - OpenSearch Serverless + DynamoDB streams
 - Kinesis with multiple S3 destinations

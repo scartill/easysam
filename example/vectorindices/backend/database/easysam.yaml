@@ -1,0 +1,15 @@
+# Imported-local table definition (validated against local_schemas.json).
+# Exercises vectorindices via the modular import path, not the central resources.yaml.
+tables:
+  Review:
+    attributes:
+      - name: ReviewId
+        hash: true
+    vectorindices:
+      - name: by-text
+        attribute: TextEmbedding
+        dimensions: 768
+        distance: EUCLIDEAN
+        hash: ProductId
+        filters:
+          - Rating

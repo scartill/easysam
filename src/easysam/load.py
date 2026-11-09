@@ -384,11 +384,57 @@ def process_default_tables(resources_data: dict, errors: list[str]):
                 trigger_config['startingposition'] = 'latest'
 
 
+def process_default_vectorindices(resources_data: dict, errors: list[str]):
+    for table_name, table in (resources_data.get('tables') or {}).items():
+        if not isinstance(table, dict):
+            continue
+        vindices = table.get('vectorindices')
+        if not vindices:
+            continue
+
+        attributes = table.get('attributes')
+        if attributes is None:
+            attributes = []
+            table['attributes'] = attributes
+
+        seen = {a['name'] for a in attributes if isinstance(a, dict) and 'name' in a}
+        seen_index_names = set()
+
+        for vindex in vindices:
+            index_name = vindex.get('name')
+
+            # Vector index names must be unique within a table (DynamoDB constraint).
+            if index_name in seen_index_names:
+                errors.append(f'Duplicate vector index name {index_name} in table {table_name}')
+            else:
+                seen_index_names.add(index_name)
+
+            hash_attr = vindex.get('hash')
+            filters = vindex.get('filters') or []
+
+            # An attribute cannot be both the HASH partition key and an INLINE_FILTER.
+            if hash_attr and hash_attr in filters:
+                errors.append(
+                    f'Vector index {index_name} in table {table_name}: hash {hash_attr} must not also appear in filters'
+                )
+
+            schema_attrs = []
+            if hash_attr:
+                schema_attrs.append(hash_attr)
+            schema_attrs.extend(filters)
+
+            for attr in schema_attrs:
+                if attr not in seen:  # dedup against table.attributes only (Critique E3)
+                    attributes.append({'name': attr})  # template defaults type -> S
+                    seen.add(attr)  # cross-index dedup
+
+
 def preprocess_defaults(resources_data: dict, errors: list[str]):
     process_default_searches(resources_data, errors)
     process_default_functions(resources_data, errors)
     process_default_streams(resources_data, errors)
     process_default_tables(resources_data, errors)
+    process_default_vectorindices(resources_data, errors)
     process_default_paths(resources_data, errors)
 
 

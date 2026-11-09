@@ -1,0 +1,16 @@
+prefix: VecExample
+import:
+  - backend
+tables:
+  Product:
+    attributes:
+      - name: ProductId
+        hash: true
+    vectorindices:
+      - name: by-embedding
+        attribute: Embedding
+        dimensions: 1536
+        distance: COSINE
+        hash: Category
+        filters:
+          - Brand

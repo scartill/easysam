@@ -453,6 +453,27 @@ Resources:
             ProjectionType: ALL
         {% endfor %}
       {% endif %}
+      {% if table.vectorindices %}
+      VectorIndexes:
+        {% for vindex in table.vectorindices %}
+        - IndexName: {{ vindex.name }}
+          Dimensions: {{ vindex.dimensions }}
+          DistanceFunction: {{ vindex.distance }}
+          VectorAttribute:
+            AttributeName: {{ vindex.attribute }}
+          Projection:
+            ProjectionType: ALL
+          {% if vindex.hash %}
+          SearchSchema:
+            - AttributeName: {{ vindex.hash }}
+              SearchSchemaElementType: HASH
+            {% for f in vindex.filters %}
+            - AttributeName: {{ f }}
+              SearchSchemaElementType: INLINE_FILTER
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
       BillingMode: PAY_PER_REQUEST
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
@@ -599,6 +620,20 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref {{ prefix }}{{ table }}
         {% endfor %}
+        {% if tables %}
+        {% for table_name, table in tables.items() %}
+        {% if function.tables and table.vectorindices and table_name in function.tables %}
+        {% for vindex in table.vectorindices %}
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:SearchVectors
+              Resource: !Sub "${{ '{' }}{{ prefix }}{{ table_name }}.Arn}/index/{{ vindex.name }}"
+        {% endfor %}
+        {% endif %}
+        {% endfor %}
+        {% endif %}
         {% for bucket in function.buckets %}
         - S3CrudPolicy:
             BucketName: !Ref {{ lprefix }}{{ bucket.replace('-', '') }}Bucket

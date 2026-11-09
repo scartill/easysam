@@ -1,0 +1,5 @@
+lambda:
+  name: reviewsearcher
+  resources:
+    tables:
+      - Review

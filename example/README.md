@@ -27,6 +27,7 @@ If EasySAM is installed project-locally with uv, replace `easysam` with `uv run 
 | `userenvvars` | Global function env vars from `resources.yaml` | Lambda |
 | `plugins` | Template plugin rendering custom SAM fragments | Plugin system, Lambda |
 | `dynamottl` | DynamoDB TTL in table definitions | DynamoDB |
+| `vectorindices` | DynamoDB vector indices + scoped `SearchVectors` IAM | DynamoDB, Lambda |
 | `prismarine` | Prismarine TypedDict tables + stream trigger lambda | DynamoDB, Lambda, Prismarine |
 | `prismarinettl` | Prismarine model-level TTL (`ttl=...`) | DynamoDB, Prismarine |
 | `prismapydantic` | Prismarine Pydantic modelling + CRUD integration test | DynamoDB, Prismarine, Pydantic |
@@ -89,6 +90,15 @@ easysam --environment prod --target-region eu-west-2 --context-file example/cond
 
 - Enables DynamoDB TTL via `ttl: ExpireAt` in table definition.
 - No lambda required; pure table example.
+
+### `vectorindices`
+
+- Declares a `vectorindices` block on the `Product` table (embedding attribute,
+  dimensions, distance, hash + filter keys).
+- Generates a native `VectorIndexes` block and a `dynamodb:SearchVectors` policy
+  scoped to the index ARN for the referencing `searcher` function.
+- The `plain` function references no tables, proving no `SearchVectors` policy is
+  emitted when a function does not use the vector table.
 
 ### `prismarine`
 
