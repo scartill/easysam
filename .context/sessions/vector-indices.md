@@ -19,11 +19,8 @@
 - Test (full suite): `uv run pytest -q`
 - Examples harness: `uv run python scripts/test_examples_generation.py`  (22/22 pass)
 - Lint/format: `uv run ruff check src/easysam/load.py tests/test_vectorindices.py` ; `uv run ruff format <files>`
-- EasySAM branch: `vector-indices` — **pushed** to origin (PR #41). Prismarine source pinned
-  to its `vector-indices` git branch via `[tool.uv.sources]`.
-- Prismarine checkout: `c:\Users\boris\projects\var\prismarine` on branch `vector-indices`,
-  **pushed** (HEAD `f957948`). After editing Prismarine, rebuild the vendored lambda wheel:
-  `uv run python -m pip wheel "prismarine[vectors] @ git+https://github.com/scartill/prismarine.git@vector-indices" --no-deps -w example/reacher/thirdparty/wheels`
+- EasySAM branch: `vector-indices` — **pushed** to origin (HEAD `d526608`). Prismarine source pinned to its `vector-indices` git branch via `[tool.uv.sources]`.
+- Prismarine checkout: `c:\Users\boris\projects\var\prismarine` on branch `vector-indices`, **pushed** (HEAD `8b5c53c`). The reacher lambda layer installs Prismarine from a local `file://` path (NOT a committed wheel, NOT a git URL — SAM's pip builder accepts `file://` but not git VCS URLs). After editing Prismarine, no rebuild step is needed; just redeploy and SAM reinstalls from `example/reacher/thirdparty/requirements.txt` → `prismarine[vectors] @ file:///C:/Users/boris/projects/var/prismarine`.
 - AWS: profile `easysam-a` (account 849099337443), region us-east-1. Live stacks still up:
   `vecidxtest` (hermetic example) and `reacherdev` (reacher). Delete when done:
   `uv run easysam --aws-profile easysam-a --environment <env> delete --await`
@@ -47,17 +44,12 @@
   collision rejection, null guard, byte-identical guard).
 - `example/vectorindices/`: hermetic fixture (central `Product` + imported `Review` tables,
   `searcher`/`reviewsearcher`/`plain` functions).
-- `example/reacher/`: **full Prismarine + Bedrock example** — a `@c.vector_index` Product
-  model, a lambda that embeds via Bedrock Titan (`services: - bedrock`) and indexes/searches
-  through the generated `ProductModel.ByEmbedding.search()`. Vendored prismarine wheel in
-  `thirdparty/wheels/` (SAM can't resolve git VCS URLs), tracked via scoped `.gitignore`.
+- `example/reacher/`: **full Prismarine + Bedrock example** — a `@c.vector_index` Product model, a lambda that embeds via Bedrock Titan (`services: - bedrock`) and indexes/searches through the generated `ProductModel.ByEmbedding.search()`. The lambda layer installs Prismarine from a local `file://` path in `thirdparty/requirements.txt` (no committed wheel; a prior vendored-wheel approach was removed in `d526608`).
 - `pyproject.toml`: `[tool.uv.sources]` pins prismarine to the git branch; `boto3>=1.43.89`;
   `numpy` dev dep.
 - Docs + SDD artifacts: brainstorm, seed, questionnaire, spec (finalized), 7 tasks + summary,
   2 critiques, code review, feedback.
-- Key EasySAM commits: `ac43149` plan, `acf5c49` spec critique, `bbab334` split,
-  `12bf545` task critique, `2a7f60e` implement, `65d1dcf` code review, `2f1e87d` finalize,
-  `c5825ba` imported-path test, `24964ad` reacher example, `80ebe15` reacher finalize.
+- Key EasySAM commits: `ac43149` plan, `acf5c49` spec critique, `bbab334` split, `12bf545` task critique, `2a7f60e` implement, `65d1dcf` code review, `2f1e87d` finalize, `c5825ba` imported-path test, `24964ad` reacher example, `80ebe15` reacher finalize, `d526608` wheel → `file://` local path (HEAD, pushed).
 
 ### Prismarine (branch vector-indices, pushed — THREE runtime fixes found via live testing)
 - `runtime/dynamo_vectors.py` `_format_vector`: emit plain decimal (`Decimal(repr(x))`,
@@ -66,7 +58,7 @@
   NOT `resource.meta.client` (whose `copy_dynamodb_params` handler corrupted the SearchVector).
 - `runtime/dynamo_vectors.py` `_search_vectors`: resolve the PHYSICAL table name via
   `get_table(table).name` (like CRUD) instead of the logical model name.
-- Prismarine commits: `dcbc24e` decimal format, `f957948` get_client + physical-name.
+- Prismarine commits: `dcbc24e` decimal format, `f957948` get_client + physical-name, `8b5c53c` uv.lock boto3>=1.43.89 (HEAD, pushed).
 
 ## Blockers / Open Questions
 - None blocking. Both branches pushed; vector search validated live (Bedrock → Prismarine
@@ -103,3 +95,4 @@
   EasySAM to the Prismarine git branch, vendored the fixed wheel for the lambda layer.
   **Pushed both branches** (easysam `80ebe15`, prismarine `f957948`). Releases/versions
   deferred pending further external testing by the user.
+- 2026-11-10 00:36: Replaced the committed binary wheel with a local `file://` Prismarine reference in `example/reacher/thirdparty/requirements.txt` (SAM's pip builder accepts `file://` but not git VCS URLs; same pattern as `botobuddy @ file:///...`). Removed the wheel and the `.gitignore` override. Verified the layer builds with all three fixes and the live `reacherdev` search still returns correct rankings. Committed+pushed EasySAM `d526608`. Also committed+pushed Prismarine `8b5c53c` (uv.lock bump to boto3 1.43.126 for the `[vectors]` boto3>=1.43.89 floor). Both repos clean and synced with origin; both `reacherdev` + `vecidxtest` stacks still live on `easysam-a` for user testing. Awaiting user feedback; releases/versions still deferred.
